@@ -34,6 +34,7 @@ We work in WSL (Ubuntu, bash). Keep the repo in the Linux filesystem (`~/dev/mic
 - Payments are Stripe Checkout in test mode only, through `@micro/payments`. No real keys.
 - Prices live in `apps/<app>/config/products.json`, never in code.
 - TypeScript strict everywhere.
+- Commit messages and pull requests carry no AI attribution: no `Co-Authored-By` line, no "Generated with" line, and no tool names in the message.
 
 ## Mobile first
 
