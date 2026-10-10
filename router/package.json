@@ -1,0 +1,17 @@
+{
+  "name": "@micro/router",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --env dev --ip 0.0.0.0 --port 3000",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261006.1",
+    "@micro/config": "workspace:*",
+    "typescript": "~6.0.3",
+    "wrangler": "^4.149.0"
+  }
+}

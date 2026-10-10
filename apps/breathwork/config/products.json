@@ -1,0 +1,10 @@
+{
+  "products": [
+    {
+      "id": "placeholder",
+      "name": "PLACEHOLDER - replace before selling anything",
+      "amount": 100,
+      "currency": "usd"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+node_modules
+dist
+dev-dist
+.wrangler
+.claude/worktrees/
+*.tsbuildinfo
+
+# secrets: only .env.example files belong in the repo
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*

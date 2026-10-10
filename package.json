@@ -1,0 +1,25 @@
+{
+  "name": "micro-apps",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.10.1",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev:personality": "pnpm --filter @micro/personality dev",
+    "dev:focus": "pnpm --filter @micro/focus dev",
+    "dev:breathwork": "pnpm --filter @micro/breathwork dev",
+    "dev:attention": "pnpm --filter @micro/attention dev",
+    "dev:intention": "pnpm --filter @micro/intention dev",
+    "dev:router": "pnpm --filter @micro/router dev",
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm -r build",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@micro/config": "workspace:*",
+    "eslint": "^10.12.0",
+    "typescript": "~6.0.3"
+  }
+}

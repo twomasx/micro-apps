@@ -1,0 +1,7 @@
+{
+  "extends": "@micro/config/tsconfig.react.json",
+  "compilerOptions": {
+    "types": ["vite/client"]
+  },
+  "include": ["src", "config", "app.config.ts", "vite.config.ts"]
+}

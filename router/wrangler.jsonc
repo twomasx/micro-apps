@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "micro-router",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "routes": [{ "pattern": "polymadlabs.com/*", "zone_name": "polymadlabs.com" }],
+  // Production: each app is its own Pages project served from its root,
+  // so the /<app> prefix is stripped before forwarding. Origins are placeholders.
+  "vars": {
+    "STRIP_PREFIX": "true",
+    "PERSONALITY_ORIGIN": "https://micro-personality.pages.dev",
+    "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
+    "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
+    "ATTENTION_ORIGIN": "https://micro-attention.pages.dev",
+    "INTENTION_ORIGIN": "https://micro-intention.pages.dev"
+  },
+  "env": {
+    // Local: forward to each app's Vite server, which already serves under /<app>/.
+    "dev": {
+      "routes": [],
+      "vars": {
+        "STRIP_PREFIX": "false",
+        "PERSONALITY_ORIGIN": "http://localhost:3001",
+        "FOCUS_ORIGIN": "http://localhost:3002",
+        "BREATHWORK_ORIGIN": "http://localhost:3003",
+        "ATTENTION_ORIGIN": "http://localhost:3004",
+        "INTENTION_ORIGIN": "http://localhost:3005"
+      }
+    }
+  }
+}
