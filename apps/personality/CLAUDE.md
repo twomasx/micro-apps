@@ -104,15 +104,27 @@ Functional rules for the test (layout and flow look are Roger's):
 | `POST /api/stripe/webhook` | Verifies the signature, records the purchase. Safe to receive twice. |
 | `GET /api/health` | `{ "ok": true }` |
 
-- The client keeps `deleteToken` in IndexedDB. The server stores only its hash.
-- Result IDs: random, 12 or more characters.
+- The client keeps `deleteToken` in IndexedDB. The server stores only its hash (SHA-256).
+- Result IDs: random, 16 characters from lowercase letters and digits (no `l`, `o`, `0`, `1`). See `server/ids.ts`.
+- `DELETE` takes the token as `Authorization: Bearer <deleteToken>`. 401 without a token, 403 with the wrong one, 204 when deleted.
+- `answers` is an object from question id to value: `{ "p1-01": 4, ... }`. `scores` is an array of four `{ axis, letter, leftPct, rightPct, balanced }` in type code order.
+- Errors are `{ error: "<code>", message }` with a 4xx status. Every API response sends `Cache-Control: no-store`.
+- `unlocked` is true when `purchases` has a row for the result with product `report` or `both` and status `paid`. Step 6 must write that status.
+- `summary` is `null` until the content from build step 5 exists.
+
+## Where server code lives
+
+- Route files in `functions/api/` stay one-liners. Pages turns every file under `functions/` into a route, so the logic and its tests live in `server/` (`server/results.ts`, `server/ids.ts`, `server/http.ts`).
+- `src/lib/scoring.ts` and `src/lib/questions.ts` are shared by client and server. Keep DOM and Workers APIs out of them. `getQuestions(version)` returns the question file for a version.
+- API tests (`server/*.test.ts`) run the handlers against an in-memory local D1 from `createTestDb()` in `server/testing.ts`. Add each new migration file to the list in that file.
 
 ## Database (D1, migrations in `migrations/`)
 
 - `results`: id, version, answers (JSON), scores (JSON), type, flags (JSON), delete_token_hash, created_at.
 - `purchases`: id, stripe_session_id (unique), product, result_id, partner_result_id (nullable), amount_cents, currency, status, created_at.
 - Store raw answers. We need them later to check reliability and to rescore if the model changes.
-- Use local D1 for development (`wrangler d1 migrations apply --local`).
+- Use local D1 for development. Run `pnpm --filter @micro/personality db:migrate` once after cloning and after adding a migration. The data is a SQLite file under `apps/personality/.wrangler/` (not in git).
+- `purchases` has no foreign key to `results`, so a purchase record stays when a result is deleted.
 
 ## Content
 

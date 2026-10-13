@@ -10,6 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "db:migrate": "wrangler d1 migrations apply DB --local",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.functions.json"
   },
   "dependencies": {
