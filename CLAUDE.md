@@ -105,7 +105,7 @@ Packages are consumed as TypeScript source (`workspace:*`); they have no build s
 ## Done means
 
 1. `pnpm typecheck`, `pnpm test`, `pnpm lint` and `pnpm build` pass.
-2. The app runs with its dev script and the main flow works end to end on a 375px-wide viewport.
+2. The main flow works well on phone, tablet and desktop. Check at 375px, 768px and 1280px wide.
 3. No console errors.
 4. JavaScript stays under the 150KB gzipped budget (report the number).
 5. `DESIGN-TODO.md` lists every design decision left for Roger.
