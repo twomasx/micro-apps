@@ -28,6 +28,8 @@ This stays in your browser. Clearing your browser's site data removes it.
 
 Anyone who has the link to your result can see your type and your four percentages. They cannot see your individual answers. If you send someone a compare link, they will see your result.
 
+A comparison has its own link. Anyone who has it can see both results in it. If a full report or a couple report has been paid for, anyone who has the link can read that too.
+
 ## If you pay
 
 Payment happens on Stripe's page. Stripe collects your email and card details and sends you a receipt. We never see your card number, and we do not copy your email into our database.

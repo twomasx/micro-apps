@@ -2,7 +2,9 @@ import type { PaymentsProvider } from '@micro/payments';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import catalog from '../config/products.json';
 import p1 from '../src/data/items.p1.json';
+import type { CompareResponse } from '../src/lib/compare.ts';
 import type { Report } from '../src/lib/report.ts';
+import { getCompare } from './compare.ts';
 import {
   createCheckout,
   getReport,
@@ -78,9 +80,10 @@ beforeEach(() => {
   fake = new FakePayments();
 });
 
-async function newResultId(): Promise<string> {
+/** A result that leans `toward` (1 to 5) the right poles: 4 gives INFP at 75%, 2 gives ESTJ at 75%. */
+async function newResultId(toward = 4): Promise<string> {
   const answers = Object.fromEntries(
-    p1.items.map((item) => [item.id, RIGHT_POLES.has(item.pole) ? 4 : 2]),
+    p1.items.map((item) => [item.id, RIGHT_POLES.has(item.pole) ? toward : 6 - toward]),
   );
   const response = await createResult(
     new Request('http://localhost/api/results', {
@@ -377,6 +380,137 @@ describe('GET /api/results/:id/report', () => {
     expect((await report(id, 'cs_test_someoneelse1')).status).toBe(402);
     expect((await report(id, 'not a session')).status).toBe(402);
     expect(fake.verifyCalls).toBe(0);
+  });
+});
+
+function compare(a: string, b: string, sessionId?: string): Promise<Response> {
+  const query = sessionId ? `?session_id=${sessionId}` : '';
+  const request = new Request(`http://localhost/api/compare/${a}/${b}${query}`);
+  return getCompare(request, a, b, db, fake.factory);
+}
+
+/** Starts a checkout for a pair and returns its session id. */
+async function startPairCheckout(product: string, resultId: string, partnerResultId: string): Promise<string> {
+  const response = await checkout({ product, resultId, partnerResultId });
+  expect(response.status).toBe(201);
+  const { url } = (await response.json()) as { url: string };
+  return url.replace('https://checkout.example/', '');
+}
+
+describe('GET /api/compare/:a/:b', () => {
+  it('compares two results for free, without the couple report text', async () => {
+    const a = await newResultId(4);
+    const b = await newResultId(2);
+    const response = await compare(a, b);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    const text = await response.text();
+    expect(text).not.toContain('Questions to talk through');
+    expect(text).not.toContain('gains energy');
+    const body = JSON.parse(text) as CompareResponse;
+    expect(body.a).toEqual({ id: a, type: 'INFP', reportUnlocked: false });
+    expect(body.b).toEqual({ id: b, type: 'ESTJ', reportUnlocked: false });
+    expect(body.axes.map((axis) => [axis.axis, axis.alike, axis.difference])).toEqual([
+      ['EI', false, 50],
+      ['SN', false, 50],
+      ['TF', false, 50],
+      ['JP', false, 50],
+    ]);
+    expect(body.similarity).toBe(50);
+    expect(body.unlocked).toBe(false);
+    expect(body.couple).toBeNull();
+  });
+
+  it('rejects the same result twice and unknown results', async () => {
+    const a = await newResultId();
+    const same = await compare(a, a);
+    expect(same.status).toBe(400);
+    expect(((await same.json()) as ErrorBody).error).toBe('same_result');
+    expect((await compare(a, 'abcdefghjkmnpqrs')).status).toBe(404);
+    expect((await compare('abcdefghjkmnpqrs', a)).status).toBe(404);
+  });
+
+  it('returns the couple report once the pair is paid, from either side', async () => {
+    const a = await newResultId(4);
+    const b = await newResultId(4);
+    const sessionId = await startPairCheckout('couple', a, b);
+    expect(fake.urls.at(-1)?.successUrl).toBe(
+      `${ORIGIN}/personality/c/${a}/${b}?session_id={CHECKOUT_SESSION_ID}`,
+    );
+    fake.paidSessions.add(sessionId);
+    await webhook(sessionId);
+
+    for (const [first, second] of [
+      [a, b],
+      [b, a],
+    ] as const) {
+      const body = (await (await compare(first, second)).json()) as CompareResponse;
+      expect(body.unlocked).toBe(true);
+      expect(body.couple?.map((section) => section.heading)).toEqual(['Both I', 'Both N', 'Both F', 'Both P']);
+      expect(body.couple?.[0]?.title).toBe('Extraversion and Introversion, together');
+      expect(body.couple?.[0]?.body).toContain('You both lean toward quiet');
+      expect(body.couple?.[0]?.questions).toHaveLength(4);
+    }
+    // The couple report does not unlock either full report.
+    expect(await isUnlocked(a)).toBe(false);
+    expect(await isUnlocked(b)).toBe(false);
+  });
+
+  it('uses the "one of each" text where the two differ', async () => {
+    const a = await newResultId(4);
+    const b = await newResultId(2);
+    const sessionId = await startPairCheckout('couple', a, b);
+    fake.paidSessions.add(sessionId);
+
+    const body = (await (await compare(b, a, sessionId)).json()) as CompareResponse;
+    expect(body.unlocked).toBe(true);
+    expect(body.couple?.map((section) => section.heading)).toEqual([
+      'One E, one I',
+      'One S, one N',
+      'One T, one F',
+      'One J, one P',
+    ]);
+  });
+
+  it('"both" unlocks the couple report and the buyer\'s full report, not the partner\'s', async () => {
+    const mine = await newResultId(4);
+    const theirs = await newResultId(2);
+    const sessionId = await startPairCheckout('both', mine, theirs);
+    fake.paidSessions.add(sessionId);
+    await webhook(sessionId);
+
+    const body = (await (await compare(mine, theirs)).json()) as CompareResponse;
+    expect(body.unlocked).toBe(true);
+    expect(body.a.reportUnlocked).toBe(true);
+    expect(body.b.reportUnlocked).toBe(false);
+    expect((await report(mine)).status).toBe(200);
+    expect((await report(theirs)).status).toBe(402);
+  });
+
+  it('does not unlock from a session that paid for another pair', async () => {
+    const a = await newResultId();
+    const b = await newResultId();
+    const c = await newResultId();
+    const sessionId = await startPairCheckout('couple', a, b);
+    fake.paidSessions.add(sessionId);
+
+    expect(((await (await compare(a, c, sessionId)).json()) as CompareResponse).unlocked).toBe(false);
+    expect(((await (await compare(a, b)).json()) as CompareResponse).unlocked).toBe(false);
+    expect(((await (await compare(a, b, sessionId)).json()) as CompareResponse).unlocked).toBe(true);
+  });
+
+  it('refuses to sell a couple report that is already unlocked', async () => {
+    const a = await newResultId();
+    const b = await newResultId();
+    const sessionId = await startPairCheckout('couple', a, b);
+    fake.paidSessions.add(sessionId);
+    await webhook(sessionId);
+
+    const again = await checkout({ product: 'couple', resultId: b, partnerResultId: a });
+    expect(again.status).toBe(409);
+    // "both" is still for sale, because the full report is not unlocked yet.
+    expect((await checkout({ product: 'both', resultId: a, partnerResultId: b })).status).toBe(201);
   });
 });
 

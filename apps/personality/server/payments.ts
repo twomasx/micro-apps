@@ -6,7 +6,7 @@ import type { AxisScore } from '../src/lib/scoring.ts';
 import { buildReport } from './content.ts';
 import { error, json } from './http.ts';
 import { randomId } from './ids.ts';
-import { findResult, isReportUnlocked } from './results.ts';
+import { findResult, isCoupleUnlocked, isReportUnlocked } from './results.ts';
 
 const PRODUCTS: readonly Product[] = catalog.products;
 const MAX_BODY_CHARS = 1_000;
@@ -34,9 +34,10 @@ export function stripePayments(env: Env): PaymentsFactory {
 // The webhook and verify calls create no checkout, so they need no return URLs.
 const NO_URLS: CheckoutUrls = { successUrl: '', cancelUrl: '' };
 
-interface PurchaseRow {
+export interface PurchaseRow {
   product: string;
   result_id: string;
+  partner_result_id: string | null;
   status: string;
 }
 
@@ -94,13 +95,17 @@ export async function createCheckout(
     }
     partnerId = partner.id;
   }
-  if (product.id === 'report' && (await isReportUnlocked(db, result.id))) {
-    return error(409, 'already_unlocked', 'This report is already unlocked.');
+  // Never sell something that is already unlocked.
+  const hasReport = product.id !== 'couple' && (await isReportUnlocked(db, result.id));
+  const hasCouple = partnerId !== null && (await isCoupleUnlocked(db, result.id, partnerId));
+  if (product.id === 'report' ? hasReport : product.id === 'couple' ? hasCouple : hasReport && hasCouple) {
+    return error(409, 'already_unlocked', 'This is already unlocked.');
   }
 
   const origin = publicOrigin ?? new URL(request.url).origin;
+  // Anything bought for a pair is sold on the compare page, so the buyer goes back there.
   const page =
-    product.id === 'couple'
+    partnerId !== null
       ? `${origin}${appConfig.base}c/${result.id}/${partnerId}`
       : `${origin}${appConfig.base}r/${result.id}/report`;
   const session = await payments({
@@ -154,20 +159,22 @@ export async function handleStripeWebhook(
 
 /**
  * Used when the buyer comes back from Checkout before the webhook has arrived.
- * Only a session that we created for this result can unlock it.
+ * Only a session that we created, for a purchase that `belongs` accepts, can unlock anything.
  */
-async function confirmSession(
+export async function confirmSession(
   db: D1Database,
   payments: PaymentsFactory,
-  resultId: string,
   sessionId: string,
+  belongs: (purchase: PurchaseRow) => boolean,
 ): Promise<void> {
   if (!SESSION_ID_PATTERN.test(sessionId)) return;
   const purchase = await db
-    .prepare('SELECT product, result_id, status FROM purchases WHERE stripe_session_id = ?')
+    .prepare(
+      'SELECT product, result_id, partner_result_id, status FROM purchases WHERE stripe_session_id = ?',
+    )
     .bind(sessionId)
     .first<PurchaseRow>();
-  if (!purchase || purchase.result_id !== resultId || purchase.status !== 'pending') return;
+  if (!purchase || purchase.status !== 'pending' || !belongs(purchase)) return;
 
   const { paid } = await payments(NO_URLS).verifyPurchase(sessionId);
   if (paid) await markPaid(db, sessionId);
@@ -185,7 +192,9 @@ export async function getReport(
 
   if (!(await isReportUnlocked(db, row.id))) {
     const sessionId = new URL(request.url).searchParams.get('session_id');
-    if (sessionId) await confirmSession(db, payments, row.id, sessionId);
+    if (sessionId) {
+      await confirmSession(db, payments, sessionId, (purchase) => purchase.result_id === row.id);
+    }
     if (!(await isReportUnlocked(db, row.id))) {
       return error(402, 'payment_required', 'This report is not unlocked.');
     }

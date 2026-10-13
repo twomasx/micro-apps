@@ -1,0 +1,383 @@
+/*
+ * The comparison of two results, and the couple report.
+ * Two markers share one scale: a filled dot for the first result, a ring for the second.
+ */
+.compare {
+  gap: 28px;
+}
+
+.compare-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.compare-types {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.22em;
+  font-size: clamp(2.75rem, 14.5vw, 5.5rem);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  margin-left: -0.04em;
+}
+
+.compare-and {
+  font-size: 0.32em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink-muted);
+}
+
+/* The two markers, used in the legend and on every scale. */
+.pair-marker {
+  display: inline-block;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.pair-marker[data-side='b'] {
+  background: var(--paper);
+}
+
+.compare-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 28px;
+}
+
+.compare-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--target);
+}
+
+.compare-legend-name {
+  color: var(--ink-muted);
+}
+
+.compare-legend-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+}
+
+.compare-similarity {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.compare-similarity-value {
+  font-size: 4rem;
+  font-weight: 650;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.compare-similarity-note {
+  margin-top: 6px;
+  color: var(--ink-muted);
+}
+
+.compare-axes {
+  border-bottom: 1px solid var(--line);
+}
+
+.compare-axis {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0 12px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.compare-axis:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.compare-axis-title {
+  font-size: 1.1875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.compare-axis-tag,
+.compare-couple-tag {
+  padding: 3px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  white-space: nowrap;
+}
+
+.compare-axis[data-alike='true'] .compare-axis-tag {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.pair-scale {
+  position: relative;
+  grid-column: 1 / -1;
+  height: 28px;
+  margin-top: 14px;
+}
+
+/* The hairline, with a tick at the middle. */
+.pair-scale::before {
+  content: '';
+  position: absolute;
+  top: 13px;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--line);
+}
+
+.pair-scale::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: calc(50% - 0.5px);
+  width: 1px;
+  height: 16px;
+  background: var(--line-strong);
+}
+
+.pair-gap {
+  position: absolute;
+  top: 13px;
+  left: calc(var(--from) * 1%);
+  width: calc(var(--gap) * 1%);
+  height: 2px;
+  background: var(--accent);
+}
+
+.pair-scale .pair-marker {
+  position: absolute;
+  top: 7px;
+  z-index: 1;
+  transform: translateX(-50%);
+}
+
+.pair-scale .pair-marker[data-side='a'] {
+  left: calc(var(--a) * 1%);
+}
+
+.pair-scale .pair-marker[data-side='b'] {
+  left: calc(var(--b) * 1%);
+}
+
+.compare-axis-ends,
+.compare-axis-sides {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.compare-axis-ends {
+  font-size: 0.6875rem;
+}
+
+.compare-axis-sides {
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 10px;
+}
+
+.compare-axis-side[data-side='a'] {
+  font-weight: 600;
+}
+
+.compare-couple,
+.compare-offer,
+.compare-share,
+.compare-buy,
+.compare-unconfirmed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.compare-couple,
+.compare-offer {
+  gap: 20px;
+}
+
+.compare-couple-title {
+  font-size: 1.75rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.compare-offer-lead {
+  font-size: 1.0625rem;
+}
+
+.compare-price {
+  font-weight: 600;
+}
+
+.compare-note {
+  color: var(--ink-muted);
+}
+
+.compare-unconfirmed,
+.compare-error,
+.compare-message {
+  padding: 12px 14px;
+  border-left: 2px solid var(--accent);
+  background: var(--surface);
+}
+
+.compare-check {
+  align-self: flex-start;
+}
+
+.compare-couple-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.compare-couple-heading,
+.compare-couple-questions-title {
+  margin: 0;
+}
+
+.compare-couple-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.compare-couple-section p {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.compare-couple-questions-title {
+  margin-top: 6px;
+}
+
+.compare-couple-questions li {
+  padding: 10px 0 10px 18px;
+  border-top: 1px solid var(--line);
+  background: linear-gradient(var(--accent), var(--accent)) 0 1.15em / 8px 2px no-repeat;
+}
+
+.compare-share {
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.compare[data-state='notFound'],
+.compare[data-state='error'],
+.compare[data-state='loading'] {
+  justify-content: center;
+  gap: 16px;
+}
+
+.compare[data-state='notFound'] .compare-title,
+.compare[data-state='error'] .compare-title,
+.compare[data-state='loading'] .compare-title {
+  font-size: 1.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+  .compare {
+    max-width: 720px;
+    gap: 36px;
+    padding-top: 48px;
+  }
+
+  .compare-axis-sides {
+    flex-direction: row;
+  }
+
+  .compare-couple-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px 36px;
+  }
+
+  .compare-couple-heading,
+  .compare-couple-section > p {
+    grid-column: 1;
+  }
+
+  .compare-couple-questions-title {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    align-self: end;
+  }
+
+  .compare-couple-questions {
+    grid-column: 2;
+    grid-row: 2 / span 4;
+  }
+}
+
+/* Desktop: the headline numbers on the left, the four scales on the right. */
+@media (min-width: 1024px) {
+  .compare[data-state='ready'] {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    /* The last row on the left takes the slack, so the title and legend stay together. */
+    grid-template-rows: auto auto 1fr;
+    align-content: start;
+    gap: 28px 72px;
+    max-width: 1040px;
+  }
+
+  .compare-title,
+  .compare-legend,
+  .compare-similarity {
+    grid-column: 1;
+  }
+
+  .compare-axes {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+
+  .compare-couple,
+  .compare-offer,
+  .compare-share {
+    grid-column: 1 / -1;
+  }
+
+  .compare-offer {
+    max-width: 560px;
+  }
+}

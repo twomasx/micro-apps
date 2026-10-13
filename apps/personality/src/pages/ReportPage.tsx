@@ -283,7 +283,9 @@ export function ReportPage({ id, sessionId }: { id: string; sessionId: string | 
           <h1 className="report-title">Result not found</h1>
           <p>This result does not exist. It may have been deleted.</p>
           <p>
-            <Link to="">Go to the personality test</Link>
+            <Link to="" className="home-link">
+            Go to the personality test
+          </Link>
           </p>
         </main>
       );

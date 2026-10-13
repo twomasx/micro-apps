@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 
 import { useBackGuard } from '../hooks/useBackGuard.ts';
 import { useTest } from '../hooks/useTest.ts';
 import { navigate } from '../lib/navigation.ts';
+import { clearCompareWith, loadCompareWith } from '../lib/store.ts';
 import { isValidAnswer } from '../lib/progress.ts';
 import { currentQuestions } from '../lib/questions.ts';
 
@@ -69,7 +70,10 @@ export function TestPage() {
     const created = await test.next();
     if (created) {
       await release();
-      navigate(`r/${created.id}`, { replace: true });
+      // Someone who came from a compare link lands on the comparison, not the plain result.
+      const compareWith = await loadCompareWith();
+      await clearCompareWith();
+      navigate(compareWith ? `c/${compareWith}/${created.id}` : `r/${created.id}`, { replace: true });
     }
   };
 

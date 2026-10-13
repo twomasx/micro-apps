@@ -38,6 +38,20 @@ export async function isReportUnlocked(db: D1Database, resultId: string): Promis
   return row !== null;
 }
 
+/** True when a paid purchase covers the couple report for this pair, bought from either side. */
+export async function isCoupleUnlocked(db: D1Database, a: string, b: string): Promise<boolean> {
+  const row = await db
+    .prepare(
+      `SELECT 1 FROM purchases
+       WHERE product IN ('couple', 'both') AND status = 'paid'
+         AND ((result_id = ?1 AND partner_result_id = ?2) OR (result_id = ?2 AND partner_result_id = ?1))
+       LIMIT 1`,
+    )
+    .bind(a, b)
+    .first();
+  return row !== null;
+}
+
 /** POST /api/results */
 export async function createResult(request: Request, db: D1Database): Promise<Response> {
   const text = await request.text();

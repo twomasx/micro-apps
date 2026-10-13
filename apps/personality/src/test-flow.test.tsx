@@ -5,7 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App.tsx';
 import { currentQuestions as questions } from './lib/questions.ts';
 import { score } from './lib/scoring.ts';
-import { clearProgress, loadProgress, loadResults, removeResult } from './lib/store.ts';
+import {
+  clearCompareWith,
+  clearProgress,
+  loadCompareWith,
+  loadProgress,
+  loadResults,
+  removeResult,
+  saveCompareWith,
+} from './lib/store.ts';
 
 const RESULT_ID = 'abcdefghjkmnpqrs';
 const TOTAL = questions.items.length;
@@ -85,6 +93,7 @@ afterEach(async () => {
   vi.unstubAllEnvs();
   await clearProgress(questions.version);
   await removeResult(RESULT_ID);
+  await clearCompareWith();
 });
 
 describe('test flow', () => {
@@ -230,6 +239,21 @@ describe('test flow', () => {
     expect(await loadResults()).toMatchObject([
       { id: RESULT_ID, version: 'p1', type: 'ESTJ', deleteToken: 'token' },
     ]);
+  });
+
+  it('opens the comparison when you came from a compare link', async () => {
+    await saveCompareWith('zzzzzzzzzzzzzzzz');
+    respondWithResult();
+    await openTest();
+    await answerQuestions(TOTAL - 1, 4);
+    choose(4);
+    fireEvent.click(screen.getByRole('button', { name: 'See your result' }));
+
+    await waitFor(() =>
+      expect(window.location.pathname).toBe(`/personality/c/zzzzzzzzzzzzzzzz/${RESULT_ID}`),
+    );
+    // Used once: the next test you take ends on the plain result.
+    expect(await loadCompareWith()).toBeNull();
   });
 
   it('keeps the answers and says so when sending fails', async () => {

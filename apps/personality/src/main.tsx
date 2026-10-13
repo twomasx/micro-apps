@@ -7,6 +7,8 @@ import './styles/intro.css';
 import './styles/test.css';
 import './styles/result.css';
 import './styles/report.css';
+import './styles/compare.css';
+import './styles/info.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

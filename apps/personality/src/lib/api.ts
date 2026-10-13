@@ -1,3 +1,4 @@
+import type { CompareResponse } from './compare.ts';
 import type { ProductId } from './products.ts';
 import type { Report } from './report.ts';
 import type { Answers, AxisScore, Flag } from './scoring.ts';
@@ -93,4 +94,17 @@ export async function startCheckout(
     body: JSON.stringify({ product, resultId, partnerResultId }),
   });
   return ((await response.json()) as { url: string }).url;
+}
+
+/** The comparison of two results. The couple report comes with it once it is unlocked. */
+export async function fetchCompare(
+  a: string,
+  b: string,
+  sessionId: string | null = null,
+): Promise<CompareResponse> {
+  const query = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : '';
+  const response = await request(
+    `compare/${encodeURIComponent(a)}/${encodeURIComponent(b)}${query}`,
+  );
+  return (await response.json()) as CompareResponse;
 }

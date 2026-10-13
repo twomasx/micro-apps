@@ -7,6 +7,7 @@ import type { Progress } from './progress.ts';
 const storage = createStorage(appConfig.name);
 
 const RESULTS_KEY = storageKey(appConfig.name, 'results');
+const COMPARE_WITH_KEY = storageKey(appConfig.name, 'compare-with');
 
 function progressKey(version: string): string {
   return storageKey(appConfig.name, `progress:${version}`);
@@ -69,6 +70,31 @@ export async function removeResult(id: string): Promise<void> {
       RESULTS_KEY,
       results.filter((saved) => saved.id !== id),
     );
+  } catch {
+    // See saveProgress.
+  }
+}
+
+/** The result someone asked you to compare with, kept while you take the test. */
+export async function loadCompareWith(): Promise<string | null> {
+  try {
+    return (await storage.get<string>(COMPARE_WITH_KEY)) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveCompareWith(resultId: string): Promise<void> {
+  try {
+    await storage.set(COMPARE_WITH_KEY, resultId);
+  } catch {
+    // See saveProgress. The test still works; it ends on the plain result.
+  }
+}
+
+export async function clearCompareWith(): Promise<void> {
+  try {
+    await storage.delete(COMPARE_WITH_KEY);
   } catch {
     // See saveProgress.
   }

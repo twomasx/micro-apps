@@ -88,6 +88,8 @@ Functional rules for the test (layout and flow look are Roger's):
 - Back button: `useBackGuard` keeps one extra history entry while the test is open, so Back goes to the previous question, including after a reload.
 - Screen tests (`src/*.test.tsx`) run in jsdom with `fake-indexeddb`. They need `vi.stubEnv('BASE_URL', '/personality/')` because Vitest serves from `/`.
 - The report's charts are in `src/components/report/` (`ProfileChart`, `ScaleRuler`, `TraitBars`). They only draw: the numbers come from the report API, and the geometry (ruler ticks, profile line, part numbering, Big Five mapping) is in `src/lib/report-view.ts` and `src/lib/big-five.ts`.
+- `src/lib/compare.ts` does the comparison (shared with the server). `swapSides` puts your own result first on the compare page.
+- `/science` and `/privacy` render `content/science.md` and `content/privacy.md` through `InfoPage`. Those two files are imported into the client; no other content file may be.
 - `DESIGN-TODO.md` lists every open design decision and the class names and `data-*` attributes for each screen. Update it when a screen changes.
 
 ## Free result
@@ -97,7 +99,7 @@ Functional rules for the test (layout and flow look are Roger's):
 - "Compare with someone" creates the link `/personality/?with=<id>`. Before sharing, say plainly: "The person you send this to will see your result."
 - Save the user's result IDs in IndexedDB (`personality:results`) so the intro page can show "Your last result". Each entry also holds the `deleteToken`.
 - A result taken on this device is "own": it shows the compare link and "Delete this result". Anyone else's result shows "Take the test yourself" instead.
-- The `?with=<id>` link is created here, but the intro does nothing with it until build step 7.
+- The intro saves the id from `?with=<id>` under `personality:compare-with`. Submitting the test reads it, clears it, and opens `/c/<with>/<new>` instead of the plain result. Opening the intro with no link and no test under way clears it.
 
 ## Paid products (prices in `config/products.json`)
 
@@ -139,13 +141,14 @@ Functional rules for the test (layout and flow look are Roger's):
 - `unlocked` is true when `purchases` has a row for the result with product `report` or `both` and status `paid`.
 - `summary` is the Summary section of the type's content file.
 - `POST /api/checkout` stores a `pending` row in `purchases` with the Stripe session id. Only two things turn it into `paid`: the webhook, or `GET /api/results/:id/report?session_id=...` when the buyer returns first. Both ask Stripe whether the session is paid, and only a session we created for that result can unlock it.
-- `couple` and `both` need `partnerResultId`. Step 7 builds the page that sells them.
+- `couple` and `both` need `partnerResultId` and are sold on the compare page. For `both`, `resultId` is the buyer's own result: that one gets the full report. A paid pair is unlocked whichever way round the two ids are given.
+- `GET /api/compare/:a/:b` takes `?session_id=` the same way the report does. It answers 400 for the same id twice, 404 when either result is missing, 409 when the two results come from different question versions.
 - The report page fetches the result first and only asks for the report when it is unlocked or a `session_id` is present, so a locked report does not log a failed request.
 - `PUBLIC_ORIGIN` (in `.env`) is where Checkout sends the buyer back. Without it the functions use the request origin, which is wrong behind the Vite proxy.
 
 ## Where server code lives
 
-- Route files in `functions/api/` stay one-liners. Pages turns every file under `functions/` into a route, so the logic and its tests live in `server/` (`server/results.ts`, `server/payments.ts`, `server/content.ts`, `server/ids.ts`, `server/http.ts`).
+- Route files in `functions/api/` stay one-liners. Pages turns every file under `functions/` into a route, so the logic and its tests live in `server/` (`server/results.ts`, `server/payments.ts`, `server/compare.ts`, `server/content.ts`, `server/ids.ts`, `server/http.ts`).
 - Payment handlers take a `PaymentsFactory`, so tests pass a fake provider and never call Stripe.
 - Pages Functions cannot import `.md` files. `pnpm --filter @micro/personality content` writes `server/content.generated.ts` from `content/`. Run it after every content edit; a test fails when it is out of date. Only `server/` may import that file, because it holds the paid text.
 - `src/lib/scoring.ts` and `src/lib/questions.ts` are shared by client and server. Keep DOM and Workers APIs out of them. `getQuestions(version)` returns the question file for a version.

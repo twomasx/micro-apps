@@ -32,6 +32,18 @@ describe('parseRoute', () => {
     expect(parseRoute('/personality/r/abc/other', '', BASE)).toEqual({ name: 'notFound' });
   });
 
+  it('matches a comparison, the science page and the privacy page', () => {
+    expect(parseRoute('/personality/c/abc/def', '?session_id=cs_test_1', BASE)).toEqual({
+      name: 'compare',
+      a: 'abc',
+      b: 'def',
+      sessionId: 'cs_test_1',
+    });
+    expect(parseRoute('/personality/c/abc', '', BASE)).toEqual({ name: 'notFound' });
+    expect(parseRoute('/personality/science', '', BASE)).toEqual({ name: 'science' });
+    expect(parseRoute('/personality/privacy/', '', BASE)).toEqual({ name: 'privacy' });
+  });
+
   it('returns notFound for anything else', () => {
     for (const path of ['/personality/nope', '/personality/r', '/personality/test/x', '/focus/', '/']) {
       expect(parseRoute(path, '', BASE)).toEqual({ name: 'notFound' });

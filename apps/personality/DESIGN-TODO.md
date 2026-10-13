@@ -5,7 +5,7 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 ## Where the design lives
 
 - `src/base.css`: the tokens (`--paper`, `--ink`, `--ink-muted`, `--line`, `--accent`, `--radius`, `--font`), the reset, buttons, the footer.
-- `src/styles/intro.css`, `test.css`, `result.css`, `report.css`: one file per screen.
+- `src/styles/intro.css`, `test.css`, `result.css`, `report.css`, `compare.css`, `info.css`: one file per screen.
 - The typeface is self-hosted from the `@fontsource-variable/inter-tight` package (45 KB for Latin). No request goes to an outside font service.
 
 ## Choices to confirm or change
@@ -53,6 +53,21 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - The accent is still used only for measured things: markers, fills, the profile line, the bars, and the small numbers and letters that label them.
 - Nothing in the report animates.
 
+## How comparing behaves now
+
+- "Send a compare link" on your result shares `/personality/?with=<your result>`.
+- The person who opens it sees a note on the intro, "Someone wants to compare". When they finish the test they land on the comparison, not on the plain result. If they already have a result on that phone, the note also offers "Compare using your last result".
+- The sender does not see anything by itself. The receiver has to press "Send this comparison" to share it back. Check that this is the flow you want.
+- `/c/:a/:b` shows: both type codes, a legend (filled dot and ring), one number labeled "How similar your answers are" with a note that it is not a prediction, then the four scales with both markers and a line for the gap. Each scale is tagged "Alike" or "Different".
+- Your own result is always shown first and labeled "You", the other "Them". If neither result is from this phone they are "First" and "Second".
+- Under the scales: the couple report offer ("$7.99 once. No renewals."). If one result is yours and its full report is not unlocked, a second button sells both for $14.99.
+- Once paid, the couple report shows one block per scale: which case applies ("Both N", "One E, one I"), the text, and four questions. From 640px up the questions sit beside the text.
+- From 1024px up the numbers are on the left and the four scales on the right.
+
+## The science and privacy pages
+
+- `/science` and `/privacy` are plain reading pages built from `content/science.md` and `content/privacy.md`. Both are linked from the footer of every page.
+
 ## Still open
 
 - "Start over" on the intro does not ask first.
@@ -68,6 +83,10 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - The report has no share button of its own.
 - **Chart details** to check on your phone: marker size (12px), ruler height (40px), bar thickness (8px), the shade of the balanced band (`--tint` in `src/base.css`).
 - **Wording in the report frame**: part titles, the profile caption, the Big Five note and the "How this was measured" paragraph are drafts. They are in `ReportPage.tsx` and `src/lib/report-view.ts`, not in `content/`, because they are the same for every type.
+- **Words on the compare page**: "You" and "Them", "First" and "Second", "Alike" and "Different", the offer text, and the note under the similarity number are drafts.
+- **The similarity number is big.** The spec allows it, but decide how much weight it should get next to the four scales.
+- **Compare notice on the intro** is a white box with an accent edge. Same treatment as the messages on the result page.
+- **Footer links** ("The science", "Privacy") sit above the trademark line on every page, including during the test.
 - **Favicon.** There is none. `index.html` has an empty icon link so the browser logs no 404.
 - A share image for results (planned for later in the spec).
 - A result opened by someone else says "This type is INTJ" and offers "Take the test yourself". Check that wording.
@@ -78,4 +97,7 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - Intro: `main.intro[data-in-progress]`, `.intro-kicker`, `.intro-title`, `.intro-lead`, `.intro-specs`, `.intro-spec`, `.intro-free`, `.intro-instructions`, `.intro-actions`, `.intro-start`, `.intro-restart`, `.intro-progress`, `.intro-last-result`.
 - Test: `main.test[data-state="loading|ready|submitting"][data-index][data-answered]`, `.test-header`, `.test-progress`, `.test-axes`, `.test-axis[data-axis][data-complete]` with `--fill` (0 to 1), `.test-instructions`, `form.question[data-question-id][data-direction="forward|back"]`, `.question-fieldset`, `.question-text`, `.scale`, `.scale-option[data-value][data-selected]`, `.scale-key`, `.scale-label`, `.question-actions`, `.question-back`, `.question-next[data-last]`, `.test-error`.
 - Report: `main.report[data-state="loading|locked|ready|notFound|error"][data-type]`, `.report-title`, `.report-kicker`, `.report-type`, `.report-lead`, `.report-contents`, `.report-unconfirmed`, `.report-check`, `.report-buy`, `.report-unlock`, `.report-price`, `.report-note`, `.report-error`, `.report-cover`, `.report-cover-side`, `.report-readout`, `.report-readout-cell[data-axis]`, `.report-meta`, `.report-summary`, `.report-layout`, `.report-contents-nav`, `.report-toc`, `.report-body`, `section.report-part#profile|scales|traits|depth|method`, `.report-part-title`, `.report-part-number`, `article.report-axis[data-axis][data-balanced]`, `.report-axis-headline`, `.report-axis-name`, `.report-axis-balance`, `.report-axis-blocks`, `.report-block`, `.report-block-title`, `.report-depth-grid`, `.report-facts`, `.report-actions`, `.report-print`, `.report-back-link`. Charts: `.profile-chart` with `--rows`, `.profile-row[data-axis][data-winner]` with `--pos` and `--row`, `.profile-side[data-winner]`, `.profile-marker`, `svg.profile-overlay` (`.profile-band`, `.profile-middle`, `.profile-line`); `.ruler[data-winner]` with `--pos` and `--band`, `.ruler-tick[data-size="minor|major|center"]` with `--t`, `.ruler-band`, `.ruler-fill`, `.ruler-marker`, `.ruler-side[data-winner]`; `.traits`, `li.trait[data-axis]` with `--pct`, `.trait-bar`, `.trait-fill`. On the result page: `.result-report[data-unlocked]`, `.result-report-title`, `.result-report-lead`, `.result-report-link`, `.result-report-price`.
+- Compare: `main.compare[data-state][data-own][data-unlocked]`, `.compare-title`, `.compare-kicker`, `.compare-types`, `.compare-type`, `.compare-and`, `.compare-legend`, `.compare-legend-item[data-side="a|b"]`, `.compare-similarity`, `.compare-similarity-value`, `.compare-similarity-label`, `.compare-similarity-note`, `ul.compare-axes`, `li.compare-axis[data-axis][data-alike]`, `.compare-axis-title`, `.compare-axis-tag`, `.pair-scale` with `--a`, `--b`, `--from` and `--gap`, `.pair-marker[data-side]`, `.pair-gap`, `.compare-axis-ends`, `.compare-axis-side[data-side]`, `.compare-offer`, `.compare-buy[data-product]`, `.compare-unlock`, `.compare-unlock-both`, `.compare-price`, `.compare-note`, `.compare-unconfirmed`, `.compare-couple`, `article.compare-couple-section[data-axis]`, `.compare-couple-tag`, `.compare-couple-questions`, `.compare-share`.
+- Intro compare notice: `.intro-compare`, `.intro-compare-title`, `.intro-compare-text`, `.intro-compare-link`, `.intro-compare-own`.
+- Info pages: `main.info[data-page="science|privacy"]`, `.info-title`, `.info-section`, `.info-section-title`, `.prose-list`, `.info-back-link`. Footer: `.site-footer-nav`, `.site-footer-link`.
 - Result: `main.result[data-state][data-type][data-own][data-revealed]`, `.result-title-label`, `.result-type`, `.result-letter` with `--i`, `.result-warning`, `.result-summary`, `ul.axes`, `li.axis[data-axis][data-letter][data-balanced][data-winner="left|right"]` with `--pct` and `--step`, `.axis-headline`, `.axis-pct`, `.axis-name`, `.axis-balance`, `.axis-plain`, `.axis-scale`, `.axis-fill`, `.axis-marker`, `.axis-side[data-letter][data-winner][data-pct]`, `.result-share`, `.result-compare`, `.result-compare-warning`, `.result-message`, `.result-delete`, `.result-take-test`.
