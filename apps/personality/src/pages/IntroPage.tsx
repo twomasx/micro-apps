@@ -26,11 +26,27 @@ export function IntroPage() {
 
   return (
     <main className="intro" data-in-progress={answered > 0}>
+      <p className="intro-kicker">Four scales. Sixteen types.</p>
       <h1 className="intro-title">Personality test</h1>
       <p className="intro-lead">
-        {total} questions. About 6 minutes. You get a four-letter type and a percentage on each of
-        the four scales.
+        You get a four-letter type and a percentage on each of the four scales.
       </p>
+
+      <dl className="intro-specs">
+        <div className="intro-spec">
+          <dt>Questions</dt>
+          <dd>{total}</dd>
+        </div>
+        <div className="intro-spec">
+          <dt>Minutes</dt>
+          <dd>~6</dd>
+        </div>
+        <div className="intro-spec">
+          <dt>For the result</dt>
+          <dd>$0</dd>
+        </div>
+      </dl>
+
       <p className="intro-free">The result is free. You do not need an account.</p>
       <p className="intro-instructions">{currentQuestions.instructions}</p>
 
@@ -56,7 +72,7 @@ export function IntroPage() {
 
       {saved?.lastResult && (
         <p className="intro-last-result">
-          Your last result:{' '}
+          <span className="intro-last-result-label">Your last result:</span>{' '}
           <Link to={`r/${saved.lastResult.id}`} className="intro-last-result-link">
             {saved.lastResult.type}
           </Link>

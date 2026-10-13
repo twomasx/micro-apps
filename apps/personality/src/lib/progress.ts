@@ -35,6 +35,24 @@ export function isComplete(progress: Progress, questions: QuestionFile): boolean
   return firstUnanswered(progress, questions) === questions.items.length;
 }
 
+export interface AxisProgress {
+  axis: string;
+  answered: number;
+  total: number;
+}
+
+/** How many questions of each axis are answered. Says nothing about which way the answers lean. */
+export function axisProgress(progress: Progress, questions: QuestionFile): AxisProgress[] {
+  return questions.axes.map((axis) => {
+    const items = questions.items.filter((item) => item.axis === axis.id);
+    return {
+      axis: axis.id,
+      answered: items.filter((item) => Object.hasOwn(progress.answers, item.id)).length,
+      total: items.length,
+    };
+  });
+}
+
 export function withAnswer(progress: Progress, itemId: string, value: number): Progress {
   return { ...progress, answers: { ...progress.answers, [itemId]: value } };
 }

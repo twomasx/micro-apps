@@ -1,0 +1,230 @@
+.test {
+  gap: 0;
+}
+
+.test-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  row-gap: 12px;
+}
+
+.test-progress {
+  color: var(--ink);
+}
+
+/* Four lines, one per scale. Each fills as its ten questions are answered. */
+.test-axes {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.test-axis {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+}
+
+.test-axis-label {
+  font-size: 0.6875rem;
+}
+
+.test-axis-track {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.test-axis-track::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(var(--fill, 0));
+  transform-origin: left;
+  transition: transform 320ms var(--ease-out);
+}
+
+.test-axis[data-complete='true'] .test-axis-label {
+  color: var(--ink);
+}
+
+.question {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-top: 28px;
+}
+
+.test-instructions {
+  margin-bottom: 20px;
+  padding-left: 12px;
+  border-left: 2px solid var(--accent);
+  font-size: 1rem;
+  color: var(--ink-muted);
+}
+
+.question-fieldset {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  animation: question-in 220ms var(--ease-out) both;
+}
+
+.question[data-direction='back'] .question-fieldset {
+  animation-name: question-in-back;
+}
+
+@keyframes question-in {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+}
+
+@keyframes question-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+}
+
+.question-text {
+  font-size: clamp(1.75rem, 8vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.question-text:focus {
+  outline: none;
+}
+
+/* The five answers sit in the lower half of the screen, under the thumb. */
+.scale {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  padding-top: 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+.scale-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  min-height: var(--target-primary);
+  padding: 0 14px;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  transition:
+    background-color 100ms var(--ease-out),
+    color 100ms var(--ease-out);
+}
+
+/* The radio stays in the page for keyboards and screen readers. The row is what you see. */
+.scale-option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scale-key {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.scale-label {
+  font-size: 1.0625rem;
+  font-weight: 500;
+}
+
+.scale-option:active {
+  background: var(--line);
+}
+
+.scale-option[data-selected='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.scale-option[data-selected='true'] .scale-key {
+  color: var(--paper);
+}
+
+.scale-option:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.test-error {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+  color: var(--warning);
+}
+
+.question-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.question-back {
+  border-color: transparent;
+  padding: 0 12px 0 0;
+  color: var(--ink-muted);
+}
+
+.question-next[data-last='true'] {
+  flex: 1;
+}
+
+.test-loading {
+  margin-top: 28px;
+  color: var(--ink-muted);
+}
+
+@media (hover: hover) {
+  .scale-option:not([data-selected='true']):hover {
+    background: rgb(13 13 12 / 5%);
+  }
+}
+
+/* Tablet and up: the block is centered, so the answers no longer need to hug the bottom. */
+@media (min-width: 640px) {
+  .test {
+    justify-content: center;
+  }
+
+  .question {
+    flex: 0 1 auto;
+    padding-top: 56px;
+  }
+
+  .question-fieldset {
+    flex: 0 1 auto;
+  }
+
+  .question-text {
+    min-height: 3.4em;
+  }
+
+  .scale {
+    margin-top: 0;
+  }
+}

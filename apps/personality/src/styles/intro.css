@@ -1,0 +1,97 @@
+.intro {
+  gap: 20px;
+}
+
+.intro-title {
+  font-size: clamp(3rem, 15vw, 5.5rem);
+  font-weight: 650;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+
+.intro-lead {
+  font-size: 1.1875rem;
+  line-height: 1.4;
+}
+
+/* Three readouts in a row, divided by hairlines. */
+.intro-specs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.intro-spec {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 14px 12px 14px 0;
+}
+
+.intro-spec + .intro-spec {
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+
+.intro-spec dd {
+  font-size: 2.5rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.intro-free,
+.intro-instructions {
+  color: var(--ink-muted);
+}
+
+/* The main action sits at the bottom of the screen, under the thumb. */
+.intro-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.intro-progress {
+  color: var(--ink-muted);
+}
+
+.intro-last-result {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.intro-last-result-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+}
+
+@media (min-width: 640px) {
+  .intro {
+    justify-content: center;
+    gap: 28px;
+  }
+
+  .intro-actions {
+    margin-top: 12px;
+    flex-direction: row;
+  }
+
+  .intro-start {
+    flex: 1;
+  }
+}

@@ -4,7 +4,19 @@ Path `/personality/`. Site port 3001, functions port 8801. Run with `pnpm dev:pe
 
 A 40-question test that gives you a four-letter type (like INTJ) with a percentage on each of the four axes. A compatibility checker compares two people. Free core, optional one-time paid reports.
 
-Roger designs every screen. Follow the root CLAUDE.md design rules: unstyled semantic HTML, logic in modules, design decisions go in `DESIGN-TODO.md`.
+Roger owns the design. On Oct 12, 2026 he approved the direction "Instrument" and asked Claude to build it, so this app is styled (the root rule about unstyled HTML no longer applies here). Logic still stays in modules, and every design choice Claude makes goes in `DESIGN-TODO.md` for Roger to confirm or change.
+
+## Design: Instrument
+
+- Off-white paper, near-black ink, hairline rules, one accent color. Clean and exact, like a measuring device giving a readout.
+- Tokens are in `src/base.css` (`--paper`, `--ink`, `--ink-muted`, `--line`, `--accent`, `--radius`, `--font`). Use the tokens; never write a color or font in a screen file.
+- The accent is for measured things only: progress, scales, focus rings, underlines. Main buttons are solid ink.
+- Typeface: Inter Tight, self-hosted from `@fontsource-variable/inter-tight`, with tabular numbers. No outside font service.
+- One stylesheet per screen in `src/styles/`. Phone layout first, then `min-width: 640px` and `min-width: 1024px`.
+- Motion is short and has a job: 160 ms answer feedback, 220 ms question slide, 1.35 s result reveal. All of it is off under `prefers-reduced-motion`.
+- No streaks, confetti, fake urgency or "almost there" nags.
+- The paid report (step 6) uses a serif for long reading. That face is not chosen yet; ask Roger.
+- Light only for now.
 
 ## The model
 
@@ -69,7 +81,10 @@ Functional rules for the test (layout and flow look are Roger's):
 - `src/hooks/`: `useTest` (the whole test flow), `useBackGuard` (Back button), `useResult`, `useRoute`, `useLoaded`.
 - `src/pages/`: one thin component per screen. `src/components/Link.tsx` for in-app links.
 - No router library. Add a screen by adding a case to `parseRoute` in `src/lib/router.ts` and to `Page` in `src/App.tsx`.
-- The test asks one question per screen. You pick an answer, then press Next (or Enter). Keys 1 to 5 pick an answer.
+- The test asks one question per screen. A tap on an answer, or a key 1 to 5, saves it and moves on after 160 ms (`pick` in `TestPage.tsx`, `advanceFrom` in `useTest`). Arrow keys and Space only select; Enter or Next moves on. The last question never submits by itself.
+- The question is a `role="radiogroup"` div, not a fieldset, because a fieldset will not stretch its content to put the answers at the bottom of the screen.
+- The four progress lines show answered counts per axis (`axisProgress`), never which way the answers lean.
+- The result reveal is driven by `useReveal` (one timer, values derived per frame). It is skipped when `matchMedia` is missing, which is why tests see final values at once.
 - Back button: `useBackGuard` keeps one extra history entry while the test is open, so Back goes to the previous question, including after a reload.
 - Screen tests (`src/*.test.tsx`) run in jsdom with `fake-indexeddb`. They need `vi.stubEnv('BASE_URL', '/personality/')` because Vitest serves from `/`.
 - `DESIGN-TODO.md` lists every open design decision and the class names and `data-*` attributes for each screen. Update it when a screen changes.

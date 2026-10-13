@@ -1,0 +1,245 @@
+.result[data-state='ready'] {
+  gap: 28px;
+}
+
+.result-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* The type code is the loudest thing in the app. */
+.result-type {
+  display: flex;
+  font-size: clamp(5.5rem, 29vw, 10rem);
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  margin-left: -0.04em;
+}
+
+.result-letter {
+  animation: letter-in 520ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 150ms);
+}
+
+@keyframes letter-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.18em);
+  }
+}
+
+.result-warning {
+  padding: 12px 14px;
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+  color: var(--warning);
+}
+
+.result-summary {
+  font-size: 1.1875rem;
+  line-height: 1.45;
+}
+
+.axes {
+  border-bottom: 1px solid var(--line);
+}
+
+.axis {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: 12px;
+  padding: 18px 0 16px;
+  border-top: 1px solid var(--ink);
+}
+
+.axis + .axis {
+  border-top-color: var(--line);
+}
+
+.axis-headline {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.axis-pct {
+  min-width: 2.6ch;
+  font-size: 2.75rem;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.axis-balance {
+  align-self: center;
+  padding: 3px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  white-space: nowrap;
+}
+
+.axis-plain {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  color: var(--ink-muted);
+}
+
+/* The scale: a hairline with a tick at 50%, filled from the middle to the marker. */
+.axis-scale {
+  position: relative;
+  grid-column: 1 / -1;
+  height: 18px;
+  margin-top: 14px;
+  --offset: calc((var(--pct) - 50) * 1%);
+}
+
+.axis-scale::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--line);
+}
+
+.axis-scale::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: calc(50% - 0.5px);
+  width: 1px;
+  height: 12px;
+  background: var(--line-strong);
+}
+
+.axis-fill {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: var(--offset);
+  height: 2px;
+  background: var(--accent);
+}
+
+.axis-marker {
+  position: absolute;
+  top: 3px;
+  left: calc(50% + var(--offset) - 6px);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--paper);
+}
+
+.axis[data-winner='left'] .axis-fill {
+  right: 50%;
+  left: auto;
+}
+
+.axis[data-winner='left'] .axis-marker {
+  left: calc(50% - var(--offset) - 6px);
+}
+
+.axis-sides {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+
+.axis-side[data-winner='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.result-share,
+.result-compare,
+.result-delete {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result-compare {
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.result-compare-warning {
+  color: var(--ink-muted);
+}
+
+.result-message {
+  padding: 12px 14px;
+  border-left: 2px solid var(--accent);
+  background: var(--surface);
+}
+
+.result-delete-button {
+  align-self: flex-start;
+  border-color: transparent;
+  padding: 0;
+  color: var(--ink-muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.result-take-test-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  font-weight: 600;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+}
+
+/* The actions wait until the numbers have settled. */
+.result[data-revealed='false'] :is(.result-share, .result-compare, .result-delete, .result-take-test) {
+  opacity: 0;
+}
+
+.result-share,
+.result-compare,
+.result-delete,
+.result-take-test {
+  transition: opacity 400ms var(--ease-out);
+}
+
+/* Desktop: the type code holds the left column, the scales run down the right. */
+@media (min-width: 1024px) {
+  .result[data-state='ready'] {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-content: center;
+    column-gap: 72px;
+    max-width: 960px;
+    padding-top: 48px;
+  }
+
+  .result-title {
+    grid-row: span 6;
+    align-self: start;
+    position: sticky;
+    top: 48px;
+  }
+
+  .result-type {
+    font-size: 9.5rem;
+  }
+
+  .result[data-state='ready'] > :not(.result-title) {
+    grid-column: 2;
+  }
+}

@@ -30,9 +30,21 @@ function progressText(): string {
   return screen.getByRole('status').textContent ?? '';
 }
 
-function choose(value: number): void {
+function radio(value: number): HTMLInputElement {
   const option = questions.scale.find((entry) => entry.value === value);
-  fireEvent.click(screen.getByLabelText(option?.label ?? ''));
+  return screen.getByRole('radio', { name: option?.label });
+}
+
+/** Selects an answer the way a keyboard does: it does not move on by itself. */
+function choose(value: number): void {
+  fireEvent.click(radio(value));
+}
+
+/** Taps the answer row, the way a finger or mouse does. */
+function tap(value: number): void {
+  const row = radio(value).closest('label');
+  if (!row) throw new Error('No row for this answer');
+  fireEvent.click(row);
 }
 
 function clickNext(): void {
@@ -80,9 +92,9 @@ describe('test flow', () => {
     await openTest();
     expect(progressText()).toBe(`Question 1 of ${TOTAL}`);
     expect(screen.getByText(questions.instructions)).toBeTruthy();
-    expect(screen.getByRole('group', { name: questions.items[0]?.text })).toBeTruthy();
+    expect(screen.getByRole('radiogroup', { name: questions.items[0]?.text })).toBeTruthy();
     expect(screen.getAllByRole('radio')).toHaveLength(5);
-    expect(screen.queryByRole('button', { name: 'Back' })).toBeNull();
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Back' }).disabled).toBe(true);
   });
 
   it('does not go on without an answer', async () => {
@@ -108,7 +120,7 @@ describe('test flow', () => {
     await answerQuestions(2, 5);
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(progressText()).toBe(`Question 2 of ${TOTAL}`);
-    expect((screen.getByLabelText('Very accurate') as HTMLInputElement).checked).toBe(true);
+    expect(radio(5).checked).toBe(true);
 
     choose(1);
     await answerQuestions(0);
@@ -126,16 +138,57 @@ describe('test flow', () => {
     await waitFor(() => expect(progressText()).toBe(`Question 4 of ${TOTAL}`));
   });
 
-  it('keys 1 to 5 answer the question', async () => {
+  it('a tap on an answer saves it and moves on without Next', async () => {
     await openTest();
-    fireEvent.keyDown(window, { key: '4' });
-    const chosen = screen.getByLabelText('Moderately accurate') as HTMLInputElement;
-    expect(chosen.checked).toBe(true);
-    expect(document.activeElement).toBe(chosen);
+    tap(2);
+    expect(radio(2).checked).toBe(true);
+    await waitFor(() => expect(progressText()).toBe(`Question 2 of ${TOTAL}`));
+    expect(await loadProgress(questions.version)).toMatchObject({ answers: { 'p1-01': 2 }, index: 1 });
 
+    // Back, then tap the answer that is already selected: it still moves on.
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(progressText()).toBe(`Question 1 of ${TOTAL}`);
+    tap(2);
+    await waitFor(() => expect(progressText()).toBe(`Question 2 of ${TOTAL}`));
+  });
+
+  it('a tap on the last question does not submit by itself', async () => {
+    respondWithResult();
+    await openTest();
+    await answerQuestions(TOTAL - 1);
+    tap(3);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    expect(progressText()).toBe(`Question ${TOTAL} of ${TOTAL}`);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('keys 1 to 5 answer the question and move on', async () => {
+    await openTest();
     fireEvent.keyDown(window, { key: '7' });
     fireEvent.keyDown(window, { key: '2', ctrlKey: true });
-    expect(chosen.checked).toBe(true);
+    expect(screen.getAllByRole<HTMLInputElement>('radio').some((input) => input.checked)).toBe(false);
+
+    fireEvent.keyDown(window, { key: '4' });
+    expect(radio(4).checked).toBe(true);
+    await waitFor(() => expect(progressText()).toBe(`Question 2 of ${TOTAL}`));
+    expect(await loadProgress(questions.version)).toMatchObject({ answers: { 'p1-01': 4 } });
+  });
+
+  it('shows how much of each scale is answered, not which way it leans', async () => {
+    await openTest();
+    await answerQuestions(5);
+    const fills = Array.from(document.querySelectorAll<HTMLElement>('.test-axis')).map((axis) => [
+      axis.dataset.axis,
+      axis.style.getPropertyValue('--fill'),
+    ]);
+    expect(fills).toEqual([
+      ['EI', '0.2'],
+      ['SN', '0.1'],
+      ['TF', '0.1'],
+      ['JP', '0.1'],
+    ]);
   });
 
   it('the browser Back button goes to the previous question, not off the page', async () => {
