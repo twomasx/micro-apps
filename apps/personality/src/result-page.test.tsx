@@ -72,6 +72,7 @@ describe('result page', () => {
       '53% Intuition',
       '80% Thinking',
       '60% Judging',
+      'Full report',
     ]);
     expect(screen.getByText('balanced, leans N')).toBeTruthy();
     expect(screen.queryByText(/same answer/)).toBeNull();

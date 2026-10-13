@@ -1,12 +1,13 @@
 import { getQuestions } from '../src/lib/questions.ts';
 import { score, ScoringError, type Answers, type AxisScore, type Flag } from '../src/lib/scoring.ts';
+import { typeSummary } from './content.ts';
 import { error, json, noContent } from './http.ts';
 import { randomId, randomToken, RESULT_ID_PATTERN, sha256Hex } from './ids.ts';
 
 // 40 answers are well under 1 KB of JSON.
 const MAX_BODY_CHARS = 10_000;
 
-interface ResultRow {
+export interface ResultRow {
   id: string;
   version: string;
   scores: string;
@@ -106,7 +107,7 @@ export async function createResult(request: Request, db: D1Database): Promise<Re
   );
 }
 
-async function findResult(db: D1Database, id: string): Promise<ResultRow | null> {
+export async function findResult(db: D1Database, id: string): Promise<ResultRow | null> {
   if (!RESULT_ID_PATTERN.test(id)) return null;
   return db
     .prepare(
@@ -129,8 +130,7 @@ export async function getResult(id: string, db: D1Database): Promise<Response> {
     scores: JSON.parse(row.scores) as AxisScore[],
     flags: JSON.parse(row.flags) as Flag[],
     createdAt: row.created_at,
-    // The type summaries are written in build step 5.
-    summary: null,
+    summary: typeSummary(row.type),
     unlocked: await isReportUnlocked(db, row.id),
   });
 }

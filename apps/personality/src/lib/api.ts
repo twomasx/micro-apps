@@ -1,3 +1,5 @@
+import type { ProductId } from './products.ts';
+import type { Report } from './report.ts';
 import type { Answers, AxisScore, Flag } from './scoring.ts';
 
 export interface CreatedResult {
@@ -70,4 +72,25 @@ export async function deleteResult(id: string, deleteToken: string): Promise<voi
     method: 'DELETE',
     headers: { Authorization: `Bearer ${deleteToken}` },
   });
+}
+
+/** The paid report. Throws an ApiError with status 402 when it is not unlocked. */
+export async function fetchReport(id: string, sessionId: string | null = null): Promise<Report> {
+  const query = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : '';
+  const response = await request(`results/${encodeURIComponent(id)}/report${query}`);
+  return (await response.json()) as Report;
+}
+
+/** Starts a Stripe Checkout and returns the URL to send the buyer to. */
+export async function startCheckout(
+  product: ProductId,
+  resultId: string,
+  partnerResultId?: string,
+): Promise<string> {
+  const response = await request('checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ product, resultId, partnerResultId }),
+  });
+  return ((await response.json()) as { url: string }).url;
 }

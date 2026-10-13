@@ -3,6 +3,7 @@ import { useRoute } from './hooks/useRoute.ts';
 import type { Route } from './lib/router.ts';
 import { IntroPage } from './pages/IntroPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
+import { ReportPage } from './pages/ReportPage.tsx';
 import { ResultPage } from './pages/ResultPage.tsx';
 import { TestPage } from './pages/TestPage.tsx';
 
@@ -16,6 +17,8 @@ function pageTitle(route: Route): string {
       return `Questions | ${SITE_TITLE}`;
     case 'result':
       return `Your result | ${SITE_TITLE}`;
+    case 'report':
+      return `Full report | ${SITE_TITLE}`;
     case 'notFound':
       return `Page not found | ${SITE_TITLE}`;
   }
@@ -29,6 +32,8 @@ function Page({ route }: { route: Route }) {
       return <TestPage />;
     case 'result':
       return <ResultPage key={route.id} id={route.id} />;
+    case 'report':
+      return <ReportPage key={route.id} id={route.id} sessionId={route.sessionId} />;
     case 'notFound':
       return <NotFoundPage />;
   }

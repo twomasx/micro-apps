@@ -5,7 +5,7 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 ## Where the design lives
 
 - `src/base.css`: the tokens (`--paper`, `--ink`, `--ink-muted`, `--line`, `--accent`, `--radius`, `--font`), the reset, buttons, the footer.
-- `src/styles/intro.css`, `test.css`, `result.css`: one file per screen.
+- `src/styles/intro.css`, `test.css`, `result.css`, `report.css`: one file per screen.
 - The typeface is self-hosted from the `@fontsource-variable/inter-tight` package (45 KB for Latin). No request goes to an outside font service.
 
 ## Choices to confirm or change
@@ -35,6 +35,14 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - With "reduce motion" switched on in the phone settings, everything shows at once.
 - From 1024px up the type code holds the left column and the scales run down the right.
 
+## How the full report behaves now
+
+- The result page has a "Full report" block under Share: one line on what is in it, a hairline button "See the full report", and the price line. Once paid the button says "Read the full report" and the price is gone.
+- `/r/:id/report` shows the offer when the report is locked: the type code, three lines on what is inside, a solid ink button "Unlock the full report", then "$9.99 once. No renewals." and a note that you pay on Stripe and that anyone with the link can read an unlocked report.
+- The button goes straight to Stripe Checkout. There is no confirm step in between.
+- Coming back from Stripe opens the report. If the payment is not confirmed yet, the offer shows a note and a "Check again" button.
+- The report is one long column: summary, the four scales (each with "What this scale measures", "Your result", "Near the middle" when balanced, "As a Big Five trait"), then the type in depth. From 640px up the column is 680px wide.
+
 ## Still open
 
 - "Start over" on the intro does not ask first.
@@ -42,6 +50,13 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - After sharing, a line of text says "Link copied." Decide if that should be a toast.
 - Pressing Next with no answer shows the browser's own "select one of these options" message.
 - Loading states are one line of text.
+- **Report typeface.** The report uses Inter Tight for now. Pick the serif for long reading.
+- **Where the report offer sits on the result page**, and how loud it should be. It is a quiet block under Share now.
+- **Offer wording**: the lead, the three "what is inside" lines and the button labels are drafts.
+- **Product names on the Stripe page** ("Full personality report") are in `config/products.json`.
+- **Stripe Checkout look**: it shows your Stripe account name and default colors. Branding is set in the Stripe dashboard.
+- The report has no table of contents, print style or share button.
+- **Favicon.** There is none. `index.html` has an empty icon link so the browser logs no 404.
 - A share image for results (planned for later in the spec).
 - A result opened by someone else says "This type is INTJ" and offers "Take the test yourself". Check that wording.
 - Not yet checked on a real Android phone or in iPhone Safari. Checked in headless Chromium at 375px, 768px and 1280px.
@@ -50,4 +65,5 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 
 - Intro: `main.intro[data-in-progress]`, `.intro-kicker`, `.intro-title`, `.intro-lead`, `.intro-specs`, `.intro-spec`, `.intro-free`, `.intro-instructions`, `.intro-actions`, `.intro-start`, `.intro-restart`, `.intro-progress`, `.intro-last-result`.
 - Test: `main.test[data-state="loading|ready|submitting"][data-index][data-answered]`, `.test-header`, `.test-progress`, `.test-axes`, `.test-axis[data-axis][data-complete]` with `--fill` (0 to 1), `.test-instructions`, `form.question[data-question-id][data-direction="forward|back"]`, `.question-fieldset`, `.question-text`, `.scale`, `.scale-option[data-value][data-selected]`, `.scale-key`, `.scale-label`, `.question-actions`, `.question-back`, `.question-next[data-last]`, `.test-error`.
+- Report: `main.report[data-state="loading|locked|ready|notFound|error"][data-type]`, `.report-title`, `.report-kicker`, `.report-type`, `.report-lead`, `.report-contents`, `.report-unconfirmed`, `.report-check`, `.report-buy`, `.report-unlock`, `.report-price`, `.report-note`, `.report-error`, `.report-summary`, `.report-part`, `.report-axes`, `.report-depth`, `.report-part-title`, `article.report-axis[data-axis][data-balanced]`, `.report-axis-headline`, `.report-axis-name`, `.report-axis-balance`, `.report-block`, `.report-block-title`, `.report-back-link`. On the result page: `.result-report[data-unlocked]`, `.result-report-title`, `.result-report-lead`, `.result-report-link`, `.result-report-price`.
 - Result: `main.result[data-state][data-type][data-own][data-revealed]`, `.result-title-label`, `.result-type`, `.result-letter` with `--i`, `.result-warning`, `.result-summary`, `ul.axes`, `li.axis[data-axis][data-letter][data-balanced][data-winner="left|right"]` with `--pct` and `--step`, `.axis-headline`, `.axis-pct`, `.axis-name`, `.axis-balance`, `.axis-plain`, `.axis-scale`, `.axis-fill`, `.axis-marker`, `.axis-side[data-letter][data-winner][data-pct]`, `.result-share`, `.result-compare`, `.result-compare-warning`, `.result-message`, `.result-delete`, `.result-take-test`.

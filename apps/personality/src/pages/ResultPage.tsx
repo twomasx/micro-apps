@@ -6,6 +6,7 @@ import { useResult } from '../hooks/useResult.ts';
 import { revealStep, useReveal } from '../hooks/useReveal.ts';
 import { deleteResult, type PublicResult } from '../lib/api.ts';
 import { appHref, navigate } from '../lib/navigation.ts';
+import { getProduct, priceLine } from '../lib/products.ts';
 import { getQuestions } from '../lib/questions.ts';
 import { COMPARE_WARNING, describeAxes, SAME_ANSWERS_MESSAGE } from '../lib/result-view.ts';
 import { loadResults, removeResult, type SavedResult } from '../lib/store.ts';
@@ -147,6 +148,19 @@ function ResultView({ result, own }: ResultViewProps) {
         <button type="button" className="result-share-button" onClick={() => void shareResult()}>
           Share this result
         </button>
+      </section>
+
+      <section className="result-report" data-unlocked={result.unlocked}>
+        <h2 className="result-report-title">Full report</h2>
+        <p className="result-report-lead">
+          What each percentage means, the type in depth, and the Big Five traits behind the scores.
+        </p>
+        <Link to={`r/${result.id}/report`} className="result-report-link">
+          {result.unlocked ? 'Read the full report' : 'See the full report'}
+        </Link>
+        {!result.unlocked && (
+          <p className="result-report-price">{priceLine(getProduct('report'))}</p>
+        )}
       </section>
 
       {own ? (

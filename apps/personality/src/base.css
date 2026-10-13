@@ -112,7 +112,9 @@ main {
 .axis-balance,
 .intro-spec dt,
 .intro-last-result-label,
-.result-compare-title {
+.result-compare-title,
+.result-report-title,
+.report-kicker {
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.3;
@@ -123,7 +125,8 @@ main {
 
 /* Buttons. Primary is solid ink, secondary is a hairline box, quiet is text only. */
 button,
-.intro-start {
+.intro-start,
+.result-report-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -143,7 +146,8 @@ button,
 }
 
 button:active,
-.intro-start:active {
+.intro-start:active,
+.result-report-link:active {
   transform: scale(0.98);
 }
 
@@ -154,6 +158,7 @@ button:disabled {
 
 .intro-start,
 .result-share-button,
+.report-unlock,
 .question-next[data-last='true'] {
   min-height: var(--target-primary);
   border-color: var(--ink);
@@ -170,6 +175,7 @@ button:disabled {
 
   .intro-start:hover,
   .result-share-button:not(:disabled):hover,
+  .report-unlock:not(:disabled):hover,
   .question-next[data-last='true']:not(:disabled):hover {
     background: #2a2a27;
   }

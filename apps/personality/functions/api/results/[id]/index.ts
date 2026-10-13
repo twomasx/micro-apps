@@ -1,4 +1,4 @@
-import { deleteResult, getResult } from '../../../server/results.ts';
+import { deleteResult, getResult } from '../../../../server/results.ts';
 
 export const onRequestGet: PagesFunction<Env, 'id'> = ({ params, env }) =>
   getResult(String(params.id), env.DB);

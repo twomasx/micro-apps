@@ -106,8 +106,6 @@ Functional rules for the test (layout and flow look are Roger's):
 | `couple` | The couple report for one pair of results | $7.99 |
 | `both` | Both of the above | $14.99 |
 
-- `config/products.json` still holds a placeholder product. Replace it with these three in build step 6 (amounts in cents: 999, 799, 1499).
-
 - Full report: what each of your four percentages means, including what being near the middle means; the long type description (strengths, blind spots, at work, under stress, how others may read you); your scores described as the four Big Five traits they measure.
 - Couple report: for each axis, whether you are alike or different and what that tends to mean day to day, plus questions to talk through together.
 - Paid text is never in the client bundle. The server returns it only after it confirms the unlock. Anyone with a paid result link can read that report; that is fine, it makes sharing work.
@@ -137,12 +135,18 @@ Functional rules for the test (layout and flow look are Roger's):
 - `DELETE` takes the token as `Authorization: Bearer <deleteToken>`. 401 without a token, 403 with the wrong one, 204 when deleted.
 - `answers` is an object from question id to value: `{ "p1-01": 4, ... }`. `scores` is an array of four `{ axis, letter, leftPct, rightPct, balanced }` in type code order.
 - Errors are `{ error: "<code>", message }` with a 4xx status. Every API response sends `Cache-Control: no-store`.
-- `unlocked` is true when `purchases` has a row for the result with product `report` or `both` and status `paid`. Step 6 must write that status.
-- `summary` is `null` until the content from build step 5 exists.
+- `unlocked` is true when `purchases` has a row for the result with product `report` or `both` and status `paid`.
+- `summary` is the Summary section of the type's content file.
+- `POST /api/checkout` stores a `pending` row in `purchases` with the Stripe session id. Only two things turn it into `paid`: the webhook, or `GET /api/results/:id/report?session_id=...` when the buyer returns first. Both ask Stripe whether the session is paid, and only a session we created for that result can unlock it.
+- `couple` and `both` need `partnerResultId`. Step 7 builds the page that sells them.
+- The report page fetches the result first and only asks for the report when it is unlocked or a `session_id` is present, so a locked report does not log a failed request.
+- `PUBLIC_ORIGIN` (in `.env`) is where Checkout sends the buyer back. Without it the functions use the request origin, which is wrong behind the Vite proxy.
 
 ## Where server code lives
 
-- Route files in `functions/api/` stay one-liners. Pages turns every file under `functions/` into a route, so the logic and its tests live in `server/` (`server/results.ts`, `server/ids.ts`, `server/http.ts`).
+- Route files in `functions/api/` stay one-liners. Pages turns every file under `functions/` into a route, so the logic and its tests live in `server/` (`server/results.ts`, `server/payments.ts`, `server/content.ts`, `server/ids.ts`, `server/http.ts`).
+- Payment handlers take a `PaymentsFactory`, so tests pass a fake provider and never call Stripe.
+- Pages Functions cannot import `.md` files. `pnpm --filter @micro/personality content` writes `server/content.generated.ts` from `content/`. Run it after every content edit; a test fails when it is out of date. Only `server/` may import that file, because it holds the paid text.
 - `src/lib/scoring.ts` and `src/lib/questions.ts` are shared by client and server. Keep DOM and Workers APIs out of them. `getQuestions(version)` returns the question file for a version.
 - API tests (`server/*.test.ts`) run the handlers against an in-memory local D1 from `createTestDb()` in `server/testing.ts`. Add each new migration file to the list in that file.
 
@@ -159,7 +163,7 @@ Functional rules for the test (layout and flow look are Roger's):
 - Lives in `content/` as Markdown, not in components: `types/<CODE>.md` (free summary plus paid sections), `axes/<EI|SN|TF|JP>.md`, `pairs/<EI|SN|TF|JP>.md`, `science.md`, `privacy.md`.
 - Every file starts with `status: draft`. Roger reviews and changes it to `status: approved`.
 - File format: the `status:` line, one `# title`, then `## sections`. `parseContent` in `src/lib/content.ts` reads it. `src/content.test.ts` checks that all 26 files exist, have their sections and use no banned wording.
-- The drafts are written but nothing serves them yet. Step 6 loads them on the server and fills `summary`.
+- The server serves the files whatever their status. Before launch every file should say `approved`.
 - Describe preferences, not abilities. No claims about intelligence, success, income or which careers someone "should" have. Every type gets equally respectful framing.
 - No Barnum statements that fit everyone ("You sometimes doubt yourself"). Each sentence should be truer of this type than of its opposite.
 - Follow the writing rules in the root CLAUDE.md.
@@ -185,8 +189,15 @@ Functional rules for the test (layout and flow look are Roger's):
 
 Commit after each step.
 
+## Testing payments locally
+
+- `apps/personality/.env` needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and `PUBLIC_ORIGIN=http://localhost:3001`. Restart `pnpm dev:personality` after changing it.
+- Webhooks: `stripe listen --events checkout.session.completed --forward-to http://127.0.0.1:8801/api/stripe/webhook` (Stripe CLI is in `~/.local/bin`). The `whsec_` value it prints goes in `.env`.
+- Test card: 4242 4242 4242 4242, any future date, any CVC. Untick "Save my information with Link" or Stripe asks for a phone number.
+
 ## Later (not this week)
 
 - Script to compute Cronbach's alpha per axis from stored answers. Target 0.70 or higher once there are a few hundred results.
 - Per-result share images and Open Graph tags.
 - Results and sales in our own admin dashboard.
+- Clear out old `pending` purchase rows. Every press of "Unlock" that is not paid leaves one.

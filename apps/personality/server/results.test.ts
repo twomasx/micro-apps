@@ -182,7 +182,7 @@ describe('GET /api/results/:id', () => {
     expect(body.type).toBe('INFP');
     expect(body.scores).toEqual(created.scores);
     expect(body.flags).toEqual([]);
-    expect(body.summary).toBeNull();
+    expect(body.summary).toContain('You prefer quiet');
     expect(body.unlocked).toBe(false);
     expect(Number.isNaN(Date.parse(String(body.createdAt)))).toBe(false);
   });

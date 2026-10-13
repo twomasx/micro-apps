@@ -18,6 +18,20 @@ describe('parseRoute', () => {
     expect(parseRoute('/personality/r/abc', '', BASE)).toEqual({ name: 'result', id: 'abc' });
   });
 
+  it('matches the report and reads the checkout session', () => {
+    expect(parseRoute('/personality/r/abc/report', '', BASE)).toEqual({
+      name: 'report',
+      id: 'abc',
+      sessionId: null,
+    });
+    expect(parseRoute('/personality/r/abc/report', '?session_id=cs_test_1', BASE)).toEqual({
+      name: 'report',
+      id: 'abc',
+      sessionId: 'cs_test_1',
+    });
+    expect(parseRoute('/personality/r/abc/other', '', BASE)).toEqual({ name: 'notFound' });
+  });
+
   it('returns notFound for anything else', () => {
     for (const path of ['/personality/nope', '/personality/r', '/personality/test/x', '/focus/', '/']) {
       expect(parseRoute(path, '', BASE)).toEqual({ name: 'notFound' });

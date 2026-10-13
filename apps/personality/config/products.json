@@ -1,9 +1,21 @@
 {
   "products": [
     {
-      "id": "placeholder",
-      "name": "PLACEHOLDER - replace before selling anything",
-      "amount": 100,
+      "id": "report",
+      "name": "Full personality report",
+      "amount": 999,
+      "currency": "usd"
+    },
+    {
+      "id": "couple",
+      "name": "Couple report",
+      "amount": 799,
+      "currency": "usd"
+    },
+    {
+      "id": "both",
+      "name": "Full personality report and couple report",
+      "amount": 1499,
       "currency": "usd"
     }
   ]

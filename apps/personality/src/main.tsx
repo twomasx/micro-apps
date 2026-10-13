@@ -6,6 +6,7 @@ import './base.css';
 import './styles/intro.css';
 import './styles/test.css';
 import './styles/result.css';
+import './styles/report.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

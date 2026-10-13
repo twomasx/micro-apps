@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CONTENT } from '../server/content.generated.ts';
 import { parseContent, wordCount } from './lib/content.ts';
 import { currentQuestions } from './lib/questions.ts';
 
@@ -63,6 +64,16 @@ describe('parseContent', () => {
 });
 
 describe('content files', () => {
+  it('match the generated server module (run `pnpm content` after editing content/)', () => {
+    const fromDisk = Object.fromEntries(
+      Object.entries(files).map(([path, text]) => [
+        path.replace('../content/', ''),
+        text.replace(/\r\n/g, '\n'),
+      ]),
+    );
+    expect(CONTENT).toEqual(fromDisk);
+  });
+
   it('has the 26 expected files and no others', () => {
     const expected = [
       ...TYPE_CODES.map((code) => `types/${code}.md`),

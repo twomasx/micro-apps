@@ -1,0 +1,159 @@
+/*
+ * The full report and its unlock offer.
+ * Long reading. The serif planned for this page is not chosen yet (see DESIGN-TODO.md),
+ * so it uses the app typeface for now.
+ */
+.report {
+  gap: 24px;
+}
+
+.report-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.report-type {
+  font-size: clamp(3.5rem, 18vw, 5.5rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+
+.report-summary,
+.report-lead {
+  font-size: 1.1875rem;
+  line-height: 1.45;
+}
+
+.report-contents {
+  border-bottom: 1px solid var(--line);
+}
+
+.report-contents li {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.report-contents li:first-child {
+  border-top-color: var(--ink);
+}
+
+.report-buy,
+.report-unconfirmed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-price {
+  font-weight: 600;
+}
+
+.report-note {
+  color: var(--ink-muted);
+}
+
+.report-unconfirmed,
+.report-error {
+  padding: 12px 14px;
+  border-left: 2px solid var(--accent);
+  background: var(--surface);
+}
+
+.report-check {
+  align-self: flex-start;
+}
+
+.report-part {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ink);
+}
+
+.report-part-title {
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.report-axis {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.report-axis-headline,
+.report-block-title {
+  margin: 0;
+}
+
+.report-axis-headline {
+  font-size: 1.75rem;
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.report-axis-name {
+  margin-top: -10px;
+  color: var(--ink-muted);
+}
+
+.report-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-block-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.report-depth .report-block-title {
+  font-size: 1.1875rem;
+}
+
+.report-block p {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.report-back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  font-weight: 600;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+}
+
+.report[data-state='notFound'],
+.report[data-state='error'],
+.report[data-state='loading'] {
+  justify-content: center;
+  gap: 16px;
+}
+
+.report[data-state='notFound'] .report-title,
+.report[data-state='error'] .report-title,
+.report[data-state='loading'] .report-title {
+  font-size: 1.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+/* Tablet and up: a comfortable reading measure. */
+@media (min-width: 640px) {
+  .report {
+    max-width: 680px;
+    gap: 32px;
+    padding-top: 48px;
+  }
+}

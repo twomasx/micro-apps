@@ -164,6 +164,7 @@
 }
 
 .result-share,
+.result-report,
 .result-compare,
 .result-delete {
   display: flex;
@@ -171,11 +172,13 @@
   gap: 10px;
 }
 
+.result-report,
 .result-compare {
   padding-top: 20px;
   border-top: 1px solid var(--line);
 }
 
+.result-report-price,
 .result-compare-warning {
   color: var(--ink-muted);
 }
@@ -206,11 +209,12 @@
 }
 
 /* The actions wait until the numbers have settled. */
-.result[data-revealed='false'] :is(.result-share, .result-compare, .result-delete, .result-take-test) {
+.result[data-revealed='false'] :is(.result-share, .result-report, .result-compare, .result-delete, .result-take-test) {
   opacity: 0;
 }
 
 .result-share,
+.result-report,
 .result-compare,
 .result-delete,
 .result-take-test {
@@ -229,7 +233,7 @@
   }
 
   .result-title {
-    grid-row: span 6;
+    grid-row: span 7;
     align-self: start;
     position: sticky;
     top: 48px;
