@@ -158,6 +158,8 @@ Functional rules for the test (layout and flow look are Roger's):
 
 - Lives in `content/` as Markdown, not in components: `types/<CODE>.md` (free summary plus paid sections), `axes/<EI|SN|TF|JP>.md`, `pairs/<EI|SN|TF|JP>.md`, `science.md`, `privacy.md`.
 - Every file starts with `status: draft`. Roger reviews and changes it to `status: approved`.
+- File format: the `status:` line, one `# title`, then `## sections`. `parseContent` in `src/lib/content.ts` reads it. `src/content.test.ts` checks that all 26 files exist, have their sections and use no banned wording.
+- The drafts are written but nothing serves them yet. Step 6 loads them on the server and fills `summary`.
 - Describe preferences, not abilities. No claims about intelligence, success, income or which careers someone "should" have. Every type gets equally respectful framing.
 - No Barnum statements that fit everyone ("You sometimes doubt yourself"). Each sentence should be truer of this type than of its opposite.
 - Follow the writing rules in the root CLAUDE.md.
