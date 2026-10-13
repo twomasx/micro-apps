@@ -15,6 +15,29 @@ body {
     env(safe-area-inset-left);
 }
 
+/* Touch targets: 44px minimum, 48px for the main action of a screen. */
+button,
+.scale-option,
+.intro-start {
+  min-height: 44px;
+}
+
+.scale-option,
+.intro-start {
+  display: flex;
+  align-items: center;
+}
+
+.question-next,
+.intro-start {
+  min-height: 48px;
+}
+
+input,
+button {
+  font-size: inherit;
+}
+
 /* Tablet */
 @media (min-width: 640px) {
 }

@@ -1,11 +1,55 @@
-import { appConfig } from '../app.config';
+import { useEffect } from 'react';
+import { useRoute } from './hooks/useRoute.ts';
+import type { Route } from './lib/router.ts';
+import { IntroPage } from './pages/IntroPage.tsx';
+import { NotFoundPage } from './pages/NotFoundPage.tsx';
+import { ResultPage } from './pages/ResultPage.tsx';
+import { TestPage } from './pages/TestPage.tsx';
+
+const SITE_TITLE = 'Personality test';
+
+function pageTitle(route: Route): string {
+  switch (route.name) {
+    case 'intro':
+      return SITE_TITLE;
+    case 'test':
+      return `Questions | ${SITE_TITLE}`;
+    case 'result':
+      return `Your result | ${SITE_TITLE}`;
+    case 'notFound':
+      return `Page not found | ${SITE_TITLE}`;
+  }
+}
+
+function Page({ route }: { route: Route }) {
+  switch (route.name) {
+    case 'intro':
+      return <IntroPage />;
+    case 'test':
+      return <TestPage />;
+    case 'result':
+      return <ResultPage key={route.id} id={route.id} />;
+    case 'notFound':
+      return <NotFoundPage />;
+  }
+}
 
 export function App() {
+  const route = useRoute();
+
+  useEffect(() => {
+    document.title = pageTitle(route);
+  }, [route]);
+
   return (
-    <main>
-      <p>{appConfig.name}</p>
-      <p>{import.meta.env.BASE_URL}</p>
-      <p>skeleton</p>
-    </main>
+    <>
+      <Page route={route} />
+      <footer className="site-footer">
+        <p className="site-footer-trademark">
+          Not affiliated with The Myers-Briggs Company. Myers-Briggs and MBTI are trademarks of The
+          Myers-Briggs Company.
+        </p>
+      </footer>
+    </>
   );
 }
