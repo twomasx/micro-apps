@@ -1,3 +1,4 @@
+import { bigFiveTraits } from '../src/lib/big-five.ts';
 import { parseContent, type ContentFile } from '../src/lib/content.ts';
 import type { QuestionFile } from '../src/lib/questions.ts';
 import type { Report, ReportAxis, ReportBlock } from '../src/lib/report.ts';
@@ -31,11 +32,11 @@ export function typeSummary(type: string): string | null {
 
 /** The full paid report for one result. Only call this after the unlock is confirmed. */
 export function buildReport(
-  id: string,
-  type: string,
+  result: { id: string; type: string; createdAt: string },
   scores: readonly AxisScore[],
   questions: QuestionFile,
 ): Report {
+  const { id, type } = result;
   const axes: ReportAxis[] = describeAxes(scores, questions).map((view) => {
     const path = `axes/${view.axis}.md`;
     const blocks: ReportBlock[] = [
@@ -49,8 +50,13 @@ export function buildReport(
     return {
       axis: view.axis,
       title: getContent(path)?.title ?? view.axis,
+      letter: view.letter,
       headline: view.headline,
       balanceLabel: view.balanceLabel,
+      rightPct: scores.find((score) => score.axis === view.axis)?.rightPct ?? 50,
+      itemCount: questions.items.filter((item) => item.axis === view.axis).length,
+      left: view.left,
+      right: view.right,
       blocks,
     };
   });
@@ -62,5 +68,15 @@ export function buildReport(
     .filter(([heading]) => heading !== 'Summary')
     .map(([heading, body]) => ({ heading, body }));
 
-  return { id, type, summary: section(typePath, 'Summary'), axes, sections };
+  return {
+    id,
+    type,
+    version: questions.version,
+    createdAt: result.createdAt,
+    questionCount: questions.items.length,
+    summary: section(typePath, 'Summary'),
+    axes,
+    traits: bigFiveTraits(scores, questions),
+    sections,
+  };
 }

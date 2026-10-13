@@ -193,5 +193,11 @@ export async function getReport(
 
   const questions = getQuestions(row.version);
   if (!questions) throw new Error(`No questions for version ${row.version}`);
-  return json(buildReport(row.id, row.type, JSON.parse(row.scores) as AxisScore[], questions));
+  return json(
+    buildReport(
+      { id: row.id, type: row.type, createdAt: row.created_at },
+      JSON.parse(row.scores) as AxisScore[],
+      questions,
+    ),
+  );
 }

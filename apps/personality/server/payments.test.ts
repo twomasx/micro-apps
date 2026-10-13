@@ -297,6 +297,22 @@ describe('GET /api/results/:id/report', () => {
       '75% Perceiving',
     ]);
     expect(body.axes[0]?.title).toBe('Extraversion and Introversion');
+    // The numbers the report's graphics are drawn from.
+    expect(body.axes[0]).toMatchObject({
+      letter: 'I',
+      rightPct: 75,
+      itemCount: 10,
+      left: { letter: 'E', name: 'Extraversion', pct: 25, winner: false },
+      right: { letter: 'I', name: 'Introversion', pct: 75, winner: true },
+    });
+    expect(body.traits).toEqual([
+      { axis: 'EI', trait: 'Extraversion', pct: 25 },
+      { axis: 'SN', trait: 'Openness to experience', pct: 75 },
+      { axis: 'TF', trait: 'Agreeableness', pct: 75 },
+      { axis: 'JP', trait: 'Conscientiousness', pct: 25 },
+    ]);
+    expect(body).toMatchObject({ version: 'p1', questionCount: 40 });
+    expect(Number.isNaN(Date.parse(body.createdAt))).toBe(false);
     expect(body.axes[0]?.blocks.map((block) => block.heading)).toEqual([
       'What this scale measures',
       'Your result',

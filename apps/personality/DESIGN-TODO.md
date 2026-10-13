@@ -41,7 +41,17 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - `/r/:id/report` shows the offer when the report is locked: the type code, three lines on what is inside, a solid ink button "Unlock the full report", then "$9.99 once. No renewals." and a note that you pay on Stripe and that anyone with the link can read an unlocked report.
 - The button goes straight to Stripe Checkout. There is no confirm step in between.
 - Coming back from Stripe opens the report. If the payment is not confirmed yet, the offer shows a note and a "Check again" button.
-- The report is one long column: summary, the four scales (each with "What this scale measures", "Your result", "Near the middle" when balanced, "As a Big Five trait"), then the type in depth. From 640px up the column is 680px wide.
+- The report is laid out like a printed readout. All of these are Claude's choices for you to confirm or change:
+  - **Cover:** the type code, a four-cell readout (letter, percentage, name), the summary, and a line with the date taken, the question count and the result ID.
+  - **Contents:** five numbered parts. On a phone it is a list under the cover. From 1024px up it stays fixed beside the report.
+  - **01 Profile:** all four scales on one panel with a line joining the four markers. The shaded band is the balanced zone, 45% to 55%.
+  - **02 The four scales:** each scale is drawn as a ruler with 41 ticks, one for every position a 10-question scale can land on. The marker and the fill from the middle use the accent.
+  - **03 The Big Five traits:** four bars from low to high with a tick at the middle, and a note that the numbers do not compare you with other people.
+  - **04 In depth:** the five type sections, numbered, in two columns from 640px up.
+  - **05 How this was measured:** three numbers (40 questions, 10 per scale, 2.5 points per answer) and one paragraph.
+  - **Print or save as PDF** button at the end. The print layout hides the contents list and the buttons.
+- The accent is still used only for measured things: markers, fills, the profile line, the bars, and the small numbers and letters that label them.
+- Nothing in the report animates.
 
 ## Still open
 
@@ -55,7 +65,9 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - **Offer wording**: the lead, the three "what is inside" lines and the button labels are drafts.
 - **Product names on the Stripe page** ("Full personality report") are in `config/products.json`.
 - **Stripe Checkout look**: it shows your Stripe account name and default colors. Branding is set in the Stripe dashboard.
-- The report has no table of contents, print style or share button.
+- The report has no share button of its own.
+- **Chart details** to check on your phone: marker size (12px), ruler height (40px), bar thickness (8px), the shade of the balanced band (`--tint` in `src/base.css`).
+- **Wording in the report frame**: part titles, the profile caption, the Big Five note and the "How this was measured" paragraph are drafts. They are in `ReportPage.tsx` and `src/lib/report-view.ts`, not in `content/`, because they are the same for every type.
 - **Favicon.** There is none. `index.html` has an empty icon link so the browser logs no 404.
 - A share image for results (planned for later in the spec).
 - A result opened by someone else says "This type is INTJ" and offers "Take the test yourself". Check that wording.
@@ -65,5 +77,5 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 
 - Intro: `main.intro[data-in-progress]`, `.intro-kicker`, `.intro-title`, `.intro-lead`, `.intro-specs`, `.intro-spec`, `.intro-free`, `.intro-instructions`, `.intro-actions`, `.intro-start`, `.intro-restart`, `.intro-progress`, `.intro-last-result`.
 - Test: `main.test[data-state="loading|ready|submitting"][data-index][data-answered]`, `.test-header`, `.test-progress`, `.test-axes`, `.test-axis[data-axis][data-complete]` with `--fill` (0 to 1), `.test-instructions`, `form.question[data-question-id][data-direction="forward|back"]`, `.question-fieldset`, `.question-text`, `.scale`, `.scale-option[data-value][data-selected]`, `.scale-key`, `.scale-label`, `.question-actions`, `.question-back`, `.question-next[data-last]`, `.test-error`.
-- Report: `main.report[data-state="loading|locked|ready|notFound|error"][data-type]`, `.report-title`, `.report-kicker`, `.report-type`, `.report-lead`, `.report-contents`, `.report-unconfirmed`, `.report-check`, `.report-buy`, `.report-unlock`, `.report-price`, `.report-note`, `.report-error`, `.report-summary`, `.report-part`, `.report-axes`, `.report-depth`, `.report-part-title`, `article.report-axis[data-axis][data-balanced]`, `.report-axis-headline`, `.report-axis-name`, `.report-axis-balance`, `.report-block`, `.report-block-title`, `.report-back-link`. On the result page: `.result-report[data-unlocked]`, `.result-report-title`, `.result-report-lead`, `.result-report-link`, `.result-report-price`.
+- Report: `main.report[data-state="loading|locked|ready|notFound|error"][data-type]`, `.report-title`, `.report-kicker`, `.report-type`, `.report-lead`, `.report-contents`, `.report-unconfirmed`, `.report-check`, `.report-buy`, `.report-unlock`, `.report-price`, `.report-note`, `.report-error`, `.report-cover`, `.report-cover-side`, `.report-readout`, `.report-readout-cell[data-axis]`, `.report-meta`, `.report-summary`, `.report-layout`, `.report-contents-nav`, `.report-toc`, `.report-body`, `section.report-part#profile|scales|traits|depth|method`, `.report-part-title`, `.report-part-number`, `article.report-axis[data-axis][data-balanced]`, `.report-axis-headline`, `.report-axis-name`, `.report-axis-balance`, `.report-axis-blocks`, `.report-block`, `.report-block-title`, `.report-depth-grid`, `.report-facts`, `.report-actions`, `.report-print`, `.report-back-link`. Charts: `.profile-chart` with `--rows`, `.profile-row[data-axis][data-winner]` with `--pos` and `--row`, `.profile-side[data-winner]`, `.profile-marker`, `svg.profile-overlay` (`.profile-band`, `.profile-middle`, `.profile-line`); `.ruler[data-winner]` with `--pos` and `--band`, `.ruler-tick[data-size="minor|major|center"]` with `--t`, `.ruler-band`, `.ruler-fill`, `.ruler-marker`, `.ruler-side[data-winner]`; `.traits`, `li.trait[data-axis]` with `--pct`, `.trait-bar`, `.trait-fill`. On the result page: `.result-report[data-unlocked]`, `.result-report-title`, `.result-report-lead`, `.result-report-link`, `.result-report-price`.
 - Result: `main.result[data-state][data-type][data-own][data-revealed]`, `.result-title-label`, `.result-type`, `.result-letter` with `--i`, `.result-warning`, `.result-summary`, `ul.axes`, `li.axis[data-axis][data-letter][data-balanced][data-winner="left|right"]` with `--pct` and `--step`, `.axis-headline`, `.axis-pct`, `.axis-name`, `.axis-balance`, `.axis-plain`, `.axis-scale`, `.axis-fill`, `.axis-marker`, `.axis-side[data-letter][data-winner][data-pct]`, `.result-share`, `.result-compare`, `.result-compare-warning`, `.result-message`, `.result-delete`, `.result-take-test`.

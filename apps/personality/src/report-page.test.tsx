@@ -35,19 +35,28 @@ const RESULT: PublicResult = {
 const REPORT: Report = {
   id: ID,
   type: 'INTJ',
+  version: 'p1',
+  createdAt: '2026-10-12T12:00:00.000Z',
+  questionCount: 40,
   summary: 'A short summary.',
   axes: [
     {
       axis: 'SN',
       title: 'Sensing and Intuition',
+      letter: 'N',
       headline: '53% Intuition',
       balanceLabel: 'balanced, leans N',
+      rightPct: 52.5,
+      itemCount: 10,
+      left: { letter: 'S', name: 'Sensing', pct: 47, winner: false },
+      right: { letter: 'N', name: 'Intuition', pct: 53, winner: true },
       blocks: [
         { heading: 'Your result', body: 'First paragraph.\n\nSecond paragraph.' },
         { heading: 'Near the middle', body: 'Middle text.' },
       ],
     },
   ],
+  traits: [{ axis: 'SN', trait: 'Openness to experience', pct: 52.5 }],
   sections: [{ heading: 'Strengths', body: 'Strengths text.' }],
 };
 
@@ -135,14 +144,38 @@ describe('report page', () => {
     reportAnswers = [REPORT];
     open(`/personality/r/${ID}/report`);
 
-    expect(await screen.findByRole('heading', { level: 2, name: 'The four scales' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 2, name: '02 The four scales' })).toBeTruthy();
     expect(screen.getByRole('heading', { level: 3, name: '53% Intuition' })).toBeTruthy();
     expect(screen.getByText('(balanced, leans N)')).toBeTruthy();
     expect(screen.getByText('First paragraph.')).toBeTruthy();
     expect(screen.getByText('Second paragraph.')).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 2, name: 'INTJ in depth' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: '04 INTJ in depth' })).toBeTruthy();
     expect(screen.getByText('Strengths text.')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Unlock the full report' })).toBeNull();
+
+    // The graphics: the profile panel, a ruler with all 41 positions, and the trait bar.
+    expect(screen.getByRole('img', { name: 'Profile: 53% Intuition.' })).toBeTruthy();
+    expect(document.querySelectorAll('.ruler-tick')).toHaveLength(41);
+    const ruler = document.querySelector<HTMLElement>('.ruler');
+    expect(ruler?.style.getPropertyValue('--pos')).toBe('52.5');
+    const trait = document.querySelector<HTMLElement>('.trait');
+    expect(trait?.textContent).toContain('Openness to experience 53%');
+    expect(trait?.style.getPropertyValue('--pct')).toBe('52.5');
+
+    // The contents list links to each numbered part.
+    const contents = screen.getByRole('navigation', { name: 'Contents' });
+    expect(Array.from(contents.querySelectorAll('a'), (link) => link.getAttribute('href'))).toEqual([
+      '#profile',
+      '#scales',
+      '#traits',
+      '#depth',
+      '#method',
+    ]);
+    for (const id of ['profile', 'scales', 'traits', 'depth', 'method']) {
+      expect(document.getElementById(id)).toBeTruthy();
+    }
+    expect(screen.getByText('2.5 points')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Print or save as PDF' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Back to the result' }).getAttribute('href')).toBe(
       `/personality/r/${ID}`,
     );

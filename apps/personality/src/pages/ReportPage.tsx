@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { Link } from '../components/Link.tsx';
+import { ProfileChart } from '../components/report/ProfileChart.tsx';
+import { ScaleRuler } from '../components/report/ScaleRuler.tsx';
+import { TraitBars } from '../components/report/TraitBars.tsx';
 import { useReport } from '../hooks/useReport.ts';
 import { startCheckout, type PublicResult } from '../lib/api.ts';
 import { leaveTo } from '../lib/navigation.ts';
 import { getProduct, priceLine } from '../lib/products.ts';
 import { paragraphs, type Report, type ReportBlock } from '../lib/report.ts';
+import { formatReportDate, reportParts, stepSize, type ReportPart } from '../lib/report-view.ts';
 
 const CONTENTS = [
   'What each of the four percentages means, including what it means to be near the middle.',
@@ -34,44 +38,159 @@ function BackLink({ id }: { id: string }) {
   );
 }
 
+function PartHeading({ part }: { part: ReportPart }) {
+  return (
+    <h2 className="report-part-title">
+      <span className="report-part-number">{part.number}</span> {part.title}
+    </h2>
+  );
+}
+
 function ReportView({ report }: { report: Report }) {
+  const parts = reportParts(report.type);
+  const [profile, scales, traits, depth, method] = parts;
+  const itemCount = report.axes[0]?.itemCount ?? 0;
+  if (!profile || !scales || !traits || !depth || !method) return null;
+
   return (
     <main className="report" data-state="ready" data-type={report.type}>
-      <h1 className="report-title">
-        <span className="report-kicker">Full report</span>{' '}
-        <span className="report-type">{report.type}</span>
-      </h1>
-      <p className="report-summary">{report.summary}</p>
+      <header className="report-cover">
+        <h1 className="report-title">
+          <span className="report-kicker">Full report</span>{' '}
+          <span className="report-type">{report.type}</span>
+        </h1>
+        <div className="report-cover-side">
+          <ul className="report-readout">
+            {report.axes.map((axis) => {
+              const winner = axis.left.winner ? axis.left : axis.right;
+              return (
+                <li key={axis.axis} className="report-readout-cell" data-axis={axis.axis}>
+                  <span className="report-readout-letter" aria-hidden="true">
+                    {winner.letter}
+                  </span>
+                  <span className="report-readout-pct">{winner.pct}%</span>{' '}
+                  <span className="report-readout-name">{winner.name}</span>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="report-summary">{report.summary}</p>
+          <dl className="report-meta">
+            <div className="report-meta-item">
+              <dt>Taken</dt>
+              <dd>{formatReportDate(report.createdAt)}</dd>
+            </div>
+            <div className="report-meta-item">
+              <dt>Questions</dt>
+              <dd>{report.questionCount}</dd>
+            </div>
+            <div className="report-meta-item">
+              <dt>Result</dt>
+              <dd className="report-meta-id">{report.id}</dd>
+            </div>
+          </dl>
+        </div>
+      </header>
 
-      <section className="report-part report-axes">
-        <h2 className="report-part-title">The four scales</h2>
-        {report.axes.map((axis) => (
-          <article
-            key={axis.axis}
-            className="report-axis"
-            data-axis={axis.axis}
-            data-balanced={axis.balanceLabel !== null}
-          >
-            <h3 className="report-axis-headline">{axis.headline}</h3>
-            <p className="report-axis-name">
-              {axis.title}
-              {axis.balanceLabel && <span className="report-axis-balance"> ({axis.balanceLabel})</span>}
-            </p>
-            {axis.blocks.map((block) => (
-              <Prose key={block.heading} block={block} level="h4" />
+      <div className="report-layout">
+        <nav className="report-contents-nav" aria-label="Contents">
+          <p className="report-contents-label">Contents</p>
+          <ol className="report-toc">
+            {parts.map((part) => (
+              <li key={part.id}>
+                <a className="report-toc-link" href={`#${part.id}`}>
+                  <span className="report-toc-number">{part.number}</span> {part.title}
+                </a>
+              </li>
             ))}
-          </article>
-        ))}
-      </section>
+          </ol>
+        </nav>
 
-      <section className="report-part report-depth">
-        <h2 className="report-part-title">{report.type} in depth</h2>
-        {report.sections.map((block) => (
-          <Prose key={block.heading} block={block} level="h3" />
-        ))}
-      </section>
+        <div className="report-body">
+          <section className="report-part" id={profile.id}>
+            <PartHeading part={profile} />
+            <ProfileChart axes={report.axes} />
+          </section>
 
-      <BackLink id={report.id} />
+          <section className="report-part report-axes" id={scales.id}>
+            <PartHeading part={scales} />
+            {report.axes.map((axis) => (
+              <article
+                key={axis.axis}
+                className="report-axis"
+                data-axis={axis.axis}
+                data-balanced={axis.balanceLabel !== null}
+              >
+                <h3 className="report-axis-headline">{axis.headline}</h3>
+                <p className="report-axis-name">
+                  {axis.title}
+                  {axis.balanceLabel && (
+                    <span className="report-axis-balance"> ({axis.balanceLabel})</span>
+                  )}
+                </p>
+                <ScaleRuler axis={axis} />
+                <div className="report-axis-blocks">
+                  {axis.blocks.map((block) => (
+                    <Prose key={block.heading} block={block} level="h4" />
+                  ))}
+                </div>
+              </article>
+            ))}
+          </section>
+
+          <section className="report-part" id={traits.id}>
+            <PartHeading part={traits} />
+            <p className="report-part-lead">
+              The same four scores, read as the Big Five traits the questions were written for.
+            </p>
+            <TraitBars traits={report.traits} />
+            <p className="report-part-note">
+              Each number shows how far the answers went toward the high end of the trait. It does
+              not compare this result with other people. The fifth trait, Neuroticism, is not
+              measured by this test.
+            </p>
+          </section>
+
+          <section className="report-part report-depth" id={depth.id}>
+            <PartHeading part={depth} />
+            <div className="report-depth-grid">
+              {report.sections.map((block) => (
+                <Prose key={block.heading} block={block} level="h3" />
+              ))}
+            </div>
+          </section>
+
+          <section className="report-part report-method" id={method.id}>
+            <PartHeading part={method} />
+            <dl className="report-facts">
+              <div className="report-fact">
+                <dt>Questions</dt>
+                <dd>{report.questionCount}</dd>
+              </div>
+              <div className="report-fact">
+                <dt>Per scale</dt>
+                <dd>{itemCount}</dd>
+              </div>
+              <div className="report-fact">
+                <dt>One answer moves a scale</dt>
+                <dd>{stepSize(itemCount)} points</dd>
+              </div>
+            </dl>
+            <p className="report-part-note">
+              Each scale has {itemCount} questions, half toward each side. A percentage shows how far
+              the answers went toward one side. Change one answer by one step and that scale moves
+              by {stepSize(itemCount)} points, so a score near 50% can land on either letter.
+            </p>
+          </section>
+
+          <div className="report-actions">
+            <button type="button" className="report-print" onClick={() => window.print()}>
+              Print or save as PDF
+            </button>
+            <BackLink id={report.id} />
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

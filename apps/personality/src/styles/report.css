@@ -1,10 +1,12 @@
 /*
  * The full report and its unlock offer.
- * Long reading. The serif planned for this page is not chosen yet (see DESIGN-TODO.md),
+ * The report is built like a printed instrument readout: a cover with the four numbers,
+ * a contents list, then numbered parts with a chart each.
+ * The serif planned for long reading is not chosen yet (see DESIGN-TODO.md),
  * so it uses the app typeface for now.
  */
 .report {
-  gap: 24px;
+  gap: 28px;
 }
 
 .report-title {
@@ -14,10 +16,11 @@
 }
 
 .report-type {
-  font-size: clamp(3.5rem, 18vw, 5.5rem);
+  font-size: clamp(5rem, 27vw, 9rem);
   font-weight: 700;
-  line-height: 0.9;
+  line-height: 0.86;
   letter-spacing: -0.04em;
+  margin-left: -0.04em;
 }
 
 .report-summary,
@@ -25,6 +28,8 @@
   font-size: 1.1875rem;
   line-height: 1.45;
 }
+
+/* ---------- The offer (locked) ---------- */
 
 .report-contents {
   border-bottom: 1px solid var(--line);
@@ -65,26 +70,297 @@
   align-self: flex-start;
 }
 
+/* ---------- Cover ---------- */
+
+.report-cover {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.report-cover-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* The four numbers, side by side like a readout. */
+.report-readout {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.report-readout-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px 0 12px 10px;
+  border-left: 1px solid var(--line);
+}
+
+.report-readout-cell:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.report-readout-letter {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.report-readout-pct {
+  font-size: 1.625rem;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.report-readout-name {
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+
+.report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+}
+
+.report-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.report-meta dt,
+.report-fact dt {
+  font-size: 0.6875rem;
+}
+
+.report-meta-id {
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Contents ---------- */
+
+.report-layout,
+.report-body {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.report-body {
+  gap: 40px;
+  min-width: 0;
+}
+
+.report-contents-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.report-toc {
+  border-top: 1px solid var(--ink);
+}
+
+.report-toc li {
+  border-bottom: 1px solid var(--line);
+}
+
+.report-toc-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: var(--target);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.report-toc-number {
+  min-width: 2ch;
+  color: var(--ink-muted);
+}
+
+/* ---------- Parts ---------- */
+
 .report-part {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid var(--ink);
+  scroll-margin-top: 16px;
 }
 
 .report-part-title {
-  font-size: 1.5rem;
-  line-height: 1.15;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 1.75rem;
+  line-height: 1.1;
   letter-spacing: -0.02em;
 }
+
+.report-part-number {
+  letter-spacing: 0.08em;
+}
+
+.report-part-lead {
+  font-size: 1.0625rem;
+}
+
+.report-part-note {
+  color: var(--ink-muted);
+}
+
+/* ---------- 01 Profile: four scales on one panel ---------- */
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+
+.profile-chart {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: repeat(var(--rows), 52px);
+  column-gap: 14px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.profile-overlay {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.profile-band {
+  fill: var(--tint);
+}
+
+.profile-middle,
+.profile-line {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.profile-middle {
+  stroke: var(--line-strong);
+  stroke-width: 1px;
+}
+
+.profile-line {
+  stroke: var(--accent);
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+}
+
+.profile-row {
+  display: contents;
+}
+
+.profile-side,
+.profile-track {
+  grid-row: var(--row);
+}
+
+.profile-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+}
+
+.profile-side:first-child {
+  grid-column: 1;
+}
+
+.profile-side:last-child {
+  grid-column: 3;
+  justify-content: flex-end;
+}
+
+.profile-side[data-winner='true'] {
+  color: var(--ink);
+}
+
+.profile-letter {
+  width: 1.1ch;
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
+.profile-pct {
+  min-width: 2.2ch;
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.profile-side[data-winner='true'] .profile-pct {
+  font-weight: 600;
+}
+
+.profile-track {
+  position: relative;
+  grid-column: 2;
+}
+
+.profile-track::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--line);
+}
+
+.profile-marker {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--pos) * 1%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--paper);
+  transform: translate(-50%, -50%);
+}
+
+.profile-caption {
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+/* ---------- 02 Scales: one ruler per scale ---------- */
 
 .report-axis {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-top: 18px;
+  gap: 16px;
+  padding-top: 20px;
   border-top: 1px solid var(--line);
+}
+
+.report-axis:first-of-type {
+  padding-top: 0;
+  border-top: 0;
 }
 
 .report-axis-headline,
@@ -93,15 +369,115 @@
 }
 
 .report-axis-headline {
-  font-size: 1.75rem;
+  font-size: 2.25rem;
   font-weight: 650;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  line-height: 1;
+  letter-spacing: -0.03em;
 }
 
 .report-axis-name {
   margin-top: -10px;
   color: var(--ink-muted);
+}
+
+.ruler {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ruler-scale {
+  position: relative;
+  height: 40px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.ruler-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc((50 - var(--band)) * 1%);
+  width: calc(var(--band) * 2%);
+  background: var(--tint);
+}
+
+/* One tick per position the score can take. The 1px keeps the last tick inside the ruler. */
+.ruler-tick {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--t) * (100% - 1px) / 100);
+  width: 1px;
+  height: 7px;
+  background: var(--line-strong);
+}
+
+.ruler-tick[data-size='major'] {
+  height: 14px;
+  background: var(--ink);
+}
+
+.ruler-tick[data-size='center'] {
+  height: 24px;
+  background: var(--ink);
+}
+
+.ruler-fill {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: calc((var(--pos) - 50) * 1%);
+  height: 3px;
+  background: var(--accent);
+}
+
+.ruler[data-winner='left'] .ruler-fill {
+  left: calc(var(--pos) * 1%);
+  width: calc((50 - var(--pos)) * 1%);
+}
+
+.ruler-marker {
+  position: absolute;
+  top: 6px;
+  bottom: -2px;
+  left: calc(var(--pos) * 1%);
+  width: 2px;
+  background: var(--accent);
+  transform: translateX(-50%);
+}
+
+.ruler-marker::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateX(-50%);
+}
+
+.ruler-sides {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+
+.ruler-side[data-winner='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.ruler-side-letter {
+  font-weight: 700;
+}
+
+.report-axis-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .report-block {
@@ -115,13 +491,138 @@
   font-weight: 600;
 }
 
-.report-depth .report-block-title {
-  font-size: 1.1875rem;
-}
-
 .report-block p {
   font-size: 1.0625rem;
   line-height: 1.6;
+}
+
+/* ---------- 03 Big Five: four bars from low to high ---------- */
+
+.traits {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.traits-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+}
+
+.traits-list {
+  border-top: 1px solid var(--line);
+}
+
+.trait {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px 12px;
+  padding: 14px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.trait-name {
+  font-weight: 600;
+}
+
+.trait-pct {
+  font-size: 1.375rem;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.trait-bar {
+  position: relative;
+  grid-column: 1 / -1;
+  height: 8px;
+  background: var(--tint);
+}
+
+.trait-bar::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 50%;
+  width: 1px;
+  background: var(--line-strong);
+}
+
+.trait-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--pct) * 1%);
+  background: var(--accent);
+}
+
+/* ---------- 04 In depth ---------- */
+
+.report-depth-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  counter-reset: depth;
+}
+
+.report-depth .report-block {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.report-depth .report-block:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.report-depth .report-block-title {
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.report-depth .report-block-title::before {
+  counter-increment: depth;
+  content: counter(depth, decimal-leading-zero);
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+/* ---------- 05 Method ---------- */
+
+.report-facts {
+  border-top: 1px solid var(--line);
+}
+
+.report-fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.report-fact dd {
+  font-size: 1.375rem;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.report-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .report-back-link {
@@ -133,6 +634,8 @@
   text-decoration-thickness: 2px;
   text-decoration-color: var(--accent);
 }
+
+/* ---------- Loading, missing, error ---------- */
 
 .report[data-state='notFound'],
 .report[data-state='error'],
@@ -149,11 +652,140 @@
   letter-spacing: -0.02em;
 }
 
-/* Tablet and up: a comfortable reading measure. */
+/* ---------- Tablet ---------- */
 @media (min-width: 640px) {
   .report {
-    max-width: 680px;
-    gap: 32px;
+    max-width: 720px;
+    gap: 36px;
     padding-top: 48px;
+  }
+
+  .report-readout-cell {
+    padding: 16px 0 16px 16px;
+  }
+
+  .report-readout-pct {
+    font-size: 2.25rem;
+  }
+
+  .report-readout-name {
+    font-size: 0.8125rem;
+  }
+
+  .profile-chart {
+    grid-template-rows: repeat(var(--rows), 60px);
+    column-gap: 20px;
+  }
+
+  .ruler-scale {
+    height: 48px;
+  }
+
+  .report-axis-blocks,
+  .report-depth-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 36px;
+  }
+
+  /* In a grid, every block gets a rule on top so the rows line up. */
+  .report-depth .report-block:first-child {
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .report-depth .report-block:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .report-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 28px;
+    border-top: 0;
+  }
+
+  .report-fact {
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 6px;
+    border-top: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .report-fact dd {
+    font-size: 2rem;
+  }
+}
+
+/* ---------- Desktop: the contents list stays beside the report ---------- */
+@media (min-width: 1024px) {
+  .report[data-state='ready'] {
+    max-width: 1040px;
+    gap: 56px;
+  }
+
+  .report-cover {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: start;
+    column-gap: 72px;
+  }
+
+  .report-layout {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 72px;
+  }
+
+  .report-contents-nav {
+    position: sticky;
+    top: 32px;
+  }
+
+  .report-body {
+    gap: 56px;
+  }
+}
+
+/* ---------- Print and "save as PDF" ---------- */
+@media print {
+  html,
+  body {
+    background: var(--surface);
+  }
+
+  .report,
+  .report * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .report {
+    max-width: none;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .report-contents-nav,
+  .report-actions {
+    display: none;
+  }
+
+  .report-axis,
+  .report-block,
+  .profile,
+  .traits,
+  .trait {
+    break-inside: avoid;
+  }
+
+  .report-part-title {
+    break-after: avoid;
+  }
+
+  .profile-marker {
+    box-shadow: none;
   }
 }

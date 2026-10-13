@@ -87,6 +87,7 @@ Functional rules for the test (layout and flow look are Roger's):
 - The result reveal is driven by `useReveal` (one timer, values derived per frame). It is skipped when `matchMedia` is missing, which is why tests see final values at once.
 - Back button: `useBackGuard` keeps one extra history entry while the test is open, so Back goes to the previous question, including after a reload.
 - Screen tests (`src/*.test.tsx`) run in jsdom with `fake-indexeddb`. They need `vi.stubEnv('BASE_URL', '/personality/')` because Vitest serves from `/`.
+- The report's charts are in `src/components/report/` (`ProfileChart`, `ScaleRuler`, `TraitBars`). They only draw: the numbers come from the report API, and the geometry (ruler ticks, profile line, part numbering, Big Five mapping) is in `src/lib/report-view.ts` and `src/lib/big-five.ts`.
 - `DESIGN-TODO.md` lists every open design decision and the class names and `data-*` attributes for each screen. Update it when a screen changes.
 
 ## Free result

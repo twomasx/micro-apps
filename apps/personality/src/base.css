@@ -15,6 +15,8 @@
   --ink-muted: #56554f;
   --line: rgb(13 13 12 / 14%);
   --line-strong: rgb(13 13 12 / 32%);
+  /* A faint wash of ink, for zones and empty bars in charts. */
+  --tint: rgb(13 13 12 / 7%);
   /* The one accent. Change it here and nowhere else. */
   --accent: #1f3bff;
   --warning: #8a4b00;
@@ -114,7 +116,13 @@ main {
 .intro-last-result-label,
 .result-compare-title,
 .result-report-title,
-.report-kicker {
+.report-kicker,
+.report-contents-label,
+.report-part-number,
+.report-meta dt,
+.report-fact dt,
+.traits-ends,
+.profile-caption {
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.3;
