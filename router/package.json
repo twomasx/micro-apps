@@ -6,12 +6,14 @@
   "scripts": {
     "dev": "wrangler dev --env dev --ip 0.0.0.0 --port 3000",
     "build": "wrangler deploy --dry-run --outdir dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261006.1",
     "@micro/config": "workspace:*",
     "typescript": "~6.0.3",
+    "vitest": "^5.0.3",
     "wrangler": "^4.149.0"
   }
 }

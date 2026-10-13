@@ -1,26 +1,51 @@
-const APPS = ['personality', 'focus', 'breathwork', 'attention', 'intention'] as const;
-type App = (typeof APPS)[number];
+import { comingSoonPage, homePage, notFoundPage } from './pages.ts';
+import { parseLiveApps, route, type App } from './routes.ts';
 
-type Env = { STRIP_PREFIX: string } & Record<`${Uppercase<App>}_ORIGIN`, string>;
+type Env = {
+  STRIP_PREFIX: string;
+  /** Comma-separated names of the apps that are deployed. The rest say "Coming soon". */
+  LIVE_APPS: string;
+  /** The one address people should use, like "polymadlabs.com". Other hostnames redirect to it. */
+  CANONICAL_HOST?: string;
+} & Record<`${Uppercase<App>}_ORIGIN`, string>;
+
+/** Forwards a request to an app and fixes redirects so they stay under the app's path. */
+async function forward(request: Request, url: URL, origin: string, prefix: string, strip: boolean) {
+  const path = strip ? url.pathname.slice(prefix.length) : url.pathname;
+  const response = await fetch(new Request(new URL(path + url.search, origin), request));
+
+  // The app thinks it lives at "/", so its own redirects need the prefix put back.
+  const location = response.headers.get('location');
+  if (!strip || !location?.startsWith('/') || location.startsWith('//')) return response;
+  const fixed = new Response(response.body, response);
+  fixed.headers.set('location', `${prefix}${location}`);
+  return fixed;
+}
 
 export default {
   async fetch(request, env): Promise<Response> {
     const url = new URL(request.url);
-    const app = APPS.find((a) => url.pathname === `/${a}` || url.pathname.startsWith(`/${a}/`));
 
-    if (!app) {
-      return new Response('polymadlabs.com placeholder', {
-        headers: { 'content-type': 'text/plain; charset=utf-8' },
-      });
+    // Browser storage is kept per hostname, so www and the bare domain must not both serve the apps:
+    // someone's saved results would exist on one and not the other.
+    if (env.CANONICAL_HOST && url.hostname !== env.CANONICAL_HOST && url.hostname.endsWith(`.${env.CANONICAL_HOST}`)) {
+      return Response.redirect(`https://${env.CANONICAL_HOST}${url.pathname}${url.search}`, 308);
     }
 
-    const prefix = `/${app}`;
-    if (url.pathname === prefix) {
-      return Response.redirect(`${url.origin}${prefix}/${url.search}`, 308);
+    const target = route(url.pathname, parseLiveApps(env.LIVE_APPS));
+    switch (target.kind) {
+      case 'home':
+        return homePage();
+      case 'addSlash':
+        return Response.redirect(`${url.origin}/${target.app}/${url.search}`, 308);
+      case 'comingSoon':
+        return comingSoonPage(target.app);
+      case 'notFound':
+        return notFoundPage();
+      case 'app': {
+        const origin = env[`${target.app.toUpperCase() as Uppercase<App>}_ORIGIN`];
+        return forward(request, url, origin, target.prefix, env.STRIP_PREFIX === 'true');
+      }
     }
-
-    const origin = env[`${app.toUpperCase() as Uppercase<App>}_ORIGIN`];
-    const path = env.STRIP_PREFIX === 'true' ? url.pathname.slice(prefix.length) : url.pathname;
-    return fetch(new Request(new URL(path + url.search, origin), request));
   },
 } satisfies ExportedHandler<Env>;

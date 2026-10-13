@@ -3,11 +3,20 @@
   "name": "micro-router",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
-  "routes": [{ "pattern": "polymadlabs.com/*", "zone_name": "polymadlabs.com" }],
-  // Production: each app is its own Pages project served from its root,
-  // so the /<app> prefix is stripped before forwarding. Origins are placeholders.
+  // Production: `wrangler deploy`. Custom domains make Cloudflare create the proxied
+  // DNS records for both hostnames. www redirects to the bare domain (see CANONICAL_HOST).
+  "routes": [
+    { "pattern": "polymadlabs.com", "custom_domain": true },
+    { "pattern": "www.polymadlabs.com", "custom_domain": true }
+  ],
+  "workers_dev": false,
+  // Each app is its own Pages project served from its root,
+  // so the /<app> prefix is stripped before forwarding.
+  // Origins of apps that are not in LIVE_APPS are placeholders.
   "vars": {
     "STRIP_PREFIX": "true",
+    "LIVE_APPS": "personality",
+    "CANONICAL_HOST": "polymadlabs.com",
     "PERSONALITY_ORIGIN": "https://micro-personality.pages.dev",
     "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
     "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
@@ -20,11 +29,27 @@
       "routes": [],
       "vars": {
         "STRIP_PREFIX": "false",
+        "LIVE_APPS": "personality,focus,breathwork,attention,intention",
         "PERSONALITY_ORIGIN": "http://localhost:3001",
         "FOCUS_ORIGIN": "http://localhost:3002",
         "BREATHWORK_ORIGIN": "http://localhost:3003",
         "ATTENTION_ORIGIN": "http://localhost:3004",
         "INTENTION_ORIGIN": "http://localhost:3005"
+      }
+    },
+    // A copy of production on a workers.dev address, with no domain attached:
+    // `wrangler deploy --env preview`. Use it to try the router before it goes live.
+    "preview": {
+      "routes": [],
+      "workers_dev": true,
+      "vars": {
+        "STRIP_PREFIX": "true",
+        "LIVE_APPS": "personality",
+        "PERSONALITY_ORIGIN": "https://micro-personality.pages.dev",
+        "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
+        "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
+        "ATTENTION_ORIGIN": "https://micro-attention.pages.dev",
+        "INTENTION_ORIGIN": "https://micro-intention.pages.dev"
       }
     }
   }
