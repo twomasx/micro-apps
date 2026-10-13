@@ -201,11 +201,9 @@ Commit after each step.
 
 ## Deploy
 
-- Hosting: Cloudflare Pages project `micro-personality` (https://micro-personality.pages.dev), production branch `main`. The router Worker forwards `polymadlabs.com/personality/*` to it with the `/personality` prefix removed.
-- Deploy from `apps/personality`: `pnpm build`, then `pnpm exec wrangler pages deploy dist --project-name micro-personality --branch main`. A push to GitHub does not deploy.
-- Database: D1 `micro-personality`, id in `wrangler.jsonc`. After adding a migration: `pnpm exec wrangler d1 migrations apply DB --remote`. Local dev uses its own file, kept under `preview_database_id`.
-- Secrets live in the Pages project, set with `pnpm exec wrangler pages secret put <NAME> --project-name micro-personality`: `STRIPE_SECRET_KEY` (test mode), `STRIPE_WEBHOOK_SECRET`, `PUBLIC_ORIGIN` (`https://polymadlabs.com`). A changed secret needs a new deploy.
-- The router is in `router/`. `pnpm exec wrangler deploy --env preview` puts it on a workers.dev address with no domain. `pnpm exec wrangler deploy` is production and attaches `polymadlabs.com` and `www`. Add an app to `LIVE_APPS` in `router/wrangler.jsonc` when it is deployed; until then its path says "Coming soon".
+- Live at https://polymadlabs.com/personality/. The steps, the secrets, the Stripe webhook and the test list are in `DEPLOY.md` at the repo root.
+- Short version, from `apps/personality`: `pnpm build`, then `pnpm exec wrangler pages deploy dist --project-name micro-personality --branch main`. A push to GitHub does not deploy.
+- The router adds `no-transform` to HTML so Cloudflare cannot add its analytics script. Keep that when changing the router.
 
 ## Later (not this week)
 

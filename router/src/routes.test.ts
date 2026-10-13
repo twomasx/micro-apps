@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { withoutInjection } from './index.ts';
 import { comingSoonPage, homePage, notFoundPage } from './pages.ts';
 import { parseLiveApps, route } from './routes.ts';
 
@@ -38,6 +39,30 @@ describe('route', () => {
     for (const path of ['/nope', '/focus/anything', '/personalityx/', '/index.html', '/api/health']) {
       expect(route(path, LIVE)).toEqual({ kind: 'notFound' });
     }
+  });
+});
+
+describe('withoutInjection', () => {
+  it('marks HTML so Cloudflare adds no analytics script, and keeps the page', async () => {
+    const page = withoutInjection(homePage());
+    expect(page.headers.get('cache-control')).toBe('no-transform');
+    expect(page.status).toBe(200);
+    expect(await page.text()).toContain('PolymadLabs');
+  });
+
+  it('keeps an existing Cache-Control value', () => {
+    const response = new Response('<p>hi</p>', {
+      status: 404,
+      headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=0' },
+    });
+    const marked = withoutInjection(response);
+    expect(marked.headers.get('cache-control')).toBe('public, max-age=0, no-transform');
+    expect(marked.status).toBe(404);
+  });
+
+  it('leaves everything that is not HTML alone', () => {
+    const json = Response.json({ ok: true }, { headers: { 'cache-control': 'no-store' } });
+    expect(withoutInjection(json)).toBe(json);
   });
 });
 

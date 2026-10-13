@@ -90,6 +90,7 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - **Favicon.** There is none. `index.html` has an empty icon link so the browser logs no 404.
 - A share image for results (planned for later in the spec).
 - A result opened by someone else says "This type is INTJ" and offers "Take the test yourself". Check that wording.
+- **Router pages.** `polymadlabs.com/`, the four "Coming soon" pages and the 404 page are plain unstyled HTML in `router/src/pages.ts`. They are yours to design.
 - Not yet checked on a real Android phone or in iPhone Safari. Checked in headless Chromium at 375px, 768px and 1280px.
 
 ## Class names and state attributes
