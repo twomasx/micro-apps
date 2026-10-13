@@ -63,12 +63,25 @@ Functional rules for the test (layout and flow look are Roger's):
 - Keys 1 to 5 answer on desktop. Each question is a proper radio group with labels. Move focus to the new question when it changes. Announce progress ("Question 12 of 40") to screen readers.
 - The Android Back button goes to the previous question during the test, not off the page.
 
+## Where client code lives
+
+- `src/lib/`: plain TypeScript with no React. `router.ts` (URL to screen), `navigation.ts` (`navigate`, `appHref`), `progress.ts`, `store.ts` (IndexedDB), `api.ts`, `result-view.ts`.
+- `src/hooks/`: `useTest` (the whole test flow), `useBackGuard` (Back button), `useResult`, `useRoute`, `useLoaded`.
+- `src/pages/`: one thin component per screen. `src/components/Link.tsx` for in-app links.
+- No router library. Add a screen by adding a case to `parseRoute` in `src/lib/router.ts` and to `Page` in `src/App.tsx`.
+- The test asks one question per screen. You pick an answer, then press Next (or Enter). Keys 1 to 5 pick an answer.
+- Back button: `useBackGuard` keeps one extra history entry while the test is open, so Back goes to the previous question, including after a reload.
+- Screen tests (`src/*.test.tsx`) run in jsdom with `fake-indexeddb`. They need `vi.stubEnv('BASE_URL', '/personality/')` because Vitest serves from `/`.
+- `DESIGN-TODO.md` lists every open design decision and the class names and `data-*` attributes for each screen. Update it when a screen changes.
+
 ## Free result
 
 - Type code, the four axes with percentages and balanced labels, and a short summary for the type (about 80 words).
 - Share button: Web Share API through `packages/platform`, falling back to copying the link.
 - "Compare with someone" creates the link `/personality/?with=<id>`. Before sharing, say plainly: "The person you send this to will see your result."
-- Save the user's result IDs in IndexedDB (`personality:results`) so the intro page can show "Your last result".
+- Save the user's result IDs in IndexedDB (`personality:results`) so the intro page can show "Your last result". Each entry also holds the `deleteToken`.
+- A result taken on this device is "own": it shows the compare link and "Delete this result". Anyone else's result shows "Take the test yourself" instead.
+- The `?with=<id>` link is created here, but the intro does nothing with it until build step 7.
 
 ## Paid products (prices in `config/products.json`)
 

@@ -163,8 +163,9 @@ describe('test flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'See your result' }));
     await waitFor(() => expect(window.location.pathname).toBe(`/personality/r/${RESULT_ID}`));
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchMock.mock.calls[0] ?? [];
+    const posts = fetchMock.mock.calls.filter(([, options]) => options?.method === 'POST');
+    expect(posts).toHaveLength(1);
+    const [url, init] = posts[0] ?? [];
     expect(url).toBe('/personality/api/results');
     expect(init?.method).toBe('POST');
     const sent = JSON.parse(String(init?.body)) as { version: string; answers: Record<string, number> };
