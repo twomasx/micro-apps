@@ -1,0 +1,403 @@
+{
+  "testId": "personality",
+  "version": "p1",
+  "instructions": "Describe yourself as you generally are now, not as you wish to be. Answer honestly. There are no right or wrong answers.",
+  "scale": [
+    {
+      "value": 1,
+      "label": "Very inaccurate"
+    },
+    {
+      "value": 2,
+      "label": "Moderately inaccurate"
+    },
+    {
+      "value": 3,
+      "label": "Neither accurate nor inaccurate"
+    },
+    {
+      "value": 4,
+      "label": "Moderately accurate"
+    },
+    {
+      "value": 5,
+      "label": "Very accurate"
+    }
+  ],
+  "axes": [
+    {
+      "id": "EI",
+      "left": {
+        "letter": "E",
+        "name": "Extraversion",
+        "plain": "energized by people and activity"
+      },
+      "right": {
+        "letter": "I",
+        "name": "Introversion",
+        "plain": "energized by quiet and time alone"
+      },
+      "bigFive": "Extraversion"
+    },
+    {
+      "id": "SN",
+      "left": {
+        "letter": "S",
+        "name": "Sensing",
+        "plain": "trusts facts, details and experience"
+      },
+      "right": {
+        "letter": "N",
+        "name": "Intuition",
+        "plain": "drawn to ideas, patterns and possibilities"
+      },
+      "bigFive": "Openness to experience"
+    },
+    {
+      "id": "TF",
+      "left": {
+        "letter": "T",
+        "name": "Thinking",
+        "plain": "decides by logic and consistency"
+      },
+      "right": {
+        "letter": "F",
+        "name": "Feeling",
+        "plain": "decides by values and effect on people"
+      },
+      "bigFive": "Agreeableness"
+    },
+    {
+      "id": "JP",
+      "left": {
+        "letter": "J",
+        "name": "Judging",
+        "plain": "prefers plans, order and closure"
+      },
+      "right": {
+        "letter": "P",
+        "name": "Perceiving",
+        "plain": "prefers flexibility and open options"
+      },
+      "bigFive": "Conscientiousness"
+    }
+  ],
+  "sources": {
+    "IPIP": "International Personality Item Pool (ipip.ori.org). Public domain. Items adapted by adding 'I' at the start.",
+    "Original": "Written by PolymadLabs for the Thinking and Perceiving poles, where the IPIP opposite-keyed items describe faults (for example 'Insult people') instead of preferences. Not yet validated; check reliability after a few hundred results."
+  },
+  "items": [
+    {
+      "id": "p1-01",
+      "axis": "EI",
+      "pole": "E",
+      "text": "I am the life of the party.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Am the life of the party."
+    },
+    {
+      "id": "p1-02",
+      "axis": "SN",
+      "pole": "N",
+      "text": "I have a vivid imagination.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Have a vivid imagination."
+    },
+    {
+      "id": "p1-03",
+      "axis": "TF",
+      "pole": "F",
+      "text": "I sympathize with others' feelings.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Sympathize with others' feelings."
+    },
+    {
+      "id": "p1-04",
+      "axis": "JP",
+      "pole": "J",
+      "text": "I like order.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Like order."
+    },
+    {
+      "id": "p1-05",
+      "axis": "EI",
+      "pole": "I",
+      "text": "I keep in the background.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Keep in the background."
+    },
+    {
+      "id": "p1-06",
+      "axis": "SN",
+      "pole": "S",
+      "text": "I prefer to stick with things that I know.",
+      "source": "IPIP-NEO facet O4 Adventurousness",
+      "sourceText": "Prefer to stick with things that I know."
+    },
+    {
+      "id": "p1-07",
+      "axis": "TF",
+      "pole": "T",
+      "text": "I decide with my head more than my heart.",
+      "source": "Original (PolymadLabs)"
+    },
+    {
+      "id": "p1-08",
+      "axis": "JP",
+      "pole": "P",
+      "text": "I am not bothered by disorder.",
+      "source": "IPIP-NEO facet C2 Orderliness",
+      "sourceText": "Am not bothered by disorder."
+    },
+    {
+      "id": "p1-09",
+      "axis": "EI",
+      "pole": "E",
+      "text": "I feel comfortable around people.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Feel comfortable around people."
+    },
+    {
+      "id": "p1-10",
+      "axis": "SN",
+      "pole": "N",
+      "text": "I love to daydream.",
+      "source": "IPIP-NEO facet O1 Imagination",
+      "sourceText": "Love to daydream."
+    },
+    {
+      "id": "p1-11",
+      "axis": "TF",
+      "pole": "F",
+      "text": "I feel others' emotions.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Feel others' emotions."
+    },
+    {
+      "id": "p1-12",
+      "axis": "JP",
+      "pole": "J",
+      "text": "I follow a schedule.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Follow a schedule."
+    },
+    {
+      "id": "p1-13",
+      "axis": "EI",
+      "pole": "I",
+      "text": "I don't like to draw attention to myself.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Don't like to draw attention to myself."
+    },
+    {
+      "id": "p1-14",
+      "axis": "SN",
+      "pole": "S",
+      "text": "I trust what I can see and measure more than hunches.",
+      "source": "Original (PolymadLabs)"
+    },
+    {
+      "id": "p1-15",
+      "axis": "TF",
+      "pole": "T",
+      "text": "I give honest criticism, even when it stings.",
+      "source": "Original (PolymadLabs)"
+    },
+    {
+      "id": "p1-16",
+      "axis": "JP",
+      "pole": "P",
+      "text": "I like to keep my options open.",
+      "source": "Original (PolymadLabs)"
+    },
+    {
+      "id": "p1-17",
+      "axis": "EI",
+      "pole": "E",
+      "text": "I start conversations.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Start conversations."
+    },
+    {
+      "id": "p1-18",
+      "axis": "SN",
+      "pole": "N",
+      "text": "I like to get lost in thought.",
+      "source": "IPIP-NEO facet O1 Imagination",
+      "sourceText": "Like to get lost in thought."
+    },
+    {
+      "id": "p1-19",
+      "axis": "TF",
+      "pole": "F",
+      "text": "I have a soft heart.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Have a soft heart."
+    },
+    {
+      "id": "p1-20",
+      "axis": "JP",
+      "pole": "J",
+      "text": "I do things according to a plan.",
+      "source": "IPIP-NEO facet C2 Orderliness",
+      "sourceText": "Do things according to a plan."
+    },
+    {
+      "id": "p1-21",
+      "axis": "EI",
+      "pole": "I",
+      "text": "I am quiet around strangers.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Am quiet around strangers."
+    },
+    {
+      "id": "p1-22",
+      "axis": "SN",
+      "pole": "S",
+      "text": "I am attached to conventional ways.",
+      "source": "IPIP-NEO facet O4 Adventurousness",
+      "sourceText": "Am attached to conventional ways."
+    },
+    {
+      "id": "p1-23",
+      "axis": "TF",
+      "pole": "T",
+      "text": "I look at a problem logically before I think about how people feel.",
+      "source": "Original (PolymadLabs)"
+    },
+    {
+      "id": "p1-24",
+      "axis": "JP",
+      "pole": "P",
+      "text": "I postpone decisions.",
+      "source": "IPIP-NEO facet C5 Self-Discipline",
+      "sourceText": "Postpone decisions."
+    },
+    {
+      "id": "p1-25",
+      "axis": "EI",
+      "pole": "E",
+      "text": "I talk to a lot of different people at parties.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Talk to a lot of different people at parties."
+    },
+    {
+      "id": "p1-26",
+      "axis": "SN",
+      "pole": "N",
+      "text": "I enjoy thinking about things.",
+      "source": "IPIP-NEO facet O5 Intellect",
+      "sourceText": "Enjoy thinking about things."
+    },
+    {
+      "id": "p1-27",
+      "axis": "TF",
+      "pole": "F",
+      "text": "I make people feel at ease.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Make people feel at ease."
+    },
+    {
+      "id": "p1-28",
+      "axis": "JP",
+      "pole": "J",
+      "text": "I get chores done right away.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Get chores done right away."
+    },
+    {
+      "id": "p1-29",
+      "axis": "EI",
+      "pole": "I",
+      "text": "I seek quiet.",
+      "source": "IPIP-NEO facet E2 Gregariousness",
+      "sourceText": "Seek quiet."
+    },
+    {
+      "id": "p1-30",
+      "axis": "SN",
+      "pole": "S",
+      "text": "I focus on facts and details more than the big picture.",
+      "source": "Original (PolymadLabs)"
+    },
+    {
+      "id": "p1-31",
+      "axis": "TF",
+      "pole": "T",
+      "text": "I would rather be honest than tactful.",
+      "source": "Original (PolymadLabs)"
+    },
+    {
+      "id": "p1-32",
+      "axis": "JP",
+      "pole": "P",
+      "text": "I prefer to improvise rather than plan.",
+      "source": "Original (PolymadLabs)"
+    },
+    {
+      "id": "p1-33",
+      "axis": "EI",
+      "pole": "E",
+      "text": "I don't mind being the center of attention.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Don't mind being the center of attention."
+    },
+    {
+      "id": "p1-34",
+      "axis": "SN",
+      "pole": "N",
+      "text": "I spend time reflecting on things.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Spend time reflecting on things."
+    },
+    {
+      "id": "p1-35",
+      "axis": "TF",
+      "pole": "F",
+      "text": "I value cooperation over competition.",
+      "source": "IPIP-NEO facet A6 Sympathy",
+      "sourceText": "Value cooperation over competition."
+    },
+    {
+      "id": "p1-36",
+      "axis": "JP",
+      "pole": "J",
+      "text": "I carry out my plans.",
+      "source": "IPIP-NEO facet C5 Self-Discipline",
+      "sourceText": "Carry out my plans."
+    },
+    {
+      "id": "p1-37",
+      "axis": "EI",
+      "pole": "I",
+      "text": "I don't talk a lot.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Don't talk a lot."
+    },
+    {
+      "id": "p1-38",
+      "axis": "SN",
+      "pole": "S",
+      "text": "I am not interested in abstract ideas.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Am not interested in abstract ideas."
+    },
+    {
+      "id": "p1-39",
+      "axis": "TF",
+      "pole": "T",
+      "text": "I contradict others.",
+      "source": "IPIP-NEO facet A4 Cooperation",
+      "sourceText": "Contradict others."
+    },
+    {
+      "id": "p1-40",
+      "axis": "JP",
+      "pole": "P",
+      "text": "I leave my belongings around.",
+      "source": "IPIP-50 Big Five markers",
+      "sourceText": "Leave my belongings around."
+    }
+  ]
+}
