@@ -173,29 +173,3 @@ a {
     animation: none;
   }
 }
-
-/* ---------- Simple pages ---------- */
-
-.page {
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: calc(20px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
-    calc(32px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
-  display: grid;
-  gap: 16px;
-}
-
-.page-back {
-  justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  min-height: 48px;
-  color: var(--soft);
-}
-
-.page-title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
-}

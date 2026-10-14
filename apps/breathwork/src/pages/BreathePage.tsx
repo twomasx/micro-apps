@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AgainIcon, LockIcon, MenuIcon, PauseIcon, PlayIcon, SoundOffIcon, SoundOnIcon } from '../components/Icons';
+import { IntroCard } from '../components/IntroCard';
 import { Link } from '../components/Link';
 import { Sheet } from '../components/Sheet';
 import { TechniquePicker } from '../components/TechniquePicker';
@@ -12,9 +13,6 @@ import { breathCount, lengthLabel, noteText, nowText, startLabel } from '../lib/
 import { techniques } from '../lib/techniques';
 import { defaultTheme } from '../themes';
 import '../styles/breathe.css';
-
-const SAFETY =
-  "Breathe gently. If you feel dizzy or lightheaded, stop and breathe normally. Don't practice breath holds while driving, in water, or anywhere fainting would be dangerous. If you are pregnant or have a heart or lung condition, check with a doctor first.";
 
 type SheetName = 'length' | 'menu' | null;
 
@@ -48,6 +46,12 @@ export function BreathePage() {
         <div className="breathe-title">
           <h1 className="breathe-name">{technique.name}</h1>
           <p className="breathe-note">{noteText(technique, plan.preview)}</p>
+          {technique.evidence && (
+            <Link to={`science#${technique.id}`} className="evidence-chip">
+              {technique.evidence.label}
+              <span className="visually-hidden">: read the research on {technique.name}</span>
+            </Link>
+          )}
         </div>
         <div className="breathe-corner">
           <span className="breathe-clock">
@@ -65,19 +69,7 @@ export function BreathePage() {
       </div>
 
       {moment === 'intro' ? (
-        <section className="intro" aria-labelledby="intro-title">
-          <h2 id="intro-title" className="intro-title">
-            Follow the shape
-          </h2>
-          <p className="intro-text">
-            The dot goes up while you breathe in, across while you hold, and down while you breathe out. Each side
-            shows its seconds.
-          </p>
-          <p className="intro-safety">{SAFETY}</p>
-          <button type="button" className="go-wide" onClick={screen.startFromIntro}>
-            Start
-          </button>
-        </section>
+        <IntroCard onStart={screen.startFromIntro} />
       ) : (
         <>
           <section className="now">

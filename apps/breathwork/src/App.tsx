@@ -3,6 +3,8 @@ import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
 import { BreathePage } from './pages/BreathePage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { SciencePage } from './pages/SciencePage';
 
 const SITE_TITLE = 'Breathwork';
 
@@ -24,6 +26,8 @@ const PAGE_TITLES: Record<Exclude<Route['name'], 'breathe'>, string> = {
 
 function Page({ route }: { route: Route }) {
   if (route.name === 'breathe') return <BreathePage />;
+  if (route.name === 'science') return <SciencePage />;
+  if (route.name === 'privacy') return <PrivacyPage />;
   if (route.name === 'bench' && BenchPage) {
     return (
       <Suspense fallback={null}>
@@ -39,7 +43,8 @@ export function App() {
 
   useEffect(() => {
     document.title = route.name === 'breathe' ? SITE_TITLE : `${PAGE_TITLES[route.name]} | ${SITE_TITLE}`;
-    window.scrollTo(0, 0);
+    // A link to a section (science#sigh) scrolls there itself.
+    if (!window.location.hash) window.scrollTo(0, 0);
   }, [route]);
 
   return <Page route={route} />;

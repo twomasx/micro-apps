@@ -52,3 +52,9 @@ Roger asked for the choices that best fit how breathwork is actually practiced.
 ## Tried and changed
 
 - **Resonant leaf width.** The first leaf was nearly round. The sides now span 88% of their length instead of 80%, which gives a clearer leaf.
+
+## Science, privacy and first run (step 4)
+
+- **Evidence label** under the wording on the breathing screen: a sun-outlined pill with an arrow ("Little research >"). It opens the science page scrolled to that technique. Same idea as focus, which Roger approved there.
+- **Text pages** share the poster look: cobalt, white headings in Outfit 800, soft blue body text, sun-yellow label pills and a sun rule beside each source. Each technique on the science page is a card with its small shape, its label, its pattern in seconds, its wording, a plain note and its sources.
+- **First run on small phones:** the wording line and evidence label are hidden while the first-run card is up, so the shape drawing itself stays large enough to read. The card links to the science page.

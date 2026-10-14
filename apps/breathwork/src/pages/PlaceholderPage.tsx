@@ -1,4 +1,5 @@
 import { Link } from '../components/Link';
+import '../styles/page.css';
 
 /** Screens that are built in later steps. Not shipped like this. */
 export function PlaceholderPage({ title }: { title: string }) {

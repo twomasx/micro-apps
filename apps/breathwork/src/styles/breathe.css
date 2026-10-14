@@ -45,6 +45,39 @@
   max-width: 34ch;
 }
 
+.evidence-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 2px 10px 2px 12px;
+  border: 2px solid var(--sun);
+  border-radius: 999px;
+  color: var(--sun);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.evidence-chip::after {
+  /* Arrow, and a tap area of at least 44px around a smaller chip. */
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+  margin-left: -1px;
+}
+
+.evidence-chip::before {
+  content: '';
+  position: absolute;
+  inset: -10px -6px;
+}
+
 .breathe-corner {
   display: flex;
   align-items: center;
@@ -299,6 +332,18 @@
   color: var(--soft);
   font-size: 1rem;
   line-height: 1.4;
+}
+
+/* While the first-run card is up, the shape drawing itself gets the room. */
+.breathe[data-moment='intro'] .breathe-note,
+.breathe[data-moment='intro'] .evidence-chip {
+  display: none;
+}
+
+.intro-link {
+  color: var(--white);
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--sun);
 }
 
 .intro .go-wide {
