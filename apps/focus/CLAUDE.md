@@ -15,7 +15,7 @@ For this app Roger has picked a direction and wants Claude to design and style i
 - The session timer is part of the orbit: a faint ring around it that fills as the session runs, or the stars' trail, or something better you come up with.
 - The preset name is large and elegant. The reference uses a large serif (Cormorant). Change it if you find something better.
 - Colors from the reference: background around `#080a1c` to `#141a3d`, star cream `#f3ebdd`, soft gold `#e6c88f`, muted lavender `#9ea3c4` for secondary text. Calm, spacey, not neon.
-- Keep the "Headphones on" indicator from the reference's Scope option: a small glowing dot with plain text, top of the screen. It only lights up after the headphone check passes (see below).
+- Keep the "Headphones on" indicator from the reference's Scope option: a small glowing dot with plain text, top of the screen. It is a reminder only. The app does not check for headphones (see below).
 - Motion is slow and continuous. Transitions between presets are smooth: the orbit speed eases to its new rate over a second or two, it never jumps.
 - Things to explore and show Roger: the stars reacting gently when you start and stop; a soft change in the starfield or orbit color per preset; what the screen does in the last minute of a session; a "session complete" moment.
 - Phone first. On tablet and desktop the orbit gets more room. The controls stay where a thumb reaches on phone and stay simple on desktop.
@@ -55,9 +55,9 @@ No accounts. After purchase the server creates a random unlock code (at least 12
 
 The research found that listening **before** a task worked better than listening during it, and longer sessions worked better. Prime mode is a session you do right before you start work. At the end it says plainly: "Prime complete. Start your work now." Make this the main call to action on first visit.
 
-## Headphone check
+## Headphones reminder
 
-Browsers can't detect headphones. Before the first session, run a short check: a soft tone plays in one ear, the user taps which ear they heard it in, then the other ear. Both right: "Headphones on" lights up and stays on for that visit. Wrong or skipped: explain in one line that binaural beats only work with headphones, and let them continue anyway.
+Browsers can't detect headphones, and the app does not test for them. The "Headphones on" dot and text at the top of the player is a reminder only. Before the first session, show one line: "Put your headphones on. Binaural beats only work with headphones."
 
 ## Audio engine (`src/lib/audio.ts`)
 
@@ -87,7 +87,7 @@ Browsers can't detect headphones. Before the first session, run a short check: a
 
 | Route | What it does |
 | --- | --- |
-| `/` | The player (Orbit). First visit offers Prime mode and the headphone check. |
+| `/` | The player (Orbit). First visit offers Prime mode and shows the headphones line. |
 | `/unlock` | What the lifetime unlock adds, the price, the buy button. |
 | `/restore` | Enter an unlock code. |
 | `/science` | How it works, the meta-analysis, evidence per preset, safety. |
@@ -107,7 +107,7 @@ D1 table `purchases`: id, stripe_session_id (unique), unlock_code_hash, amount_c
 
 ## Build order
 
-1. Audio engine, headphone check logic and tests. **Stop so Roger can listen on his phone with headphones.**
+1. Audio engine and tests, with a test page that has left-only and right-only tones and a switch between the two audio routes. The test page does not ship. **Stop so Roger can listen on his phone with headphones.**
 2. The Orbit player: presets, timer, Prime mode, volume, Media Session. **Stop so Roger can review the design on his phone.** Iterate with him here.
 3. Evidence research for each preset. **Stop and show Roger the labels and sources.**
 4. Science, privacy and first-run content.
