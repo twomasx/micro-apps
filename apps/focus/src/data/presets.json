@@ -1,4 +1,5 @@
 {
+  "evidenceApproved": false,
   "presets": [
     {
       "id": "sleep",
@@ -8,8 +9,26 @@
       "carrier": 250,
       "wording": "Often used to wind down before sleep.",
       "free": true,
-      "evidence": null,
-      "sources": []
+      "evidence": "Little research",
+      "sources": [
+        {
+          "authors": "Jirakittayakorn and Wongsawat",
+          "year": 2018,
+          "title": "A Novel Insight of Effects of a 3-Hz Binaural Beat on Sleep Stages During Sleep",
+          "journal": "Frontiers in Human Neuroscience",
+          "url": "https://doi.org/10.3389/fnhum.2018.00387",
+          "finding": "24 people, one night. A 3 Hz beat was played during sleep. The group that heard it spent longer in deep sleep (stage N3) and reached it sooner than the group that heard silence."
+        },
+        {
+          "authors": "Bang, Choi and Yoon",
+          "year": 2019,
+          "title": "Minimal Effects of Binaural Auditory Beats for Subclinical Insomnia: A Randomized Double-Blind Controlled Study",
+          "journal": "Journal of Clinical Psychopharmacology",
+          "url": "https://doi.org/10.1097/JCP.0000000000001097",
+          "finding": "43 people with mild insomnia. Music with a theta beat for 30 minutes before bed, for 2 weeks, did not improve sleep more than the same music without the beat."
+        }
+      ],
+      "evidenceNote": "No study we found tested a 2 Hz beat before sleep. These are the closest."
     },
     {
       "id": "calm",
@@ -19,8 +38,34 @@
       "carrier": 300,
       "wording": "Often used for meditation and relaxation.",
       "free": true,
-      "evidence": null,
-      "sources": []
+      "evidence": "Some research",
+      "sources": [
+        {
+          "authors": "Jirakittayakorn and Wongsawat",
+          "year": 2017,
+          "title": "Brain Responses to a 6-Hz Binaural Beat: Effects on General Theta Rhythm and Frontal Midline Theta Activity",
+          "journal": "Frontiers in Neuroscience",
+          "url": "https://doi.org/10.3389/fnins.2017.00365",
+          "finding": "28 people. A 6 Hz beat for 30 minutes. Theta activity in the brain rose within 10 minutes, and people reported less tension than the control group."
+        },
+        {
+          "authors": "Padmanabhan, Hildreth and Laws",
+          "year": 2005,
+          "title": "A prospective, randomised, controlled study examining binaural beat audio and pre-operative anxiety in patients undergoing general anaesthesia for day case surgery",
+          "journal": "Anaesthesia",
+          "url": "https://doi.org/10.1111/j.1365-2044.2005.04287.x",
+          "finding": "Patients waiting for day surgery. Anxiety scores fell 26.3% with binaural beat audio, 11.1% with the same audio without beats, and 3.8% with no audio."
+        },
+        {
+          "authors": "Fatima, Zaidi, Sundus, Alam, Parveen and Khan",
+          "year": 2026,
+          "title": "Efficacy of theta binaural beat therapy on pain, cognition and anxiety in adults: A systematic review and meta-analysis of randomized controlled trials",
+          "journal": "Explore",
+          "url": "https://doi.org/10.1016/j.explore.2026.103471",
+          "finding": "A review of 13 randomized trials (630 people) of theta beats, 4 to 8 Hz. Anxiety fell mainly in people facing a medical procedure or living with chronic pain. The anxiety results were too different to combine into one number."
+        }
+      ],
+      "evidenceNote": null
     },
     {
       "id": "relaxed",
@@ -30,8 +75,34 @@
       "carrier": 300,
       "wording": "Often used for calm, steady attention.",
       "free": false,
-      "evidence": null,
-      "sources": []
+      "evidence": "Mixed results",
+      "sources": [
+        {
+          "authors": "Rakhshan, Hassani-Abharian, Joghataei, Nasehi and Khosrowabadi",
+          "year": 2022,
+          "title": "Effects of the Alpha, Beta, and Gamma Binaural Beat Brain Stimulation and Short-Term Training on Simultaneously Assessed Visuospatial and Verbal Working Memories",
+          "journal": "BioMed Research International",
+          "url": "https://doi.org/10.1155/2022/8588272",
+          "finding": "31 people, 8 minutes per sound. A 10 Hz beat gave a few small gains on a visual memory task and worse results on a listening task."
+        },
+        {
+          "authors": "Beauchene, Abaid, Moran, Diana and Leonessa",
+          "year": 2016,
+          "title": "The Effect of Binaural Beats on Visuospatial Working Memory and Cortical Connectivity",
+          "journal": "PLoS One",
+          "url": "https://doi.org/10.1371/journal.pone.0166630",
+          "finding": "A 10 Hz beat during a visual memory task lowered accuracy. A 15 Hz beat raised it."
+        },
+        {
+          "authors": "Basu and Banerjee",
+          "year": 2023,
+          "title": "Potential of binaural beats intervention for improving memory and attention: insights from meta-analysis and systematic review",
+          "journal": "Psychological Research",
+          "url": "https://doi.org/10.1007/s00426-022-01706-7",
+          "finding": "A meta-analysis of 15 studies found a medium effect on memory and attention overall (g = 0.40), with conflicting results between studies."
+        }
+      ],
+      "evidenceNote": null
     },
     {
       "id": "focus",
@@ -41,8 +112,34 @@
       "carrier": 350,
       "wording": "Often used for active work and concentration.",
       "free": true,
-      "evidence": null,
-      "sources": []
+      "evidence": "Mixed results",
+      "sources": [
+        {
+          "authors": "Lane, Kasian, Owens and Marsh",
+          "year": 1998,
+          "title": "Binaural auditory beats affect vigilance performance and mood",
+          "journal": "Physiology and Behavior",
+          "url": "https://doi.org/10.1016/s0031-9384(97)00436-8",
+          "finding": "29 people, a 30 minute watch-keeping task. With 16 and 24 Hz beats they caught more targets and made fewer false alarms than with 1.5 and 4 Hz beats."
+        },
+        {
+          "authors": "Robison, Obulasetty, Blais, Wingert and Brewer",
+          "year": 2022,
+          "title": "The effect of binaural beat stimulation on sustained attention",
+          "journal": "Psychological Research",
+          "url": "https://doi.org/10.1007/s00426-021-01524-3",
+          "finding": "Three experiments with a 16 Hz beat. Taken together, the authors found rather strong evidence against a benefit for sustained attention."
+        },
+        {
+          "authors": "Beauchene, Abaid, Moran, Diana and Leonessa",
+          "year": 2016,
+          "title": "The Effect of Binaural Beats on Visuospatial Working Memory and Cortical Connectivity",
+          "journal": "PLoS One",
+          "url": "https://doi.org/10.1371/journal.pone.0166630",
+          "finding": "A 15 Hz beat during a visual memory task raised accuracy. 5 Hz and 10 Hz beats lowered it."
+        }
+      ],
+      "evidenceNote": "No study we found tested 18 Hz exactly. These used 15, 16 and 24 Hz."
     },
     {
       "id": "deep",
@@ -52,8 +149,34 @@
       "carrier": 400,
       "wording": "Studied for attention and memory.",
       "free": false,
-      "evidence": null,
-      "sources": []
+      "evidence": "Mixed results",
+      "sources": [
+        {
+          "authors": "Engelbregt, Barmentlo, Keeser, Pogarell and Deijen",
+          "year": 2021,
+          "title": "Effects of binaural and monaural beat stimulation on attention and EEG",
+          "journal": "Experimental Brain Research",
+          "url": "https://doi.org/10.1007/s00221-021-06155-z",
+          "finding": "25 students. Fewer errors on an attention task with a 40 Hz beat than with pink noise. Brain recordings did not show the brain matching the beat."
+        },
+        {
+          "authors": "Engelbregt, Meijburg, Schulten, Pogarell and Deijen",
+          "year": 2019,
+          "title": "The Effects of Binaural and Monoaural Beat Stimulation on Cognitive Functioning in Subjects with Different Levels of Emotionality",
+          "journal": "Advances in Cognitive Psychology",
+          "url": "https://doi.org/10.5709/acp-0268-8",
+          "finding": "24 people. Faster on an attention task with a 40 Hz beat than with white noise, but a plain 40 Hz pulse in both ears did the same. No change in working memory."
+        },
+        {
+          "authors": "Borges, Arantes and Naves",
+          "year": 2023,
+          "title": "Influence of Binaural Beats Stimulation of Gamma Frequency over Memory Performance and EEG Spectral Density",
+          "journal": "Healthcare",
+          "url": "https://doi.org/10.3390/healthcare11060801",
+          "finding": "30 people. A 40 Hz beat made no difference to memory task results or to brain recordings."
+        }
+      ],
+      "evidenceNote": null
     }
   ]
 }
