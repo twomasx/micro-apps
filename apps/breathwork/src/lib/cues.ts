@@ -62,7 +62,10 @@ export function scheduleTone(ctx: BaseAudioContext, destination: AudioNode, tone
 }
 
 export interface CuePlayer {
-  /** Creates or wakes the audio context. Call it from a tap or key press, before the first cue. */
+  /**
+   * Creates or wakes the audio context. Call it from a tap or key press, before the first cue,
+   * and only while sound is on: on iPhone it pauses any music that is playing.
+   */
   prepare(): Promise<void>;
   play(kind: CueKind): void;
   setMuted(muted: boolean): void;
@@ -87,9 +90,12 @@ export function createCuePlayer(volume = DEFAULT_CUE_VOLUME): CuePlayer {
     async prepare() {
       if (!hasAudioContext()) return;
       if (!ctx) {
-        // Safari 17 and up: mix with music that is already playing, and follow the silent switch.
+        // Safari 17 and up: play through the iPhone silent switch. The cues are the only guide
+        // with your eyes closed there, since iPhones have no Vibration API. This pauses music
+        // that is playing, so the player is only prepared while sound is on.
+        // Android has no silent switch: Chrome plays at media volume whatever the ring mode.
         const session = (navigator as AudioSessionNavigator).audioSession;
-        if (session) session.type = 'ambient';
+        if (session) session.type = 'playback';
         ctx = new AudioContext({ latencyHint: 'interactive' });
       }
       if (ctx.state !== 'running') {

@@ -205,6 +205,15 @@ describe('breath controller', () => {
     expect(t.controller.snapshot().muted).toBe(true);
   });
 
+  it('starts no audio while muted, so your music keeps playing, and starts it when sound goes on', () => {
+    const t = setup();
+    t.controller.setMuted(true);
+    t.controller.start();
+    expect(t.deps.cues.prepare).not.toHaveBeenCalled();
+    t.controller.setMuted(false);
+    expect(t.deps.cues.prepare).toHaveBeenCalledOnce();
+  });
+
   it('sends every frame to themes but tells React only when the text changes', () => {
     const t = setup();
     const frames = vi.fn();

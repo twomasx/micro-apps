@@ -102,11 +102,16 @@ describe('breathAt: 4-7-8 and resonant', () => {
     expect(breathAt(fourSevenEight, 11000).secondsLeft).toBe(8);
   });
 
+  it('counts 5, 4, 3, 2, 1 through a 5.5 s phase, the 5 holding the extra half second', () => {
+    const counts = [0, 1000, 1499, 1500, 2500, 3500, 4500, 5499].map((ms) => breathAt(resonant, ms).secondsLeft);
+    expect(counts).toEqual([5, 5, 5, 4, 3, 2, 1, 1]);
+  });
+
   it('runs resonant at 5.5 s each way, exactly', () => {
     expect(cycleMs(resonant)).toBe(11000);
     expect(breathAt(resonant, 5499).phase.kind).toBe('in');
     expect(breathAt(resonant, 5500).phase.kind).toBe('out');
-    expect(breathAt(resonant, 0).secondsLeft).toBe(6);
+    expect(breathAt(resonant, 0).secondsLeft).toBe(5);
     expect(breathAt(resonant, 2750).lungLevel).toBeCloseTo(0.5);
   });
 });

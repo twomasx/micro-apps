@@ -8,7 +8,11 @@ export interface BreathState {
   progress: number;
   phaseElapsedMs: number;
   phaseRemainingMs: number;
-  /** The countdown shown on screen. Rounds up, so it reads 1 in the last second, never 0. */
+  /**
+   * The countdown shown on screen: whole seconds, ending on 1 as the phase ends, never 0.
+   * A phase with a half second (Resonant's 5.5 s) counts 5, 4, 3, 2, 1, and the 5 holds
+   * the extra half second, so every later number lasts exactly one second.
+   */
   secondsLeft: number;
   /** How full the lungs are, 0 (empty) to 1 (full), eased within each phase. */
   lungLevel: number;
@@ -90,7 +94,7 @@ export function breathAt(technique: Pick<Technique, 'phases'>, elapsedMs: number
     progress,
     phaseElapsedMs,
     phaseRemainingMs,
-    secondsLeft: Math.max(1, Math.ceil(phaseRemainingMs / 1000)),
+    secondsLeft: Math.max(1, Math.min(Math.floor(phase.ms / 1000), Math.ceil(phaseRemainingMs / 1000))),
     lungLevel: from + (to - from) * easeInOut(progress),
     cycle,
     cycleProgress: intoCycle / total,

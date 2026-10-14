@@ -191,7 +191,8 @@ export function createBreathController(
       const now = deps.now();
       const status = sessionStatus(session, now);
       if (status === 'running') return;
-      void deps.cues.prepare();
+      // Muted means no audio at all, so music you are playing keeps playing.
+      if (!deps.cues.muted) void deps.cues.prepare();
       if (status === 'complete') session = createSession(session.durationMs);
       // A fresh session cues its first phase; a resumed one waits for the next change.
       lastKey = status === 'paused' ? phaseKey(breathAt(current, elapsedMs(session, now))) : null;
@@ -225,6 +226,8 @@ export function createBreathController(
     },
     setMuted(muted) {
       deps.cues.setMuted(muted);
+      // Turning sound on is a tap, so the audio can start here.
+      if (!muted) void deps.cues.prepare();
       emit(frameAt(deps.now()));
     },
     dismissNotice() {
