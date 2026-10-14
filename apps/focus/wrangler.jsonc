@@ -7,8 +7,9 @@
     {
       "binding": "DB",
       "database_name": "micro-focus",
-      // Placeholder. Replace with the real id (see D1_DATABASE_ID in .env.example).
-      "database_id": "00000000-0000-0000-0000-000000000000"
+      "database_id": "89f48402-5c96-4982-95c3-807c9b08760f",
+      // Local dev and tests use their own SQLite file under this id, never the real database.
+      "preview_database_id": "00000000-0000-0000-0000-000000000000"
     }
   ]
 }

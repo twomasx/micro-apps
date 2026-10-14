@@ -12,6 +12,8 @@ A push to GitHub does not deploy anything. Every deploy is a command run from th
 | Router, for trying changes | Worker `micro-router-preview` | https://micro-router-preview.micro-router.workers.dev |
 | Personality app | Pages project `micro-personality` | https://micro-personality.pages.dev |
 | Personality database | D1 `micro-personality` | id in `apps/personality/wrangler.jsonc` |
+| Focus app | Pages project `micro-focus` | https://micro-focus.pages.dev |
+| Focus database | D1 `micro-focus` | id in `apps/focus/wrangler.jsonc` |
 
 Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. The domain is on the same account. Wrangler on Roger's WSL machine is logged in to it (`pnpm exec wrangler whoami`).
 
@@ -20,8 +22,8 @@ Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. 
 1. `polymadlabs.com` and `www.polymadlabs.com` are custom domains of the router Worker. Cloudflare made the DNS record for each one, proxied (orange cloud). Do not add or edit records for these two names by hand.
 2. `www` redirects (308) to the same path on `polymadlabs.com`. Browser storage is kept per hostname, so the apps must be served from one hostname only.
 3. `/` is a plain placeholder page with a link to `/personality/`.
-4. `/personality/...` is forwarded to the Pages project with `/personality` removed from the path. The app is built with base `/personality/`, so its links, assets and service worker all stay under that path.
-5. `/focus/`, `/breathwork/`, `/attention/` and `/intention/` say "Coming soon" with status 200 until the app is listed in `LIVE_APPS`.
+4. `/personality/...` and `/focus/...` are forwarded to their Pages projects with the app prefix removed from the path. Each app is built with its base path (`/personality/`, `/focus/`), so its links, assets and service worker all stay under that path.
+5. `/breathwork/`, `/attention/` and `/intention/` say "Coming soon" with status 200 until the app is listed in `LIVE_APPS`.
 6. Everything else is a 404.
 
 The router also adds `no-transform` to the `Cache-Control` header of every HTML page. Without it Cloudflare adds its Web Analytics script to our pages, and we allow no outside analytics.
@@ -67,6 +69,30 @@ pnpm exec wrangler pages secret put <NAME> --project-name micro-personality
 
 A changed secret only takes effect after the next deploy.
 
+## Deploy the focus app
+
+First deployed on Oct 13, 2026. From `apps/focus`:
+
+```bash
+pnpm build
+pnpm exec wrangler pages deploy dist --project-name micro-focus --branch main
+```
+
+Run the four checks from the repo root first. Database changes work as for personality: apply a new file in `apps/focus/migrations/` with `pnpm exec wrangler d1 migrations apply DB --remote` before deploying the code that needs it.
+
+### Secrets
+
+Four secrets live in the `micro-focus` Pages project:
+
+| Name | Value |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | The same test mode key as personality. |
+| `STRIPE_WEBHOOK_SECRET` | The signing secret of the focus webhook (see Stripe below). Saved at `~/.config/polymadlabs/focus-stripe-webhook-secret`. |
+| `UNLOCK_CODE_SECRET` | 64 hex characters. Unlock codes are made from it. **Never change it**, or every code already sold stops working. Saved at `~/.config/polymadlabs/focus-unlock-code-secret`. |
+| `PUBLIC_ORIGIN` | `https://polymadlabs.com` |
+
+Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-focus`, then deploy again.
+
 ## Deploy the router
 
 From `router`:
@@ -87,7 +113,9 @@ pnpm exec wrangler deploy --env=""        # production: polymadlabs.com and www
 - Test mode. The code refuses a key that does not start with `sk_test_`. Going live needs a change in `packages/payments/src/stripe.ts` as well as live keys.
 - Webhook: `https://polymadlabs.com/personality/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UPxeIIbd3re6uBdIm3vv1hN`. Its signing secret was saved on Roger's machine at `~/.config/polymadlabs/stripe-webhook-secret`, outside the repo.
 - If the webhook is ever recreated, it gets a new signing secret: put it in `STRIPE_WEBHOOK_SECRET` and deploy again.
-- Local development uses the Stripe CLI and its own secret. See "Testing payments locally" in `apps/personality/CLAUDE.md`.
+- Focus webhook: `https://polymadlabs.com/focus/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.
+- Every webhook gets the checkout events of every app on the account. Each app ignores sessions it did not create.
+- Local development uses the Stripe CLI and its own secret. See "Testing payments locally" in `apps/personality/CLAUDE.md` and `apps/focus/CLAUDE.md`.
 
 ## Check a deploy
 
@@ -117,6 +145,20 @@ The full list, in a browser at 375px, 768px and 1280px. All of it passed on Oct 
 
 Delete your test results when you are done. Their purchase rows stay in the database by design.
 
+### Check focus
+
+Passed on Oct 13, 2026 in headless Chromium, through the preview router and then polymadlabs.com:
+
+1. `curl -s https://polymadlabs.com/focus/api/health` gives `{"ok":true}`.
+2. `/focus/` plays at 375px, 768px and 1280px. Everything loads from polymadlabs.com, the service worker scope is `/focus/`, no console errors, no sideways scroll.
+3. The evidence label opens `/focus/science` at that preset.
+4. `/focus/unlock` says "$6.99 once. No renewals." Pay with card 4242 4242 4242 4242. You come back to "Thank you. Focus is unlocked on this device." with a code in groups of four. A reload shows the same code.
+5. Relaxed and Deep have no lock after paying.
+6. In another browser, `/focus/restore` with that code (lower case and spaces are fine) unlocks it there too.
+7. In Stripe, the `checkout.session.completed` event shows 0 pending webhooks, and the row in D1 `micro-focus` is `paid` with a 64-character hash and no code.
+
+One test purchase from that check is in the production database (`cs_test_a1CV2u...`, test mode).
+
 ## Undo
 
 - **A bad app deploy:** Pages keeps every deployment. `pnpm exec wrangler pages deployment list --project-name micro-personality` shows them. Roll back in the Cloudflare dashboard (Workers & Pages, `micro-personality`, Deployments), or check out the last good commit and deploy it again.
@@ -125,8 +167,9 @@ Delete your test results when you are done. Their purchase rows stay in the data
 
 ## Known gaps
 
-- Nothing has been checked on a real Android phone or in iPhone Safari.
+- Nothing has been checked on a real Android phone or in iPhone Safari. For focus this matters most: playing with the screen off and the lock screen controls (see `apps/focus/DESIGN-TODO.md`).
+- The home page at `/` still links only to the personality test.
 - Every file in `apps/personality/content/` still says `status: draft`.
 - Cloudflare's Web Analytics is blocked by the router's header, but it is still switched on for the domain. Switch it off in the dashboard (Analytics & Logs, Web Analytics) so the block is not the only thing in the way.
-- Unpaid checkouts leave `pending` rows in `purchases`. Nothing clears them yet.
+- Unpaid checkouts leave `pending` rows in `purchases`, in both apps. Nothing clears them yet.
 - The PWA has no icons or theme color yet (see `apps/personality/DESIGN-TODO.md`).
