@@ -2,9 +2,13 @@ import { lazy, Suspense, useEffect } from 'react';
 import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
 import { BreathePage } from './pages/BreathePage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
+import { CustomPage } from './pages/CustomPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { RestorePage } from './pages/RestorePage';
 import { SciencePage } from './pages/SciencePage';
+import { UnlockPage } from './pages/UnlockPage';
+import { WeekPage } from './pages/WeekPage';
 
 const SITE_TITLE = 'Breathwork';
 
@@ -25,17 +29,33 @@ const PAGE_TITLES: Record<Exclude<Route['name'], 'breathe'>, string> = {
 };
 
 function Page({ route }: { route: Route }) {
-  if (route.name === 'breathe') return <BreathePage />;
-  if (route.name === 'science') return <SciencePage />;
-  if (route.name === 'privacy') return <PrivacyPage />;
-  if (route.name === 'bench' && BenchPage) {
-    return (
-      <Suspense fallback={null}>
-        <BenchPage />
-      </Suspense>
-    );
+  switch (route.name) {
+    case 'breathe':
+      return <BreathePage />;
+    case 'week':
+      return <WeekPage />;
+    case 'custom':
+      return <CustomPage />;
+    case 'unlock':
+      return <UnlockPage sessionId={route.sessionId} />;
+    case 'restore':
+      return <RestorePage />;
+    case 'science':
+      return <SciencePage />;
+    case 'privacy':
+      return <PrivacyPage />;
+    case 'bench':
+      if (BenchPage) {
+        return (
+          <Suspense fallback={null}>
+            <BenchPage />
+          </Suspense>
+        );
+      }
+      return <NotFoundPage />;
+    case 'notFound':
+      return <NotFoundPage />;
   }
-  return <PlaceholderPage title={PAGE_TITLES[route.name]} />;
 }
 
 export function App() {

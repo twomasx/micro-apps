@@ -1,4 +1,5 @@
 import type { BreathSnapshot } from './breath-controller';
+import { isCustomTechnique } from './custom';
 import { formatClock } from './session';
 import { cycleMs, type PhaseKind, type Technique } from './techniques';
 
@@ -30,7 +31,7 @@ export function nowText(snapshot: BreathSnapshot, context: ViewContext): NowText
       return { word: 'Ready', hint: 'Press start, then follow the dot', count: null, kind: 'ready' };
     case 'complete':
       if (preview) {
-        return { word: 'Preview over', hint: `${technique.name} is part of the lifetime unlock.`, count: null, kind: 'done' };
+        return { word: 'Preview over', hint: lockedLine(technique), count: null, kind: 'done' };
       }
       return {
         word: 'Session complete',
@@ -57,9 +58,16 @@ export function startLabel(status: BreathSnapshot['status']): 'Start' | 'Pause' 
   return 'Start';
 }
 
+/** "Resonant is part of the lifetime unlock." or, for your own pattern, "Custom patterns are ...". */
+function lockedLine(technique: Technique): string {
+  return isCustomTechnique(technique)
+    ? 'Custom patterns are part of the lifetime unlock.'
+    : `${technique.name} is part of the lifetime unlock.`;
+}
+
 /** The line under the technique name. */
 export function noteText(technique: Technique, preview: boolean): string {
-  return preview ? `1 minute preview. ${technique.name} is part of the lifetime unlock.` : technique.wording;
+  return preview ? `1 minute preview. ${lockedLine(technique)}` : technique.wording;
 }
 
 /** The value on the length button: "5 min", or "1 min preview". */

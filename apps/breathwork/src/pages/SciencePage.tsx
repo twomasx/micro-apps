@@ -21,7 +21,7 @@ function TechniqueEvidence({ technique }: { technique: Technique }) {
   return (
     <section className="evidence" id={technique.id} aria-labelledby={`${technique.id}-title`}>
       <div className="evidence-head">
-        <MiniShape technique={technique} />
+        <MiniShape phases={technique.phases} />
         <h3 className="evidence-title" id={`${technique.id}-title`}>
           {technique.name}
         </h3>

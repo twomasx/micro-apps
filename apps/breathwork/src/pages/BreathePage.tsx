@@ -9,6 +9,7 @@ import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { minuteOptions, UNLOCKED_MINUTES, wholeBreathsMs } from '../lib/limits';
 import { navigate } from '../lib/navigation';
+import { getProduct, priceLine } from '../lib/products';
 import { breathCount, lengthLabel, noteText, nowText, startLabel } from '../lib/screen-view';
 import { techniques } from '../lib/techniques';
 import { defaultTheme } from '../themes';
@@ -41,6 +42,7 @@ export function BreathePage() {
       data-status={snapshot.status}
       data-moment={moment}
       data-kind={now.kind}
+      data-preview={plan.preview || undefined}
     >
       <header className="breathe-top">
         <div className="breathe-title">
@@ -77,17 +79,15 @@ export function BreathePage() {
               <p className="now-word" key={`${now.word}-${snapshot.phaseIndex}-${snapshot.status}`} data-kind={now.kind}>
                 {now.word}
               </p>
-              <p className="now-hint">
-                {now.hint}
-                {snapshot.status === 'complete' && plan.preview && (
-                  <>
-                    {' '}
-                    <Link to="unlock" className="now-link">
-                      See the unlock
-                    </Link>
-                  </>
-                )}
-              </p>
+              <p className="now-hint">{now.hint}</p>
+              {snapshot.status === 'complete' && plan.preview && (
+                <p className="offer">
+                  <Link to="unlock" className="offer-link">
+                    See the lifetime unlock
+                  </Link>
+                  <span className="offer-price">{priceLine(getProduct('lifetime'))}</span>
+                </p>
+              )}
             </div>
             {now.count !== null && (
               <span className="now-count" aria-hidden="true">

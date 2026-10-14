@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BreathSnapshot } from './breath-controller';
+import { customToTechnique } from './custom';
 import { breathCount, lengthLabel, noteText, nowText, startLabel } from './screen-view';
 import { findTechnique } from './techniques';
 
@@ -73,6 +74,9 @@ describe('labels', () => {
   it('shows the wording, or the preview line for a locked technique', () => {
     expect(noteText(sigh, false)).toBe(sigh.wording);
     expect(noteText(resonant, true)).toBe('1 minute preview. Resonant is part of the lifetime unlock.');
+    const custom = customToTechnique({ in: 4, holdIn: 2, out: 6, holdOut: 0 });
+    expect(noteText(custom, true)).toBe('1 minute preview. Custom patterns are part of the lifetime unlock.');
+    expect(noteText(custom, false)).toBe('4 s in, 2 s hold, 6 s out.');
   });
 
   it('labels the length', () => {

@@ -148,9 +148,37 @@
   color: var(--soft);
 }
 
-.now-link {
-  color: var(--sun);
-  font-weight: 600;
+.offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 10px;
+}
+
+.offer-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--cobalt);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.offer-price {
+  color: var(--soft);
+}
+
+/* A finished preview fades the shape back, so the offer is what you see. */
+.breathe-stage {
+  transition: opacity 1.4s ease;
+}
+
+.breathe[data-preview][data-status='complete'] .breathe-stage {
+  opacity: 0.3;
 }
 
 .now-count {
@@ -489,7 +517,8 @@
   }
 
   .go,
-  .picker-option {
+  .picker-option,
+  .breathe-stage {
     transition: none;
   }
 }

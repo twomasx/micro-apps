@@ -2,15 +2,18 @@
 
 Decisions that are built the simplest way for now and need your call. What has been decided, and why, is in `DESIGN-NOTES.md`.
 
-## For the step 2 design review
+## Open decisions
 
 1. **The cyclic sigh's shape.** A steep climb, a short top-up, then a long curved slide back down. The slide has to bow (2 s + 1 s of breathing in can't reach across a 6 s side in straight lines), so the shape looks like a sail or a fin. Say if you would rather see something else.
 2. **The first-visit screen** keeps the full safety text (the spec asks for it there). To give the drawing shape room on small phones, the wording line and evidence label are hidden until you press Start.
 3. **Desktop** leaves space in the right column between the name and the phase word. It could hold the session progress or a short description of the technique.
 4. **Time left on a finished session** reads 0:00. It could show the session length instead.
-5. **Menu pages** week, custom, unlock and restore are placeholders until step 5. The science and privacy pages are done.
-7. **Evidence label on the breathing screen** ("Little research", with an arrow) opens the science page at that technique, as in focus. Its tap area is 50px tall. Say if you would rather it were plain text.
-6. **App icon:** the cyclic sigh's shape with the yellow dot, on cobalt. Files in `public/`.
+5. **Custom pattern buttons** step by whole seconds. The data allows half seconds (like Resonant's 5.5 s), so half-second steps can be added if you want them.
+6. **Unfinished sessions** are not recorded. Only a session that runs to the end leaves its shape on Your week. A partly drawn shape for a stopped session is possible.
+7. **Free users' sessions are recorded too,** so Your week is already filled in on the day they unlock. They see an example week until then.
+8. **Custom patterns on the breathing screen** show as "Your pattern" with their seconds as the wording line, and no picker button is selected. They are reached from the menu (Custom patterns, then Breathe this pattern).
+9. **Evidence label on the breathing screen** ("Little research", with an arrow) opens the science page at that technique, as in focus. Its tap area is 50px tall. Say if you would rather it were plain text.
+10. **App icon:** the cyclic sigh's shape with the yellow dot, on cobalt. Files in `public/`.
 
 ## Device checks still open
 

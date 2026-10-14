@@ -70,7 +70,8 @@ describe('custom pattern as a technique', () => {
 
   it('is named by its numbers', () => {
     expect(customName(pattern(4, 2, 6, 0))).toBe('4-2-6-0');
-    expect(customToTechnique(pattern(4.5, 0, 6, 0)).name).toBe('4.5-0-6-0');
+    expect(customToTechnique(pattern(4.5, 0, 6, 0)).short).toBe('4.5-0-6-0');
+    expect(customToTechnique(pattern(4, 2, 6, 0))).toMatchObject({ name: 'Your pattern', wording: '4 s in, 2 s hold, 6 s out.' });
   });
 });
 

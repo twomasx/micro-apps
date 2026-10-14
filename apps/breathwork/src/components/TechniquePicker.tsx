@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
 import { isTechniqueLocked } from '../lib/limits';
 import { buildShape, outlinePath } from '../lib/shape';
-import type { Technique } from '../lib/techniques';
+import type { Phase, Technique } from '../lib/techniques';
 import { LockIcon } from './Icons';
 
-/** A small copy of a technique's shape, for the picker. */
-export function MiniShape({ technique }: { technique: Technique }) {
-  const d = useMemo(() => outlinePath(buildShape(technique.phases), 3), [technique]);
+/** A small copy of a breathing pattern's shape: the picker, the science page, your week. */
+export function MiniShape({ phases }: { phases: readonly Pick<Phase, 'kind' | 'ms'>[] }) {
+  const key = phases.map((p) => `${p.kind}${p.ms}`).join(' ');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const d = useMemo(() => outlinePath(buildShape(phases), 3), [key]);
   return (
     <svg className="mini-shape" viewBox="-0.15 -0.15 1.3 1.3" aria-hidden="true" focusable="false">
       <path d={d} />
@@ -37,7 +39,7 @@ export function TechniquePicker({ techniques, selectedId, unlocked, onSelect }: 
             data-locked={locked || undefined}
             onClick={() => onSelect(technique)}
           >
-            <MiniShape technique={technique} />
+            <MiniShape phases={technique.phases} />
             <span className="picker-name">
               {technique.short}
               {locked && <LockIcon />}

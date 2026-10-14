@@ -1,9 +1,9 @@
 {
   "products": [
     {
-      "id": "placeholder",
-      "name": "PLACEHOLDER - replace before selling anything",
-      "amount": 100,
+      "id": "lifetime",
+      "name": "Breathwork lifetime unlock",
+      "amount": 499,
       "currency": "usd"
     }
   ]

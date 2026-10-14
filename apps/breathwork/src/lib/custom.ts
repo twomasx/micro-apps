@@ -1,3 +1,4 @@
+import { patternText } from './content';
 import { PHASE_WORDS, type Phase, type Technique } from './techniques';
 
 /** A pattern you make yourself: seconds to breathe in, hold full, breathe out, hold empty. */
@@ -67,6 +68,11 @@ export function customName(pattern: CustomPattern): string {
   return CUSTOM_FIELDS.map((field) => String(pattern[field])).join('-');
 }
 
+/** True for a technique made from a custom pattern. */
+export function isCustomTechnique(technique: Pick<Technique, 'id'>): boolean {
+  return technique.id.startsWith('custom-');
+}
+
 export function customId(pattern: CustomPattern): string {
   return `custom-${customName(pattern)}`;
 }
@@ -82,10 +88,10 @@ export function customToTechnique(pattern: CustomPattern): Technique {
   }
   return {
     id: customId(pattern),
-    name: customName(pattern),
+    name: 'Your pattern',
     short: customName(pattern),
     free: false,
-    wording: 'Your own pattern.',
+    wording: `${patternText({ phases })}.`,
     phases,
     evidence: null,
   };
