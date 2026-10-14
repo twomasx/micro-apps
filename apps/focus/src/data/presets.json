@@ -1,0 +1,59 @@
+{
+  "presets": [
+    {
+      "id": "sleep",
+      "name": "Sleep",
+      "short": "Sleep",
+      "beat": 2,
+      "carrier": 250,
+      "wording": "Often used to wind down before sleep.",
+      "free": true,
+      "evidence": null,
+      "sources": []
+    },
+    {
+      "id": "calm",
+      "name": "Calm",
+      "short": "Calm",
+      "beat": 6,
+      "carrier": 300,
+      "wording": "Often used for meditation and relaxation.",
+      "free": true,
+      "evidence": null,
+      "sources": []
+    },
+    {
+      "id": "relaxed",
+      "name": "Relaxed focus",
+      "short": "Relaxed",
+      "beat": 10,
+      "carrier": 300,
+      "wording": "Often used for calm, steady attention.",
+      "free": false,
+      "evidence": null,
+      "sources": []
+    },
+    {
+      "id": "focus",
+      "name": "Focus",
+      "short": "Focus",
+      "beat": 18,
+      "carrier": 350,
+      "wording": "Often used for active work and concentration.",
+      "free": true,
+      "evidence": null,
+      "sources": []
+    },
+    {
+      "id": "deep",
+      "name": "Deep focus",
+      "short": "Deep",
+      "beat": 40,
+      "carrier": 400,
+      "wording": "Studied for attention and memory.",
+      "free": false,
+      "evidence": null,
+      "sources": []
+    }
+  ]
+}

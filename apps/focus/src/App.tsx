@@ -1,11 +1,6 @@
-import { appConfig } from '../app.config';
+import { BenchPage } from './pages/BenchPage';
 
+// Step 1: the audio test page is the whole app. The player replaces it in step 2.
 export function App() {
-  return (
-    <main>
-      <p>{appConfig.name}</p>
-      <p>{import.meta.env.BASE_URL}</p>
-      <p>skeleton</p>
-    </main>
-  );
+  return <BenchPage />;
 }

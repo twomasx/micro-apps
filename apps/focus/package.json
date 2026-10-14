@@ -9,6 +9,7 @@
     "dev:functions": "mkdir -p dist && wrangler pages dev --ip 127.0.0.1 --port 8802",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.functions.json"
   },
   "dependencies": {
@@ -27,6 +28,7 @@
     "typescript": "~6.0.3",
     "vite": "^8.3.4",
     "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.3",
     "workbox-window": "^7.4.1",
     "wrangler": "^4.149.0"
   }
