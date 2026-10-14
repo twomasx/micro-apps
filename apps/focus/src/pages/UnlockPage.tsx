@@ -163,7 +163,9 @@ export function UnlockPage({ sessionId }: { sessionId: string | null }) {
   const [state] = usePlayer();
   const saved = useSavedUnlock(state.unlocked);
 
-  useEffect(() => window.scrollTo(0, 0), []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   let body;
   if (sessionId) body = <Returned sessionId={sessionId} />;

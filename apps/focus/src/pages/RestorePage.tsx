@@ -20,7 +20,9 @@ export function RestorePage() {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<Status>('idle');
 
-  useEffect(() => window.scrollTo(0, 0), []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();

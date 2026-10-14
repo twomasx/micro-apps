@@ -3,7 +3,9 @@ import { Link } from '../components/Link';
 import '../styles/page.css';
 
 export function PrivacyPage() {
-  useEffect(() => window.scrollTo(0, 0), []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <main className="page">
