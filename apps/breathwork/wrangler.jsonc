@@ -7,8 +7,7 @@
     {
       "binding": "DB",
       "database_name": "micro-breathwork",
-      // Placeholder until deploy (step 7). Replace with the real id (see D1_DATABASE_ID in .env.example).
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "7e64da56-4b4a-4aa2-92d4-1a3e960d1949",
       // Local dev and tests use their own SQLite file under this id, never the real database.
       "preview_database_id": "00000000-0000-0000-0000-000000000000"
     }

@@ -14,6 +14,8 @@ A push to GitHub does not deploy anything. Every deploy is a command run from th
 | Personality database | D1 `micro-personality` | id in `apps/personality/wrangler.jsonc` |
 | Focus app | Pages project `micro-focus` | https://micro-focus.pages.dev |
 | Focus database | D1 `micro-focus` | id in `apps/focus/wrangler.jsonc` |
+| Breathwork app | Pages project `micro-breathwork` | https://micro-breathwork.pages.dev |
+| Breathwork database | D1 `micro-breathwork` | id in `apps/breathwork/wrangler.jsonc` |
 
 Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. The domain is on the same account. Wrangler on Roger's WSL machine is logged in to it (`pnpm exec wrangler whoami`).
 
@@ -21,9 +23,9 @@ Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. 
 
 1. `polymadlabs.com` and `www.polymadlabs.com` are custom domains of the router Worker. Cloudflare made the DNS record for each one, proxied (orange cloud). Do not add or edit records for these two names by hand.
 2. `www` redirects (308) to the same path on `polymadlabs.com`. Browser storage is kept per hostname, so the apps must be served from one hostname only.
-3. `/` is a plain placeholder page with a link to `/personality/`.
-4. `/personality/...` and `/focus/...` are forwarded to their Pages projects with the app prefix removed from the path. Each app is built with its base path (`/personality/`, `/focus/`), so its links, assets and service worker all stay under that path.
-5. `/breathwork/`, `/attention/` and `/intention/` say "Coming soon" with status 200 until the app is listed in `LIVE_APPS`.
+3. `/` is a plain placeholder page with links to `/personality/` and `/breathwork/`.
+4. `/personality/...`, `/focus/...` and `/breathwork/...` are forwarded to their Pages projects with the app prefix removed from the path. Each app is built with its base path (`/personality/`, `/focus/`, `/breathwork/`), so its links, assets and service worker all stay under that path.
+5. `/attention/` and `/intention/` say "Coming soon" with status 200 until the app is listed in `LIVE_APPS`.
 6. Everything else is a 404.
 
 The router also adds `no-transform` to the `Cache-Control` header of every HTML page. Without it Cloudflare adds its Web Analytics script to our pages, and we allow no outside analytics.
@@ -93,6 +95,30 @@ Four secrets live in the `micro-focus` Pages project:
 
 Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-focus`, then deploy again.
 
+## Deploy the breathwork app
+
+First deployed on Oct 14, 2026. From `apps/breathwork`:
+
+```bash
+pnpm build
+pnpm exec wrangler pages deploy dist --project-name micro-breathwork --branch main
+```
+
+Run the four checks from the repo root first. Database changes work as for the other apps: apply a new file in `apps/breathwork/migrations/` with `pnpm exec wrangler d1 migrations apply DB --remote` before deploying the code that needs it.
+
+### Secrets
+
+Four secrets live in the `micro-breathwork` Pages project:
+
+| Name | Value |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | The same test mode key as personality and focus. |
+| `STRIPE_WEBHOOK_SECRET` | The signing secret of the breathwork webhook (see Stripe below). Saved at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`. |
+| `UNLOCK_CODE_SECRET` | 64 hex characters, its own, not focus's. **Never change it**, or every code already sold stops working. Saved at `~/.config/polymadlabs/breathwork-unlock-code-secret`. |
+| `PUBLIC_ORIGIN` | `https://polymadlabs.com` |
+
+Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-breathwork`, then deploy again.
+
 ## Deploy the router
 
 From `router`:
@@ -114,6 +140,7 @@ pnpm exec wrangler deploy --env=""        # production: polymadlabs.com and www
 - Webhook: `https://polymadlabs.com/personality/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UPxeIIbd3re6uBdIm3vv1hN`. Its signing secret was saved on Roger's machine at `~/.config/polymadlabs/stripe-webhook-secret`, outside the repo.
 - If the webhook is ever recreated, it gets a new signing secret: put it in `STRIPE_WEBHOOK_SECRET` and deploy again.
 - Focus webhook: `https://polymadlabs.com/focus/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.
+- Breathwork webhook: `https://polymadlabs.com/breathwork/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQVAQIbd3re6uBdkogYUm05`. Signing secret at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`.
 - Every webhook gets the checkout events of every app on the account. Each app ignores sessions it did not create.
 - Local development uses the Stripe CLI and its own secret. See "Testing payments locally" in `apps/personality/CLAUDE.md` and `apps/focus/CLAUDE.md`.
 
@@ -159,6 +186,20 @@ Passed on Oct 13, 2026 in headless Chromium, through the preview router and then
 
 One test purchase from that check is in the production database (`cs_test_a1CV2u...`, test mode).
 
+### Check breathwork
+
+Passed on Oct 14, 2026 in headless Chromium, through the preview router and then polymadlabs.com:
+
+1. `curl -s https://polymadlabs.com/breathwork/api/health` gives `{"ok":true}`. The home page links to `/breathwork/`.
+2. `/breathwork/` breathes at 375px, 768px and 1280px: the first-run card, Start, the dot moving. Everything loads from polymadlabs.com, the service worker scope is `/breathwork/`, no console errors, no sideways scroll.
+3. The evidence label opens `/breathwork/science` at that technique.
+4. `/breathwork/unlock` says "$4.99 once. No renewals." Pay with card 4242 4242 4242 4242. You come back to "Thank you. Breathwork is unlocked on this device." with a code in groups of four. A reload shows the same code.
+5. Resonant has no lock after paying, and runs full sessions instead of the 1 minute preview.
+6. In another browser, `/breathwork/restore` with that code (lower case and spaces are fine) unlocks it there too. A wrong code is refused.
+7. In Stripe, the `checkout.session.completed` event shows 0 pending webhooks, and the row in D1 `micro-breathwork` is `paid` with a 64-character hash and no code.
+
+One test purchase from that check is in the production database (`cs_test_a1iypjsyee...`, test mode), and one unpaid `pending` row from a direct API check.
+
 ## Undo
 
 - **A bad app deploy:** Pages keeps every deployment. `pnpm exec wrangler pages deployment list --project-name micro-personality` shows them. Roll back in the Cloudflare dashboard (Workers & Pages, `micro-personality`, Deployments), or check out the last good commit and deploy it again.
@@ -167,8 +208,8 @@ One test purchase from that check is in the production database (`cs_test_a1CV2u
 
 ## Known gaps
 
-- Nothing has been checked on a real Android phone or in iPhone Safari. For focus this matters most: playing with the screen off and the lock screen controls (see `apps/focus/DESIGN-TODO.md`).
-- The home page at `/` still links only to the personality test.
+- Nothing has been checked on a real Android phone or in iPhone Safari. For focus this matters most: playing with the screen off and the lock screen controls (see `apps/focus/DESIGN-TODO.md`). For breathwork: tones, vibration and the screen staying awake (see `apps/breathwork/DESIGN-TODO.md`).
+- The home page at `/` links to the personality test and breathwork. Focus is live but not linked from it yet.
 - Every file in `apps/personality/content/` still says `status: draft`.
 - Cloudflare's Web Analytics is blocked by the router's header, but it is still switched on for the domain. Switch it off in the dashboard (Analytics & Logs, Web Analytics) so the block is not the only thing in the way.
 - Unpaid checkouts leave `pending` rows in `purchases`, in both apps. Nothing clears them yet.
