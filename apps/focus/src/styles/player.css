@@ -84,7 +84,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--muted);
 }
 
@@ -154,13 +154,14 @@
   padding: 2px 12px;
   border: 1px solid rgba(230, 200, 143, 0.4);
   border-radius: 999px;
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--gold);
 }
 
 /* The evidence label opens its part of the science page. The tap area is taller than the label. */
 .chip-link {
   position: relative;
+  z-index: 1;
   text-decoration: none;
 }
 
@@ -179,7 +180,7 @@
 .chip-link::before {
   content: '';
   position: absolute;
-  inset: -9px -6px;
+  inset: -10px -6px;
 }
 
 /* ---------- Orbit and clock ---------- */
@@ -237,7 +238,7 @@
 
 .clock-label {
   margin-top: 4px;
-  font-size: 0.875rem;
+  font-size: 1rem;
   letter-spacing: 0.04em;
   color: var(--muted);
 }
@@ -283,7 +284,7 @@
 }
 
 .side-caption {
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--muted);
 }
 
@@ -459,7 +460,7 @@
 }
 
 .sheet-small {
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--muted);
 }
 
@@ -784,7 +785,7 @@
     display: block;
     margin-top: 10px;
     text-align: center;
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--muted);
     opacity: 0.75;
   }

@@ -44,8 +44,12 @@ Direction: Orbit. This file lists what was decided, what else was tried, and wha
 4. **Preview repeats.** A free user can play the 60 second preview of a locked preset again after it ends. Each time ends with the unlock offer. A limit per day is possible if you want one.
 5. **Changing length or mode during a session** restarts the timer and keeps the sound playing.
 6. **Prime mode is the default mode**, so the left button reads "Prime, 10 min" until you switch to Session in the Length sheet.
-7. **App icon.** Not designed yet. It comes with the final checks step.
+7. **App icon.** The two stars on a faint ring with a short gold arc, like a session just started, on the deep blue. Files in `public/`: `favicon.svg`, `icon-192.png`, `icon-512.png` (also used as the maskable icon, since everything sits in the middle 80%) and `apple-touch-icon.png`.
 8. **Menu.** The three dots open links to The science, Lifetime unlock, Restore purchase and Privacy.
+
+## Text size
+
+All text is 16px or larger, as the root rules ask. In step 6 the small labels went from 14px to 16px: "Headphones on", the evidence label, the word under the clock, the captions above "10 min" and "30%", the safety line in sheets, and the keyboard hint on desktop. The player still fits a 360 by 560 screen.
 
 ## Text pages
 
