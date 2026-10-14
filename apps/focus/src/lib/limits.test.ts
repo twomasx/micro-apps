@@ -42,6 +42,13 @@ describe('free tier', () => {
     expect(playbackLimit(free, 45, false)).toEqual({ durationMs: 10 * MINUTE, preview: false });
   });
 
+  it('uses the Prime lengths in Prime mode', () => {
+    expect(playbackLimit(free, 20, false, true)).toEqual({ durationMs: 10 * MINUTE, preview: false });
+    expect(playbackLimit(free, 20, true, true)).toEqual({ durationMs: 20 * MINUTE, preview: false });
+    expect(playbackLimit(free, 5, true, true)).toEqual({ durationMs: 10 * MINUTE, preview: false });
+    expect(playbackLimit(locked, 10, false, true)).toEqual({ durationMs: 60_000, preview: true });
+  });
+
   it('plays a locked preset as a 60 second preview', () => {
     expect(PREVIEW_MS).toBe(60_000);
     expect(playbackLimit(locked, 10, false)).toEqual({ durationMs: 60_000, preview: true });

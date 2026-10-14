@@ -48,14 +48,18 @@ export interface PlaybackLimit {
   preview: boolean;
 }
 
-/** How long a session may run for this preset and this user. */
+/** How long a session may run for this preset and this user. Prime mode has its own lengths. */
 export function playbackLimit(
   preset: Pick<Preset, 'free'>,
   requestedMinutes: number,
   unlocked: boolean,
+  prime = false,
 ): PlaybackLimit {
   if (isPresetLocked(preset, unlocked)) return { durationMs: PREVIEW_MS, preview: true };
-  return { durationMs: clampSessionMinutes(requestedMinutes, unlocked) * MINUTE_MS, preview: false };
+  const minutes = prime
+    ? clampPrimeMinutes(requestedMinutes, unlocked)
+    : clampSessionMinutes(requestedMinutes, unlocked);
+  return { durationMs: minutes * MINUTE_MS, preview: false };
 }
 
 export function canUseCustomBeat(unlocked: boolean): boolean {

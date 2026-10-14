@@ -27,14 +27,14 @@ export default defineConfig({
       scope: base,
       manifest: {
         id: base,
-        name,
-        short_name: name,
+        name: 'Focus',
+        short_name: 'Focus',
         start_url: base,
         scope: base,
         display: 'standalone',
-        // Placeholders. Colours and icons come with each app's own design.
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        theme_color: '#080a1c',
+        background_color: '#080a1c',
+        // Icons are added in the final checks step.
         icons: [],
       },
       workbox: {

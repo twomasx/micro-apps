@@ -1,0 +1,756 @@
+/*
+ * The player (Orbit). Phone first: the base rules are a small phone.
+ * Taller and wider screens only add room. min-width and min-height queries only.
+ */
+
+/* Lets the glow colour fade between presets. Browsers without @property switch at once. */
+@property --nebula {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #141a3d;
+}
+
+.player {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---------- Sky ---------- */
+
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(120% 78% at 50% 47%, var(--nebula) 0%, var(--deep) 72%);
+  transition: --nebula 1.8s ease;
+}
+
+/* A little warmth behind the orbit while a session plays. */
+.sky::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 44% at 50% 47%, rgba(230, 200, 143, 0.075), transparent 70%);
+  opacity: 0;
+  transition: opacity 2.4s ease;
+}
+
+.sky[data-state='playing']::after {
+  opacity: 1;
+}
+
+.sky-stars {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Slow twinkle: two layers fade in and out over many seconds. Far below any flicker rate. */
+.sky-stars[data-layer='1'] {
+  animation: twinkle 9s ease-in-out infinite alternate;
+}
+
+.sky-stars[data-layer='2'] {
+  animation: twinkle 13s ease-in-out -6s infinite alternate;
+}
+
+@keyframes twinkle {
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px 0 20px;
+}
+
+.headphones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.headphones-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 10px 1px rgba(230, 200, 143, 0.7);
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+/* ---------- Heading ---------- */
+
+.player-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.player[data-ready='true'] .player-main {
+  opacity: 1;
+}
+
+.head {
+  text-align: center;
+  padding: 2px 20px 0;
+}
+
+.preset-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2.5rem, 12vw, 3.25rem);
+  line-height: 1;
+  letter-spacing: -0.005em;
+  color: var(--star);
+}
+
+.head[data-complete='true'] .preset-name {
+  font-size: clamp(2.125rem, 10.4vw, 3rem);
+}
+
+.preset-line {
+  max-width: 19rem;
+  min-height: 3em;
+  margin: 8px auto 0;
+  color: var(--muted);
+}
+
+.chip-row {
+  min-height: 28px;
+  margin-top: 4px;
+}
+
+.chip {
+  display: inline-block;
+  padding: 2px 12px;
+  border: 1px solid rgba(230, 200, 143, 0.4);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  color: var(--gold);
+}
+
+/* ---------- Orbit and clock ---------- */
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--orbit-side);
+  height: var(--orbit-side);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.clock {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  transition: opacity 1.2s ease;
+}
+
+.clock[data-state='complete'] {
+  opacity: 0;
+}
+
+.clock-time {
+  font-family: var(--serif);
+  font-size: clamp(1.75rem, calc(var(--orbit-radius) * 0.44), 3.75rem);
+  line-height: 1;
+  color: var(--star);
+  white-space: nowrap;
+  font-variant-numeric: lining-nums;
+  transition: font-size 0.5s ease;
+}
+
+/* Fixed-width digits, so the clock does not shake as the numbers change. */
+.clock-digit {
+  display: inline-block;
+  width: 0.5em;
+  text-align: center;
+}
+
+.clock-colon {
+  display: inline-block;
+  width: 0.26em;
+  text-align: center;
+}
+
+.clock-label {
+  margin-top: 4px;
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* ---------- Controls ---------- */
+
+.foot {
+  padding: 0 16px 10px;
+}
+
+/* Takes no room when empty, so the orbit gets the space. */
+.hint {
+  display: grid;
+  place-items: center;
+  max-width: 21rem;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--muted);
+}
+
+.hint:not(:empty) {
+  padding-bottom: 8px;
+}
+
+.controls {
+  padding-top: 4px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.side-button {
+  display: grid;
+  justify-items: center;
+  justify-self: center;
+  min-width: 88px;
+  min-height: 56px;
+  padding: 4px 8px;
+  border-radius: 16px;
+}
+
+.side-caption {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.side-value {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  line-height: 1.1;
+  color: var(--star);
+  font-variant-numeric: lining-nums;
+}
+
+.play {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  color: var(--star);
+  background: rgba(243, 235, 221, 0.08);
+  border: 1px solid rgba(243, 235, 221, 0.28);
+  transition:
+    background-color 0.6s ease,
+    box-shadow 1.2s ease,
+    transform 0.15s ease;
+}
+
+.play[data-state='playing'] {
+  background: rgba(243, 235, 221, 0.14);
+  box-shadow: 0 0 44px rgba(230, 200, 143, 0.16);
+}
+
+.play:active {
+  transform: scale(0.96);
+}
+
+.presets {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.preset {
+  position: relative;
+  min-height: 48px;
+  padding: 0 4px 6px;
+  font-family: var(--serif);
+  font-size: 1.3125rem;
+  color: var(--muted);
+  transition: color 0.4s ease;
+}
+
+.preset[aria-pressed='true'] {
+  color: var(--star);
+}
+
+/* The gold dot under the chosen preset. */
+.preset::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.preset[aria-pressed='true']::after {
+  opacity: 1;
+}
+
+.preset .lock-icon {
+  position: absolute;
+  top: 6px;
+  right: -4px;
+  width: 8px;
+  height: 10px;
+  opacity: 0.6;
+}
+
+.keys-hint {
+  display: none;
+}
+
+/* ---------- Sheets ---------- */
+
+.sheet {
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  overflow: visible;
+}
+
+.sheet::backdrop {
+  background: rgba(4, 5, 16, 0.6);
+}
+
+.sheet-body {
+  display: grid;
+  gap: 14px;
+  max-height: 88dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px calc(20px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom))
+    calc(20px + env(safe-area-inset-left));
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  border-radius: 26px 26px 0 0;
+  animation: sheet-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(28px);
+    opacity: 0;
+  }
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sheet-title:focus {
+  outline: none;
+}
+
+.sheet-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 2rem;
+  line-height: 1.05;
+  color: var(--star);
+}
+
+.sheet-close {
+  flex: none;
+  margin-right: -10px;
+}
+
+.sheet-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: var(--star);
+}
+
+.sheet-subtitle .lock-icon {
+  color: var(--muted);
+}
+
+.sheet-text {
+  color: var(--muted);
+}
+
+.sheet-strong {
+  color: var(--ink);
+}
+
+.sheet-small {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.segment {
+  min-height: 44px;
+  border-radius: 999px;
+  color: var(--muted);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.segment[aria-pressed='true'] {
+  background: var(--star);
+  color: var(--deep);
+  font-weight: 600;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.options[data-columns='3'] {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.option-unit {
+  white-space: pre;
+}
+
+.option[aria-pressed='true'] {
+  background: var(--star);
+  border-color: var(--star);
+  color: var(--deep);
+  font-weight: 600;
+}
+
+.option[data-locked='true'] {
+  color: var(--muted);
+}
+
+.option .lock-icon {
+  margin-left: 5px;
+}
+
+.slider {
+  display: grid;
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+}
+
+.slider-label output {
+  color: var(--star);
+}
+
+.slider input {
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.slider input::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--line);
+  border-radius: 2px;
+}
+
+.slider input::-moz-range-track {
+  height: 2px;
+  background: var(--line);
+  border-radius: 2px;
+}
+
+.slider input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -10px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--star);
+  box-shadow: 0 0 14px rgba(230, 200, 143, 0.45);
+}
+
+.slider input::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--star);
+  box-shadow: 0 0 14px rgba(230, 200, 143, 0.45);
+}
+
+.button-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: var(--star);
+  color: var(--deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button-quiet {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 16px;
+  margin: 0 auto;
+  color: var(--gold);
+}
+
+.menu {
+  display: grid;
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  color: var(--star);
+  text-decoration: none;
+}
+
+.adds {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.adds li {
+  position: relative;
+  padding-left: 18px;
+  color: var(--ink);
+}
+
+.adds li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.price {
+  font-family: var(--serif);
+  font-size: 1.625rem;
+  color: var(--star);
+  font-variant-numeric: lining-nums;
+}
+
+/* ---------- Taller phones: more air ---------- */
+
+@media (min-height: 700px) {
+  .topbar {
+    padding-top: 10px;
+  }
+
+  .head {
+    padding-top: 10px;
+  }
+
+  .preset-name {
+    font-size: clamp(2.75rem, 13.5vw, 4rem);
+  }
+
+  .head[data-complete='true'] .preset-name {
+    font-size: clamp(2.25rem, 10.6vw, 3.5rem);
+  }
+
+  .preset-line {
+    margin-top: 12px;
+  }
+
+  .chip-row {
+    margin-top: 8px;
+  }
+
+  .foot {
+    padding-bottom: 18px;
+  }
+
+  .presets {
+    margin-top: 18px;
+  }
+}
+
+/* ---------- Tablet: the orbit gets more room, sheets become cards ---------- */
+
+@media (min-width: 640px) {
+  .head {
+    padding-top: 20px;
+  }
+
+  .foot {
+    width: 100%;
+    max-width: 30rem;
+    margin: 0 auto;
+    padding-bottom: 28px;
+  }
+
+  .preset-line {
+    max-width: 24rem;
+  }
+
+  .sheet {
+    width: 27rem;
+    margin: auto;
+  }
+
+  .sheet-body {
+    padding: 22px 26px 24px;
+    border: 1px solid var(--line);
+    border-radius: 26px;
+  }
+}
+
+/* ---------- Desktop ---------- */
+
+@media (min-width: 1024px) {
+  .preset-name {
+    font-size: 4.5rem;
+  }
+
+  .head[data-complete='true'] .preset-name {
+    font-size: 4rem;
+  }
+
+  .preset-line {
+    max-width: 30rem;
+    min-height: 1.5em;
+  }
+
+  .foot {
+    padding-bottom: 20px;
+  }
+}
+
+/* The key hint only makes sense with a keyboard. */
+@media (min-width: 1024px) and (hover: hover) {
+  .keys-hint {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted);
+    opacity: 0.75;
+  }
+}
+
+/* ---------- Reduced motion: nothing slides, fades or twinkles ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .sky,
+  .sky::after,
+  .player-main,
+  .clock,
+  .clock-time,
+  .play,
+  .preset,
+  .preset::after,
+  .segment,
+  .option {
+    transition: none;
+  }
+
+  .sky-stars,
+  .sheet-body {
+    animation: none;
+  }
+
+  .sky-stars {
+    opacity: 0.7;
+  }
+}
