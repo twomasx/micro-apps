@@ -19,3 +19,36 @@ Roger asked for the choices that best fit how breathwork is actually practiced.
 - **iPhone: tones play through the silent switch.** iPhones have no vibration, so on a phone kept on silent the tones are the only guide with eyes closed. The other choice ("ambient") kept music playing but went silent without any sign on silent phones. The cost: starting a session with sound on pauses music that is playing. With sound muted the app starts no audio at all, so music keeps playing. Safari 16 and older follow the silent switch either way.
 - **Android: no silent switch.** Chrome plays the tones at media volume whatever the ring mode (silent, vibrate or normal). Vibration works whatever the volume.
 - **Vibration** (Android): in 40 ms, top-up 20 ms, hold 12 ms, out two short buzzes, done three buzzes. Different enough to tell apart with the phone in a hand or a pocket.
+
+## The Pattern screen (step 2)
+
+- **One column on a phone:** technique name and its one-line wording at the top, time left and the menu in the top corner, the shape in the middle, then the phase word with its hint and the yellow count, then the controls, then the technique picker at the very bottom. Start and the picker are in thumb reach.
+- **Controls:** Length on the left (opens a sheet), a big sun-yellow start button in the middle (play, pause, again), Sound on the right. Same arrangement as focus, so the two apps feel related without sharing any visuals.
+- **Technique picker:** four equal buttons, each with a small copy of its shape over its name. The shape is the app's identity, so it is in the picker too. Resonant has a small lock. Keys 1 to 4 pick, Space starts and pauses.
+- **Length sheet:** each length shows how many whole breaths it is ("5 min, 33 breaths"). Paid lengths are dashed with a lock and lead to the unlock page.
+- **Type:** Outfit, self-hosted, Latin only (one file of about 30 KB). Names 800, phase word 750, count 400 in sun yellow. Every number uses tabular figures so the clock and count do not shake.
+- **Tablet:** the same column, wider and with larger type. **Desktop:** the shape on the left, everything else in a column on the right.
+
+## The shapes
+
+- Built by `src/lib/shape.ts` from the rule: one side per phase, length in proportion to its seconds, in goes up, holds go across, out comes down, clockwise. Tests check exact proportions for all four techniques and for every custom pattern from 0 to 12 s.
+- **Box** is a square. **4-7-8** is a triangle with sides exactly 4, 7 and 8, the hold flat along the top (the reference sketch tilted the hold; the spec says holds go across). **Cyclic sigh** is a steep 2 s climb, a gentler 1 s top-up, then a long curved 6 s slide back down: 2 + 1 cannot reach across 6 in straight lines, so the slide bows outward to exactly 6. **Resonant** is a leaf tilted up to the right, two equal curved sides.
+- When straight sides can't close a custom shape with exact lengths, the longer side bows outward. If holds are longer than the breaths can span, the longer hold bows instead. Lengths always stay exact.
+- Labels sit outside the middle of each side ("4 s", "5.5 s"). The side you are on turns white and bold.
+
+## Motion
+
+- The dot moves at an even speed along each side (measured by distance, also on curves). The finished part of the line is solid white; the rest is a faint track.
+- A soft yellow halo around the dot grows as the lungs fill and shrinks as they empty, so breathing out looks slower and softer. The phase word fades in quickly for in and hold, slower (0.9 s) for out.
+- **Switching technique** morphs one outline into the next over 0.7 s (240 points along each outline, eased). Labels fade out and back in.
+- **First visit:** the shape draws itself once with the dot leading, about one breath long (4.5 to 8 s), each side's label appearing as that side is finished, next to "Follow the shape", one plain line on how to read it, and the safety text. Start answers it and begins the first session.
+- **Session complete:** the whole shape is solid and fills softly with sun yellow, the dot rests at the start, and the words read "Session complete, 33 breaths in 4:57." The start button becomes Again. A finished preview says "Preview over" with a link to the unlock.
+- **Reduced motion:** no morph, no word fade, no fill fade, and the first-run shape appears whole at once. The dot still moves, because it is the guide. Nothing flashes anywhere.
+
+## App icon
+
+- The cyclic sigh's shape in white on cobalt, with the yellow dot at its start. Made from the app's own shape code. `favicon.svg` (rounded), `icon-192.png`, `icon-512.png` (also the maskable icon: everything sits inside the middle 80%) and `apple-touch-icon.png`.
+
+## Tried and changed
+
+- **Resonant leaf width.** The first leaf was nearly round. The sides now span 88% of their length instead of 80%, which gives a clearer leaf.

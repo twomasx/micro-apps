@@ -27,15 +27,20 @@ export default defineConfig({
       scope: base,
       manifest: {
         id: base,
-        name,
-        short_name: name,
+        name: 'Breathwork',
+        short_name: 'Breathwork',
         start_url: base,
         scope: base,
         display: 'standalone',
-        // Placeholders. Colours and icons come with each app's own design.
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        icons: [],
+        theme_color: '#2341d6',
+        background_color: '#2341d6',
+        // Paths are relative to the manifest, so they follow `base`.
+        icons: [
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          // Everything sits inside the middle 80%, so the same picture works as a maskable icon.
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       },
       workbox: {
         cacheId: name,

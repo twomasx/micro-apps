@@ -1,0 +1,79 @@
+/* The Pattern theme's stage. Sizes are in viewBox units (the stage is 100 across). */
+.pattern {
+  overflow: visible;
+}
+
+.pattern-fill {
+  fill: var(--sun);
+  stroke: none;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.pattern-track,
+.pattern-done {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pattern-track {
+  stroke: var(--line);
+  stroke-width: 1.3;
+}
+
+.pattern-done {
+  stroke: var(--white);
+  stroke-width: 2.4;
+  opacity: 0;
+}
+
+.pattern-halo {
+  fill: var(--sun);
+  opacity: 0.22;
+}
+
+.pattern-dot {
+  fill: var(--sun);
+}
+
+.pattern-label {
+  fill: var(--soft);
+  font-family: var(--sans);
+  font-weight: 500;
+  transition:
+    opacity 0.45s ease,
+    fill 0.3s ease;
+}
+
+.pattern-label[data-shown='false'] {
+  opacity: 0;
+}
+
+.pattern-label[data-active='true'] {
+  fill: var(--white);
+  font-weight: 700;
+}
+
+/* While one shape turns into the next, only the outline moves. */
+.pattern[data-morphing='true'] .pattern-done,
+.pattern[data-morphing='true'] .pattern-halo,
+.pattern[data-morphing='true'] .pattern-dot {
+  opacity: 0 !important;
+}
+
+/* Session complete: the finished shape fills softly with sun. */
+.pattern[data-moment='complete'] .pattern-fill {
+  opacity: 0.16;
+}
+
+.pattern[data-moment='complete'] .pattern-halo {
+  opacity: 0.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pattern-fill,
+  .pattern-label {
+    transition: none;
+  }
+}

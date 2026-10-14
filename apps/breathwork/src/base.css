@@ -1,24 +1,201 @@
 /*
- * Layout baseline only. This file belongs to this app and is not shared.
+ * Shared by every page of this app. This file belongs to this app only.
  * Mobile first: the rules outside media queries are the phone layout.
- * Use min-width queries only. No max-width queries.
+ * Use min-width (and min-height) queries only. No max-width queries.
+ *
+ * Pattern: a bold poster in cobalt, white and sun yellow, set in Outfit.
  */
+:root {
+  --cobalt: #2341d6;
+  --cobalt-deep: #1a33b4;
+  --white: #f6f7fb;
+  --soft: #b4c2ff;
+  --sun: #ffd45c;
+  --line: rgba(246, 247, 251, 0.32);
+  --sans: 'Outfit Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  background: var(--cobalt);
 }
 
 body {
   margin: 0;
+  min-height: 100dvh;
+  background: var(--cobalt);
+  color: var(--white);
+  font-family: var(--sans);
   font-size: max(16px, 1rem);
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+  overflow-x: hidden;
 }
 
-/* Tablet */
+h1,
+h2,
+h3,
+p,
+ul,
+ol {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 3px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 50%;
+}
+
+/* ---------- Sheets ---------- */
+
+.sheet {
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--white);
+  overflow: visible;
+}
+
+.sheet::backdrop {
+  background: rgba(10, 18, 70, 0.55);
+}
+
+.sheet-body {
+  display: grid;
+  gap: 16px;
+  max-height: 88dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom))
+    calc(20px + env(safe-area-inset-left));
+  background: var(--white);
+  color: var(--cobalt);
+  border-radius: 24px 24px 0 0;
+  animation: sheet-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sheet-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.sheet-title:focus {
+  outline: none;
+}
+
+.sheet-close {
+  flex: none;
+  margin-right: -10px;
+}
+
+.sheet-text {
+  color: var(--cobalt-deep);
+}
+
 @media (min-width: 640px) {
+  .sheet {
+    margin: auto;
+    width: min(440px, calc(100% - 48px));
+  }
+
+  .sheet-body {
+    border-radius: 24px;
+    padding-bottom: 24px;
+  }
 }
 
-/* Desktop */
-@media (min-width: 1024px) {
+@media (prefers-reduced-motion: reduce) {
+  .sheet-body {
+    animation: none;
+  }
+}
+
+/* ---------- Simple pages ---------- */
+
+.page {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: calc(20px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+    calc(32px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+  display: grid;
+  gap: 16px;
+}
+
+.page-back {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--soft);
+}
+
+.page-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
