@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+import { describeEntry, lastSevenDays, type HistoryEntry } from '../lib/history';
+import { loadHistory } from '../lib/store';
 import { canUseCustomBeat, canUseNoise, primeMinutesOptions, sessionMinutesOptions, UNLOCKED_PRIME_MINUTES, UNLOCKED_SESSION_MINUTES } from '../lib/limits';
 import { BEAT_MAX_HZ, BEAT_MIN_HZ } from '../lib/frequencies';
 import type { NoiseKind } from '../lib/noise';
@@ -168,15 +171,18 @@ export function SoundSheet({ state, dispatch, onLocked }: SheetContentProps) {
   );
 }
 
-export function MenuSheet() {
+export function MenuSheet({ unlocked, onHistory }: { unlocked: boolean; onHistory: () => void }) {
   return (
     <>
       <nav className="menu" aria-label="More about Focus">
+        <button type="button" className="menu-link" onClick={onHistory}>
+          Session history {!unlocked && <LockIcon />}
+        </button>
         <Link to="science" replace className="menu-link">
           The science
         </Link>
         <Link to="unlock" replace className="menu-link">
-          Lifetime unlock
+          {unlocked ? 'Your unlock code' : 'Lifetime unlock'}
         </Link>
         <Link to="restore" replace className="menu-link">
           Restore purchase
@@ -226,4 +232,43 @@ export function IntroSheet({ onStart, onClose }: { onStart: () => void; onClose:
       </button>
     </>
   );
+}
+
+export function HistorySheet() {
+  const [history, setHistory] = useState<HistoryEntry[] | null>(null);
+  const [now] = useState(() => Date.now());
+  useEffect(() => {
+    void loadHistory().then(setHistory);
+  }, []);
+
+  if (history === null) return null;
+  if (history.length === 0) {
+    return <p className="sheet-text">Finished sessions show here, with the date, the preset and the length.</p>;
+  }
+  const week = lastSevenDays(history, now);
+  return (
+    <>
+      <p className="sheet-text sheet-strong">
+        Last 7 days: {week.sessions} {week.sessions === 1 ? 'session' : 'sessions'}, {week.minutes} min
+      </p>
+      <ol className="history">
+        {history.slice(0, 50).map((entry) => (
+          <li key={entry.at} className="history-row">
+            <span className="history-name">{entry.name}</span>
+            <span className="history-detail">{describeEntry(entry)}</span>
+            <time className="history-when" dateTime={new Date(entry.at).toISOString()}>
+              {formatWhen(entry.at)}
+            </time>
+          </li>
+        ))}
+      </ol>
+      {history.length > 50 && <p className="sheet-small">The 50 most recent of {history.length}.</p>}
+    </>
+  );
+}
+
+const WHEN = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+
+function formatWhen(at: number): string {
+  return WHEN.format(new Date(at));
 }

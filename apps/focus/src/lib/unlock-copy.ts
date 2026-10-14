@@ -6,3 +6,5 @@ export const UNLOCK_ADDS: readonly string[] = [
   'A soft noise layer under the tones: pink or brown',
   'Session history on this device',
 ];
+
+export const SAVE_CODE_LINE = 'Save this code to unlock Focus on another device.';

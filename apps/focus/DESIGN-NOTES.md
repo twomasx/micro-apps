@@ -53,6 +53,20 @@ Direction: Orbit. This file lists what was decided, what else was tried, and wha
 - On the science page each preset is a card with its label, the two ear frequencies, the note on how close the studies are, and its sources. Each source shows the authors and year as a link to the paper, the title and journal in italics, and what the study found in plain words.
 - Text is 16px or larger everywhere on these pages. Lines stay under about 70 characters on desktop.
 
+## Unlock, restore and history
+
+- **Unlock page:** the five things the unlock adds, the price in the large serif ("$6.99 once. No renewals."), one cream button "Buy the lifetime unlock", and a link to restore. Nothing else.
+- **After paying:** Stripe sends the buyer back to `/focus/unlock?session_id=...`. The page says "Checking your payment." and asks the server up to 8 times over about 10 seconds. Then: "Thank you. Focus is unlocked on this device." and the code in a gold-edged card with "Save this code to unlock Focus on another device." and a copy button. A reload of that page shows the same code again.
+- **Codes** look like `7K3M-Q9TD-2XWB-HC4R`: 16 letters and numbers in groups of four, without I, L, O or U. Typing is forgiving: lower case, spaces, and O for 0 or I and L for 1 all work.
+- **Restore page:** one field and one button. Wrong codes get one plain line in gold under the button.
+- **Once unlocked,** the menu item "Lifetime unlock" reads "Your unlock code" and opens the code again.
+- **Session history** is a sheet from the menu. The top line shows the last 7 days ("Last 7 days: 3 sessions, 40 min"), then the most recent 50 sessions with the preset, the mode and length, and the date. For free users the item has a lock and opens the unlock offer. Only finished sessions are kept. A session that is paused and left is not.
+
+## Open for Roger (payments)
+
+1. **History counts finished sessions only.** Counting stopped sessions too (with the minutes actually played) is possible.
+2. **The code card** could also offer "Share" to send the code to yourself. Left out for now, to keep the one action clear.
+
 ## Audio route
 
 Both routes from step 1 are still in the code. The player uses route B (direct output with a silent audio element), set in `src/lib/app-player.ts`. This is waiting for Roger's phone results from the test page, which is still at `/focus/bench` in dev.

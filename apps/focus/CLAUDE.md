@@ -105,6 +105,16 @@ Browsers can't detect headphones, and the app does not test for them. The "Headp
 
 D1 table `purchases`: id, stripe_session_id (unique), unlock_code_hash, amount_cents, currency, status, created_at. Store only a hash of the unlock code. Session history stays on the device (IndexedDB, key prefix `focus:`), never on the server.
 
+Unlock codes are an HMAC of the Stripe session ID with the secret `UNLOCK_CODE_SECRET` (at least 32 characters). The success page can show the code again after a reload, and the database stores only its SHA-256 hash. Never change the secret once real codes exist, or they stop working.
+
+### Testing payments locally
+
+1. `cp .env.example .env` and fill it in: the test secret key, `openssl rand -hex 32` for `UNLOCK_CODE_SECRET`, and `PUBLIC_ORIGIN=http://localhost:3002`.
+2. `pnpm db:migrate` once, to make the local `purchases` table.
+3. For the webhook: `stripe listen --api-key <test key> --forward-to localhost:8802/api/stripe/webhook` and put the `whsec_...` it prints in `STRIPE_WEBHOOK_SECRET`.
+4. Restart `pnpm dev:focus`. Wrangler reads `.env` only when it starts.
+5. Pay with card 4242 4242 4242 4242. The success page works even without step 3, because it asks Stripe directly.
+
 ## Build order
 
 1. Audio engine and tests, with a test page that has left-only and right-only tones and a switch between the two audio routes. The test page does not ship. **Stop so Roger can listen on his phone with headphones.**

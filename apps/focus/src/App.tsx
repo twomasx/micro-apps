@@ -1,10 +1,12 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
-import { PlaceholderPage } from './pages/PlaceholderPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { PlayerPage } from './pages/PlayerPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { RestorePage } from './pages/RestorePage';
 import { SciencePage } from './pages/SciencePage';
+import { UnlockPage } from './pages/UnlockPage';
 
 const SITE_TITLE = 'Focus';
 
@@ -34,15 +36,17 @@ function Page({ route }: { route: Route }) {
           </Suspense>
         );
       }
-      return <PlaceholderPage title={PAGE_TITLES.notFound} text="There is no page at this address." />;
+      return <NotFoundPage />;
+    case 'unlock':
+      return <UnlockPage sessionId={route.sessionId} />;
+    case 'restore':
+      return <RestorePage />;
     case 'science':
       return <SciencePage />;
     case 'privacy':
       return <PrivacyPage />;
     case 'notFound':
-      return <PlaceholderPage title={PAGE_TITLES.notFound} text="There is no page at this address." />;
-    default:
-      return <PlaceholderPage title={PAGE_TITLES[route.name]} text="This page is not written yet." />;
+      return <NotFoundPage />;
   }
 }
 

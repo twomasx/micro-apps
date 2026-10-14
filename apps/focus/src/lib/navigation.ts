@@ -26,3 +26,8 @@ export function subscribeToLocation(onChange: () => void): () => void {
 export function currentLocation(): string {
   return `${window.location.pathname}${window.location.search}`;
 }
+
+/** Leaves the app for another site, like Stripe Checkout. */
+export function leaveTo(url: string): void {
+  window.location.assign(url);
+}

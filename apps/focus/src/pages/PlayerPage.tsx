@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from '../components/Link';
 import { LockIcon, MenuIcon, PauseIcon, PlayIcon } from '../components/Icons';
 import { Orbit } from '../components/Orbit';
-import { IntroSheet, LengthSheet, MenuSheet, OfferSheet, SoundSheet } from '../components/PlayerSheets';
+import { HistorySheet, IntroSheet, LengthSheet, MenuSheet, OfferSheet, SoundSheet } from '../components/PlayerSheets';
 import { Sheet } from '../components/Sheet';
 import { Sky } from '../components/Sky';
 import { usePlayer } from '../hooks/usePlayer';
@@ -14,13 +14,14 @@ import { presets } from '../lib/presets';
 import { tintFor } from '../orbit/tints';
 import '../styles/player.css';
 
-type SheetName = 'length' | 'sound' | 'menu' | 'offer';
+type SheetName = 'length' | 'sound' | 'menu' | 'offer' | 'history';
 
 const SHEET_TITLES: Record<SheetName | 'intro' | 'preview', string> = {
   length: 'Length',
   sound: 'Sound',
   menu: 'Focus',
   offer: 'Lifetime unlock',
+  history: 'Session history',
   preview: 'That was the 60 second preview',
   intro: 'Prime before you work',
 };
@@ -159,7 +160,10 @@ export function PlayerPage() {
       <Sheet open={sheet !== null} onClose={closeSheet} title={sheet ? SHEET_TITLES[sheet] : ''} name={sheet ?? ''}>
         {sheet === 'length' && <LengthSheet {...sheetProps} />}
         {sheet === 'sound' && <SoundSheet {...sheetProps} />}
-        {sheet === 'menu' && <MenuSheet />}
+        {sheet === 'menu' && (
+          <MenuSheet unlocked={state.unlocked} onHistory={() => setChosen(state.unlocked ? 'history' : 'offer')} />
+        )}
+        {sheet === 'history' && <HistorySheet />}
         {(sheet === 'offer' || sheet === 'preview') && <OfferSheet onClose={closeSheet} />}
         {sheet === 'intro' && <IntroSheet onStart={startPrime} onClose={closeSheet} />}
       </Sheet>

@@ -615,12 +615,49 @@
 .menu-link {
   display: flex;
   align-items: center;
+  gap: 10px;
+  width: 100%;
   min-height: 52px;
+  text-align: left;
   border-bottom: 1px solid var(--line);
   font-family: var(--serif);
   font-size: 1.5rem;
   color: var(--star);
   text-decoration: none;
+}
+
+/* ---------- Session history ---------- */
+
+.history {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.history-name {
+  font-family: var(--serif);
+  font-size: 1.375rem;
+  line-height: 1.2;
+  color: var(--star);
+}
+
+.history-detail {
+  align-self: center;
+  color: var(--gold);
+}
+
+.history-when {
+  grid-column: 1 / -1;
+  color: var(--muted);
 }
 
 .adds {

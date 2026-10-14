@@ -1,12 +1,11 @@
 import { Link } from '../components/Link';
 import '../styles/page.css';
 
-/** Stands in for a page that a later build step writes. */
-export function PlaceholderPage({ title, text }: { title: string; text: string }) {
+export function NotFoundPage() {
   return (
     <main className="page">
-      <h1 className="page-title">{title}</h1>
-      <p>{text}</p>
+      <h1 className="page-title">Page not found</h1>
+      <p>There is no page at this address.</p>
       <p>
         <Link to="" className="page-link">
           Back to the player

@@ -11,6 +11,7 @@ body:has(.page) {
   padding: calc(8px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right))
     calc(40px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 
@@ -195,5 +196,137 @@ body:has(.page) {
 
   .evidence {
     padding: 24px 26px;
+  }
+}
+
+/* ---------- Unlock and restore ---------- */
+
+.inline-link {
+  color: var(--gold);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.adds-list {
+  gap: 10px;
+}
+
+.page .price-line {
+  font-family: var(--serif);
+  font-size: 1.75rem;
+  line-height: 1.2;
+  color: var(--star);
+}
+
+.page-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: var(--star);
+  color: var(--deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.page-button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.page .page-status:empty {
+  display: none;
+}
+
+.page .page-status {
+  color: var(--gold);
+}
+
+.code-card {
+  display: grid;
+  gap: 10px;
+  padding: 22px 18px 10px;
+  border: 1px solid rgba(230, 200, 143, 0.4);
+  border-radius: 18px;
+  background: rgba(16, 20, 47, 0.7);
+  text-align: center;
+}
+
+.page .code-label {
+  color: var(--gold);
+}
+
+.page .code {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--star);
+  font-variant-numeric: tabular-nums lining-nums;
+  user-select: all;
+  overflow-wrap: anywhere;
+}
+
+.code-copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin: 0 auto;
+  padding: 0 16px;
+  color: var(--gold);
+}
+
+.code-form {
+  display: grid;
+  gap: 12px;
+}
+
+.field-label {
+  color: var(--ink);
+}
+
+.code-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(16, 20, 47, 0.8);
+  color: var(--star);
+  font: inherit;
+  font-size: 1.125rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.code-input::placeholder {
+  color: rgba(158, 163, 196, 0.5);
+}
+
+.code-input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.code-input[aria-invalid='true'] {
+  border-color: rgba(230, 200, 143, 0.6);
+}
+
+@media (min-width: 640px) {
+  .page-button {
+    width: auto;
+    justify-self: start;
+    min-width: 18rem;
+  }
+
+  .code-card {
+    padding: 26px 26px 12px;
+  }
+
+  .page .code {
+    font-size: 1.625rem;
   }
 }

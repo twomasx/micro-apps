@@ -1,9 +1,12 @@
+import { checkCode } from './api';
 import { createAudioEngine, type OutputRoute } from './audio';
 import { bindMediaSession, setMediaSessionState } from './media-session';
+import { selectedPreset, toneOf, type PlayerState } from './player';
 import { createPlayerController, type PlayerController } from './player-controller';
 import { mediaTitle } from './player-view';
-import { loadSettings, saveSettings } from './store';
-import { elapsedMs } from './timer';
+import { loadSettings, loadUnlock, recordSession, saveSettings, saveUnlock } from './store';
+import { elapsedMs, type SessionTimer } from './timer';
+import { refreshUnlock } from './unlock';
 
 /**
  * Which way the sound leaves the app. Both routes are built and can be compared on /bench in dev.
@@ -12,6 +15,8 @@ import { elapsedMs } from './timer';
 const AUDIO_ROUTE: OutputRoute = 'direct';
 
 let player: PlayerController | null = null;
+/** The timer of the last session written to history, so one session is written once. */
+let recordedTimer: SessionTimer | null = null;
 
 /** In dev only, ?unlocked shows the app as it is after the lifetime unlock. Real unlocks come from the server. */
 function devUnlocked(): boolean {
@@ -36,6 +41,7 @@ export function getPlayer(): PlayerController {
       if (controller.getState().ready) void saveSettings(settings);
     },
     onChange: (state) => {
+      recordIfFinished(state);
       setMediaSessionState({
         title: mediaTitle(state),
         playing: state.status === 'playing',
@@ -49,7 +55,35 @@ export function getPlayer(): PlayerController {
     onPause: () => controller.dispatch({ type: 'pause' }),
   });
   void loadSettings().then((settings) => controller.dispatch({ type: 'hydrate', settings }));
+  void refreshUnlock({
+    load: loadUnlock,
+    save: saveUnlock,
+    check: checkCode,
+    online: () => navigator.onLine,
+    now: Date.now,
+    apply: (unlocked) => controller.dispatch({ type: 'setUnlocked', unlocked: unlocked || devUnlocked() }),
+  });
 
   player = controller;
   return controller;
+}
+
+/** Session history is part of the lifetime unlock. Only finished sessions are written, not previews. */
+function recordIfFinished(state: PlayerState) {
+  if (state.status !== 'complete' || state.completed === 'preview' || state.completed === null) return;
+  if (!state.unlocked || state.timer === recordedTimer) return;
+  recordedTimer = state.timer;
+  void recordSession({
+    at: state.now,
+    name: selectedPreset(state)?.name ?? 'Custom',
+    beat: toneOf(state).beat,
+    minutes: Math.round(state.timer.durationMs / 60_000),
+    mode: state.completed,
+  });
+}
+
+/** After a purchase or a restored code: remember the code on this device and unlock the player. */
+export async function unlockWithCode(code: string): Promise<void> {
+  await saveUnlock({ code, valid: true, checkedAt: Date.now() });
+  getPlayer().dispatch({ type: 'setUnlocked', unlocked: true });
 }
