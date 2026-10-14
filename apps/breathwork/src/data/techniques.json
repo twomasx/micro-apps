@@ -1,0 +1,52 @@
+{
+  "techniques": [
+    {
+      "id": "sigh",
+      "name": "Cyclic sigh",
+      "short": "Sigh",
+      "free": true,
+      "wording": "In one study, 5 minutes a day improved mood more than mindfulness meditation.",
+      "phases": [
+        { "kind": "in", "seconds": 2, "hint": "Through your nose" },
+        { "kind": "in", "seconds": 1, "word": "Inhale again", "hint": "A short top-up breath" },
+        { "kind": "out", "seconds": 6, "hint": "Slowly, through your mouth" }
+      ]
+    },
+    {
+      "id": "box",
+      "name": "Box",
+      "short": "Box",
+      "free": true,
+      "wording": "Often used to steady yourself before something stressful.",
+      "phases": [
+        { "kind": "in", "seconds": 4, "hint": "Through your nose" },
+        { "kind": "hold", "seconds": 4, "hint": "Lungs full" },
+        { "kind": "out", "seconds": 4, "hint": "Slow and even" },
+        { "kind": "hold", "seconds": 4, "hint": "Lungs empty" }
+      ]
+    },
+    {
+      "id": "478",
+      "name": "4-7-8",
+      "short": "4-7-8",
+      "free": true,
+      "wording": "Often used to wind down before sleep.",
+      "phases": [
+        { "kind": "in", "seconds": 4, "hint": "Through your nose" },
+        { "kind": "hold", "seconds": 7, "hint": "Stay relaxed" },
+        { "kind": "out", "seconds": 8, "hint": "Through your mouth" }
+      ]
+    },
+    {
+      "id": "resonant",
+      "name": "Resonant",
+      "short": "Resonant",
+      "free": false,
+      "wording": "Slow breathing at about 6 breaths a minute is the most studied pace for relaxation.",
+      "phases": [
+        { "kind": "in", "seconds": 5.5, "hint": "Slow and easy" },
+        { "kind": "out", "seconds": 5.5, "hint": "Slow and easy" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+/* Test page only. Plain and readable on a phone; not the app's design. */
+.bench {
+  font-family: system-ui, sans-serif;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 16px;
+  line-height: 1.4;
+}
+
+.bench button,
+.bench .switch {
+  min-height: 44px;
+  min-width: 44px;
+  margin: 0 8px 8px 0;
+  padding: 0 12px;
+  font: inherit;
+}
+
+.bench button[aria-pressed='true'] {
+  font-weight: 700;
+  outline: 3px solid currentColor;
+}
+
+.bench .primary {
+  min-height: 48px;
+  min-width: 120px;
+  font-weight: 700;
+}
+
+.bench .switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bench fieldset {
+  margin: 0 0 16px;
+  border: 1px solid #999;
+}
+
+.bench .readout {
+  margin: 16px 0;
+}
+
+.bench .word {
+  font-size: 40px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.bench .count {
+  color: #b07800;
+  font-variant-numeric: tabular-nums;
+}
+
+.bench .status,
+.bench .hint {
+  margin: 0;
+}
+
+.bench .notice {
+  font-weight: 700;
+}
+
+.bench .meters {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.bench .lungs {
+  --level: 0;
+  position: relative;
+  width: 48px;
+  height: 120px;
+  border: 2px solid currentColor;
+}
+
+.bench .fill {
+  position: absolute;
+  inset: auto 0 0;
+  height: calc(var(--level) * 100%);
+  background: #2341d6;
+}
+
+.bench .log {
+  font-variant-numeric: tabular-nums;
+}
