@@ -27,13 +27,13 @@ Note design decisions and alternatives you tried in `DESIGN-NOTES.md`.
 
 | Technique | Pattern | Wording |
 | --- | --- | --- |
-| Cyclic sigh | 2 s in through the nose, 1 s short top-up in, 6 s slowly out through the mouth | In one study, 5 minutes a day improved mood more than mindfulness meditation. |
+| Cyclic sigh | 2 s in through the nose, 1 s short top-up in, 6 s slowly out through the mouth | In one study, 5 minutes a day for a month lifted mood more than mindfulness meditation did. |
 | Box | 4 in, 4 hold, 4 out, 4 hold | Often used to steady yourself before something stressful. |
 | 4-7-8 | 4 in, 7 hold, 8 out | Often used to wind down before sleep. |
-| Resonant | 5.5 in, 5.5 out (about 6 breaths a minute) | Slow breathing at about 6 breaths a minute is the most studied pace for relaxation. |
+| Resonant | 5.5 in, 5.5 out (about 6 breaths a minute) | Studies have found that about 6 breaths a minute raises heart rate variability, a measure linked to rest. |
 
 - Techniques live in `src/data/techniques.json`, not in code. Resonant has no hold, so its shape is two curved sides (up, then down) making a lens or leaf shape.
-- Each technique gets an evidence label: "Some research", "Mixed results" or "Little research", with 1 to 3 sources. **Research these yourself.** Start with Balban and others, 2023, Cell Reports Medicine ("Brief structured respiration practices enhance mood and reduce physiological arousal"), which compared cyclic sighing, box breathing and mindfulness. Don't guess. Show Roger the labels and sources before using them, and fix the wording in the table if the research says something different.
+- Each technique gets an evidence label: "Some research", "Mixed results" or "Little research", with 1 to 3 sources. **Research these yourself.** Start with Balban and others, 2023, Cell Reports Medicine ("Brief structured respiration practices enhance mood and reduce physiological arousal"), which compared cyclic sighing, box breathing and mindfulness. Don't guess. Show Roger the labels and sources before using them, and fix the wording in the table if the research says something different. (Researched Oct 14, 2026: labels and sources are in `techniques.json`. The sigh and Resonant wording were changed to match what the studies found.)
 
 ## Free and paid
 

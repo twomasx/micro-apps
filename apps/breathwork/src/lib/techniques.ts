@@ -13,6 +13,28 @@ export interface Phase {
   hint: string;
 }
 
+/** How much research backs a technique. Same three labels as the focus app. */
+export type EvidenceLabel = 'Some research' | 'Mixed results' | 'Little research';
+
+export const EVIDENCE_LABELS: readonly EvidenceLabel[] = ['Some research', 'Mixed results', 'Little research'];
+
+export interface Source {
+  authors: string;
+  year: number;
+  title: string;
+  journal: string;
+  url: string;
+  /** What the study found, in plain words. */
+  finding: string;
+}
+
+export interface Evidence {
+  label: EvidenceLabel;
+  sources: readonly Source[];
+  /** One or two plain sentences on what the sources add up to. */
+  note: string;
+}
+
 export interface Technique {
   id: string;
   name: string;
@@ -21,6 +43,8 @@ export interface Technique {
   free: boolean;
   wording: string;
   phases: readonly Phase[];
+  /** Built-in techniques have researched evidence; custom patterns have none. */
+  evidence: Evidence | null;
 }
 
 export const PHASE_WORDS: Record<PhaseKind, string> = { in: 'Inhale', hold: 'Hold', out: 'Exhale' };
@@ -41,6 +65,18 @@ interface RawTechnique {
   free: boolean;
   wording: string;
   phases: RawPhase[];
+  evidence?: string;
+  sources?: Source[];
+  evidenceNote?: string;
+}
+
+function toEvidence(raw: RawTechnique): Evidence | null {
+  if (raw.evidence === undefined) return null;
+  const label = EVIDENCE_LABELS.find((l) => l === raw.evidence);
+  if (!label) throw new Error(`${raw.id}: unknown evidence label "${raw.evidence}"`);
+  const sources = raw.sources ?? [];
+  if (sources.length < 1 || sources.length > 3) throw new Error(`${raw.id}: evidence needs 1 to 3 sources`);
+  return { label, sources, note: raw.evidenceNote ?? '' };
 }
 
 function toPhase(raw: RawPhase, techniqueId: string): Phase {
@@ -58,7 +94,15 @@ export function toTechnique(raw: RawTechnique): Technique {
   if (!phases.some((p) => p.kind === 'in') || !phases.some((p) => p.kind === 'out')) {
     throw new Error(`${raw.id}: a technique needs at least one in and one out phase`);
   }
-  return { id: raw.id, name: raw.name, short: raw.short, free: raw.free, wording: raw.wording, phases };
+  return {
+    id: raw.id,
+    name: raw.name,
+    short: raw.short,
+    free: raw.free,
+    wording: raw.wording,
+    phases,
+    evidence: toEvidence(raw),
+  };
 }
 
 export const techniques: readonly Technique[] = data.techniques.map(toTechnique);

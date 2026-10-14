@@ -87,6 +87,7 @@ export function customToTechnique(pattern: CustomPattern): Technique {
     free: false,
     wording: 'Your own pattern.',
     phases,
+    evidence: null,
   };
 }
 

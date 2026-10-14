@@ -5,12 +5,45 @@
       "name": "Cyclic sigh",
       "short": "Sigh",
       "free": true,
-      "wording": "In one study, 5 minutes a day improved mood more than mindfulness meditation.",
+      "wording": "In one study, 5 minutes a day for a month lifted mood more than mindfulness meditation did.",
       "phases": [
-        { "kind": "in", "seconds": 2, "hint": "Through your nose" },
-        { "kind": "in", "seconds": 1, "word": "Inhale again", "hint": "A short top-up breath" },
-        { "kind": "out", "seconds": 6, "hint": "Slowly, through your mouth" }
-      ]
+        {
+          "kind": "in",
+          "seconds": 2,
+          "hint": "Through your nose"
+        },
+        {
+          "kind": "in",
+          "seconds": 1,
+          "word": "Inhale again",
+          "hint": "A short top-up breath"
+        },
+        {
+          "kind": "out",
+          "seconds": 6,
+          "hint": "Slowly, through your mouth"
+        }
+      ],
+      "evidence": "Little research",
+      "sources": [
+        {
+          "authors": "Balban and others",
+          "year": 2023,
+          "title": "Brief structured respiration practices enhance mood and reduce physiological arousal",
+          "journal": "Cell Reports Medicine",
+          "url": "https://doi.org/10.1016/j.xcrm.2022.100895",
+          "finding": "108 adults practiced at home, 5 minutes a day for 28 days. About 30 of them did the cyclic sigh. Their positive mood rose more, and their breathing at rest slowed more, than in the group doing mindfulness meditation. Anxiety fell by about the same amount in every group."
+        },
+        {
+          "authors": "Hanley, Davis, Worts and Pratscher",
+          "year": 2025,
+          "title": "Cyclic sighing in the clinic waiting room may decrease pain: results from a pilot randomized controlled trial",
+          "journal": "Journal of Behavioral Medicine",
+          "url": "https://doi.org/10.1007/s10865-024-00548-5",
+          "finding": "A small pilot trial in the waiting room of an orthopedic clinic. People who did 4 minutes of cyclic sighing felt less pain while they waited for an x-ray than people given a matched control activity. Anxiety and low mood did not differ."
+        }
+      ],
+      "evidenceNote": "Both trials are small, and the mood result comes from one of them. It has not been repeated yet."
     },
     {
       "id": "box",
@@ -19,11 +52,47 @@
       "free": true,
       "wording": "Often used to steady yourself before something stressful.",
       "phases": [
-        { "kind": "in", "seconds": 4, "hint": "Through your nose" },
-        { "kind": "hold", "seconds": 4, "hint": "Lungs full" },
-        { "kind": "out", "seconds": 4, "hint": "Slow and even" },
-        { "kind": "hold", "seconds": 4, "hint": "Lungs empty" }
-      ]
+        {
+          "kind": "in",
+          "seconds": 4,
+          "hint": "Through your nose"
+        },
+        {
+          "kind": "hold",
+          "seconds": 4,
+          "hint": "Lungs full"
+        },
+        {
+          "kind": "out",
+          "seconds": 4,
+          "hint": "Slow and even"
+        },
+        {
+          "kind": "hold",
+          "seconds": 4,
+          "hint": "Lungs empty"
+        }
+      ],
+      "evidence": "Little research",
+      "sources": [
+        {
+          "authors": "Balban and others",
+          "year": 2023,
+          "title": "Brief structured respiration practices enhance mood and reduce physiological arousal",
+          "journal": "Cell Reports Medicine",
+          "url": "https://doi.org/10.1016/j.xcrm.2022.100895",
+          "finding": "About 20 people did box breathing at home, 5 minutes a day for 28 days. Their mood rose and their anxiety fell, but not more than in the group doing mindfulness meditation."
+        },
+        {
+          "authors": "Marchant, Khazan, Cressman and Steffen",
+          "year": 2025,
+          "title": "Comparing the Effects of Square, 4-7-8, and 6 Breaths-per-Minute Breathing Conditions on Heart Rate Variability, CO2 Levels, and Mood",
+          "journal": "Applied Psychophysiology and Biofeedback",
+          "url": "https://doi.org/10.1007/s10484-025-09688-z",
+          "finding": "84 college students tried each pattern once. Square (box) breathing raised heart rate variability less than breathing at 6 breaths a minute. No pattern changed mood or blood pressure in a single session."
+        }
+      ],
+      "evidenceNote": "Box breathing is widely taught, for example to police and soldiers, but few studies have tested it on its own."
     },
     {
       "id": "478",
@@ -32,21 +101,97 @@
       "free": true,
       "wording": "Often used to wind down before sleep.",
       "phases": [
-        { "kind": "in", "seconds": 4, "hint": "Through your nose" },
-        { "kind": "hold", "seconds": 7, "hint": "Stay relaxed" },
-        { "kind": "out", "seconds": 8, "hint": "Through your mouth" }
-      ]
+        {
+          "kind": "in",
+          "seconds": 4,
+          "hint": "Through your nose"
+        },
+        {
+          "kind": "hold",
+          "seconds": 7,
+          "hint": "Stay relaxed"
+        },
+        {
+          "kind": "out",
+          "seconds": 8,
+          "hint": "Through your mouth"
+        }
+      ],
+      "evidence": "Little research",
+      "sources": [
+        {
+          "authors": "Aktaş and İlgin",
+          "year": 2023,
+          "title": "The Effect of Deep Breathing Exercise and 4-7-8 Breathing Techniques Applied to Patients After Bariatric Surgery on Anxiety and Quality of Life",
+          "journal": "Obesity Surgery",
+          "url": "https://doi.org/10.1007/s11695-022-06405-1",
+          "finding": "90 patients after weight-loss surgery were split into three groups. The group taught 4-7-8 breathing had lower anxiety afterwards than the group taught deep breathing and the group given routine care."
+        },
+        {
+          "authors": "Vierra, Boonla and Prasertsri",
+          "year": 2022,
+          "title": "Effects of sleep deprivation and 4-7-8 breathing control on heart rate variability, blood pressure, blood glucose, and endothelial function in healthy young adults",
+          "journal": "Physiological Reports",
+          "url": "https://doi.org/10.14814/phy2.15389",
+          "finding": "43 young adults did three short sets of 4-7-8 breathing. Heart rate and blood pressure were lower right after. There was no group that breathed normally to compare with."
+        },
+        {
+          "authors": "Marchant, Khazan, Cressman and Steffen",
+          "year": 2025,
+          "title": "Comparing the Effects of Square, 4-7-8, and 6 Breaths-per-Minute Breathing Conditions on Heart Rate Variability, CO2 Levels, and Mood",
+          "journal": "Applied Psychophysiology and Biofeedback",
+          "url": "https://doi.org/10.1007/s10484-025-09688-z",
+          "finding": "4-7-8 breathing raised heart rate variability less than breathing at 6 breaths a minute, and did not change mood in a single session."
+        }
+      ],
+      "evidenceNote": "Its use for sleep comes from practice. We found no large trial of 4-7-8 breathing for falling asleep."
     },
     {
       "id": "resonant",
       "name": "Resonant",
       "short": "Resonant",
       "free": false,
-      "wording": "Slow breathing at about 6 breaths a minute is the most studied pace for relaxation.",
+      "wording": "Studies have found that about 6 breaths a minute raises heart rate variability, a measure linked to rest.",
       "phases": [
-        { "kind": "in", "seconds": 5.5, "hint": "Slow and easy" },
-        { "kind": "out", "seconds": 5.5, "hint": "Slow and easy" }
-      ]
+        {
+          "kind": "in",
+          "seconds": 5.5,
+          "hint": "Slow and easy"
+        },
+        {
+          "kind": "out",
+          "seconds": 5.5,
+          "hint": "Slow and easy"
+        }
+      ],
+      "evidence": "Some research",
+      "sources": [
+        {
+          "authors": "Laborde and others",
+          "year": 2022,
+          "title": "Effects of voluntary slow breathing on heart rate and heart rate variability: A systematic review and a meta-analysis",
+          "journal": "Neuroscience and Biobehavioral Reviews",
+          "url": "https://doi.org/10.1016/j.neubiorev.2022.104711",
+          "finding": "A review of 223 studies. Slow breathing raised heart rate variability while people practiced, right after a single session, and after several weeks of practice."
+        },
+        {
+          "authors": "Goessl, Curtiss and Hofmann",
+          "year": 2017,
+          "title": "The effect of heart rate variability biofeedback training on stress and anxiety: a meta-analysis",
+          "journal": "Psychological Medicine",
+          "url": "https://doi.org/10.1017/S0033291717001003",
+          "finding": "24 studies with 484 people. Heart rate variability biofeedback, which trains slow, paced breathing, was linked to a large drop in self-reported stress and anxiety. The authors say better-controlled studies are still needed."
+        },
+        {
+          "authors": "Marchant, Khazan, Cressman and Steffen",
+          "year": 2025,
+          "title": "Comparing the Effects of Square, 4-7-8, and 6 Breaths-per-Minute Breathing Conditions on Heart Rate Variability, CO2 Levels, and Mood",
+          "journal": "Applied Psychophysiology and Biofeedback",
+          "url": "https://doi.org/10.1007/s10484-025-09688-z",
+          "finding": "Breathing at 6 breaths a minute raised heart rate variability more than square or 4-7-8 breathing. It did not change mood in a single session, and it led to mild over-breathing."
+        }
+      ],
+      "evidenceNote": "Most studies measure heart rate variability. Fewer measure how calm people feel."
     }
   ]
 }
