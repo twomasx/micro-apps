@@ -1,8 +1,7 @@
 import type { PaymentsProvider } from '@micro/payments';
+import { formatCode, hashCode, normalizeCode, unlockCodeFor } from '@micro/payments/unlock-codes';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import catalog from '../config/products.json';
-import { formatCode, normalizeCode } from '../src/lib/unlock-code.ts';
-import { hashCode, unlockCodeFor } from './codes.ts';
 import {
   checkUnlockCode,
   createCheckout,

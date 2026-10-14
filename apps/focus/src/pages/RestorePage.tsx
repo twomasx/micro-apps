@@ -3,7 +3,7 @@ import { Link } from '../components/Link';
 import { usePlayer } from '../hooks/usePlayer';
 import { checkCode } from '../lib/api';
 import { unlockWithCode } from '../lib/app-player';
-import { formatCode, normalizeCode } from '../lib/unlock-code';
+import { formatCode, normalizeCode } from '@micro/payments/unlock-codes';
 import '../styles/page.css';
 
 type Status = 'idle' | 'checking' | 'unlocked' | 'invalid' | 'malformed' | 'offline';

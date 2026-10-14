@@ -1,8 +1,7 @@
 import { createStripePayments, type PaymentsProvider, type Product } from '@micro/payments';
+import { formatCode, hashCode, normalizeCode, unlockCodeFor } from '@micro/payments/unlock-codes';
 import { appConfig } from '../app.config.ts';
 import catalog from '../config/products.json';
-import { formatCode } from '../src/lib/unlock-code.ts';
-import { hashCode, normalizeCode, unlockCodeFor } from './codes.ts';
 import { error, json, randomId } from './http.ts';
 
 const PRODUCTS: readonly Product[] = catalog.products;

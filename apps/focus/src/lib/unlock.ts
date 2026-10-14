@@ -1,4 +1,4 @@
-import { normalizeCode } from './unlock-code';
+import { normalizeCode } from '@micro/payments/unlock-codes';
 
 /** The unlock as remembered on this device. */
 export interface SavedUnlock {
