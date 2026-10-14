@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Focus design options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&family=Cormorant:wght@400;500&family=Manrope:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page: #26272b;
+    --page-ink: #e9e9ec;
+    --page-muted: #a3a4ab;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--page); color: var(--page-ink); }
+  body {
+    font-family: "Manrope", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 32px 16px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .intro { max-width: 380px; margin: 0 auto 32px; }
+  .intro h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .intro p { color: var(--page-muted); font-size: 15px; }
+  .option { max-width: 380px; margin: 0 auto 56px; }
+  .caption { margin-top: 14px; }
+  .caption h2 { font-size: 18px; font-weight: 600; }
+  .caption p { color: var(--page-muted); font-size: 15px; margin-top: 2px; }
+  .footnote { max-width: 380px; margin: 0 auto; color: var(--page-muted); font-size: 14px; }
+
+  .phone {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    border-radius: 30px;
+    overflow: hidden;
+    isolation: isolate;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .phone canvas { display: block; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+  /* ---------- A. Scope ---------- */
+  .scope {
+    --bg: #0c1411; --panel: #101b17; --line: #22332c; --trace: #bfead8;
+    --ink: #dce9e3; --muted: #7f978d;
+    background: var(--bg); color: var(--ink);
+    font-family: "Instrument Sans", sans-serif;
+    display: flex; flex-direction: column;
+    padding: 20px 18px 16px;
+    gap: 12px;
+  }
+  .scope .top { display: flex; justify-content: space-between; align-items: baseline; }
+  .scope .name { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .scope .hp { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .scope .hp i { width: 7px; height: 7px; border-radius: 50%; background: var(--trace); box-shadow: 0 0 8px var(--trace); }
+  .scope .screen {
+    flex: 1; min-height: 0; position: relative;
+    border: 1px solid var(--line); border-radius: 6px; background-color: var(--panel);
+    background-image:
+      linear-gradient(rgba(127,151,141,.3), rgba(127,151,141,.3)), linear-gradient(rgba(127,151,141,.3), rgba(127,151,141,.3)),
+      linear-gradient(rgba(127,151,141,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(127,151,141,.12) 1px, transparent 1px);
+    background-size: 1px 100%, 100% 1px, 100% 10%, 10% 100%;
+    background-position: center, center, 0 0, 0 0;
+    background-repeat: no-repeat, no-repeat, repeat, repeat;
+  }
+  .scope .screen canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .scope .reads { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .scope .reads div { padding: 8px 0; }
+  .scope .reads div + div { border-left: 1px solid var(--line); padding-left: 10px; }
+  .scope .reads span { display: block; font-size: 12px; color: var(--muted); }
+  .scope .reads b { font-family: "Martian Mono", monospace; font-weight: 400; font-size: 16px; }
+  .scope .reads .beat b { color: var(--trace); }
+  .scope .use { font-size: 15px; line-height: 1.4; }
+  .scope .ev { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .scope .ev a { color: var(--ink); }
+  .scope .run { display: flex; align-items: center; gap: 14px; }
+  .scope .play {
+    width: 56px; height: 56px; flex: none; border-radius: 50%;
+    border: 1.5px solid var(--trace); display: grid; place-items: center;
+  }
+  .scope .play[data-on="true"] { background: var(--trace); color: var(--bg); }
+  .scope .bar { flex: 1; }
+  .scope .bar .t { font-family: "Martian Mono", monospace; font-size: 14px; }
+  .scope .bar .track { height: 2px; background: var(--line); margin-top: 6px; }
+  .scope .bar .fill { height: 100%; width: 0; background: var(--trace); }
+  .scope .presets { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .scope .presets button { min-height: 44px; font-size: 13px; color: var(--muted); }
+  .scope .presets button + button { border-left: 1px solid var(--line); }
+  .scope .presets button[aria-pressed="true"] { color: var(--bg); background: var(--trace); }
+
+  /* ---------- B. Orbit ---------- */
+  .orbit {
+    --bg: #080a1c; --star: #f3ebdd; --gold: #e6c88f; --ink: #f1ede6; --muted: #9ea3c4;
+    background: radial-gradient(120% 80% at 50% 45%, #141a3d 0%, #080a1c 70%);
+    color: var(--ink);
+    font-family: "Manrope", sans-serif;
+  }
+  .orbit canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .orbit .over { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 22px 22px; pointer-events: none; }
+  .orbit .over > * { pointer-events: auto; }
+  .orbit .head { text-align: center; }
+  .orbit .name { font-family: "Cormorant", serif; font-weight: 400; font-size: 52px; line-height: 1; }
+  .orbit .use { font-size: 15px; color: var(--muted); margin-top: 10px; }
+  .orbit .ev { display: inline-block; margin-top: 10px; font-size: 13px; border: 1px solid rgba(230,200,143,.4); color: var(--gold); border-radius: 999px; padding: 3px 12px; }
+  .orbit .foot { text-align: center; }
+  .orbit .left { font-family: "Cormorant", serif; font-size: 26px; }
+  .orbit .left small { font-family: "Manrope", sans-serif; font-size: 14px; color: var(--muted); }
+  .orbit .play {
+    width: 64px; height: 64px; border-radius: 50%; margin: 14px auto 18px;
+    display: grid; place-items: center;
+    background: rgba(243,235,221,.08); border: 1px solid rgba(243,235,221,.25);
+    backdrop-filter: blur(6px);
+  }
+  .orbit .presets { display: flex; justify-content: space-between; }
+  .orbit .presets button { font-family: "Cormorant", serif; font-size: 20px; color: var(--muted); min-height: 44px; padding: 0 4px; position: relative; }
+  .orbit .presets button[aria-pressed="true"] { color: var(--star); }
+  .orbit .presets button[aria-pressed="true"]::after { content: ""; position: absolute; left: 50%; bottom: 6px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--gold); }
+
+  /* ---------- C. Interference ---------- */
+  .wave {
+    --ink: #17222f; --muted: #4d5b6a; --pearl: #e8eef0;
+    background: var(--pearl); color: var(--ink);
+    font-family: "Bricolage Grotesque", sans-serif;
+  }
+  .wave canvas.field { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .wave .over { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 24px 20px 20px; pointer-events: none; }
+  .wave .over > * { pointer-events: auto; }
+  .wave .head { display: flex; justify-content: space-between; align-items: flex-start; }
+  .wave .name { font-size: 28px; font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; }
+  .wave .use { font-size: 15px; color: var(--muted); margin-top: 6px; max-width: 18ch; line-height: 1.35; }
+  .wave .hz { text-align: right; }
+  .wave .hz b { display: block; font-size: 64px; font-weight: 700; line-height: .9; letter-spacing: -0.04em; }
+  .wave .hz span { font-size: 14px; color: var(--muted); }
+  .wave .ev { font-size: 13px; margin-top: 10px; color: var(--ink); background: rgba(255,255,255,.55); border-radius: 999px; padding: 4px 12px; display: inline-block; backdrop-filter: blur(6px); }
+  .wave .hint { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 12px; }
+  .wave .play {
+    width: 100%; min-height: 52px; border-radius: 999px;
+    background: var(--ink); color: var(--pearl); font-size: 16px; font-weight: 500;
+  }
+  .wave .play[data-on="true"] { background: rgba(23,34,47,.12); color: var(--ink); backdrop-filter: blur(6px); }
+  .wave .presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 10px; }
+  .wave .presets button { min-height: 44px; padding: 0; border-radius: 999px; font-size: 14px; background: rgba(255,255,255,.5); backdrop-filter: blur(6px); }
+  .wave .presets button[aria-pressed="true"] { background: #fff; box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .wave .src {
+    position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%;
+    touch-action: none; cursor: grab;
+    background: radial-gradient(circle, #fff 0 7px, rgba(255,255,255,.35) 8px 21px, transparent 22px);
+    box-shadow: 0 0 0 1px rgba(23,34,47,.15);
+  }
+  .wave .src:active { cursor: grabbing; }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Focus: three design directions</h1>
+  <p>Each screen is the main playing screen at 9:16. Tap a preset, then tap play to hear it with headphones on. In the third one, drag the two points to tune.</p>
+</div>
+
+<!-- A. Scope -->
+<section class="option">
+  <div class="phone scope" id="scope">
+    <div class="top">
+      <span class="name" data-f="name">Focus</span>
+      <span class="hp"><i></i>Headphones on</span>
+    </div>
+    <div class="screen"><canvas></canvas></div>
+    <div class="reads">
+      <div><span>Left ear</span><b data-f="left">300 Hz</b></div>
+      <div><span>Right ear</span><b data-f="right">318 Hz</b></div>
+      <div class="beat"><span>You hear</span><b data-f="beat">18 Hz</b></div>
+    </div>
+    <div>
+      <p class="use" data-f="use">Often used for active work and concentration.</p>
+      <p class="ev">Evidence: <span data-f="ev">mixed results</span>. <a href="#" onclick="return false">See the studies</a></p>
+    </div>
+    <div class="run">
+      <button class="play" data-on="false" aria-label="Play"></button>
+      <div class="bar"><span class="t" data-f="time">20:00 left</span><div class="track"><div class="fill"></div></div></div>
+    </div>
+    <div class="presets" role="group" aria-label="Presets"></div>
+  </div>
+  <div class="caption">
+    <h2>Scope</h2>
+    <p>The left tone drives one axis and the right tone the other. The figure turns over at the beat, drawn on a lab oscilloscope.</p>
+  </div>
+</section>
+
+<!-- B. Orbit -->
+<section class="option">
+  <div class="phone orbit" id="orbit">
+    <canvas></canvas>
+    <div class="over">
+      <div class="head">
+        <h3 class="name" data-f="name">Calm</h3>
+        <p class="use"><span data-f="beatPlain">6 Hz</span>. <span data-f="use">Often used for meditation and relaxation.</span></p>
+        <span class="ev" data-f="evCap">Mixed results</span>
+      </div>
+      <div class="foot">
+        <p class="left"><span data-f="clock">20:00</span> <small>left</small></p>
+        <button class="play" data-on="false" aria-label="Play"></button>
+        <div class="presets" role="group" aria-label="Presets"></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption">
+    <h2>Orbit</h2>
+    <p>Two stars, one for each ear, circle each other once per beat. The trail they leave is the session timer.</p>
+  </div>
+</section>
+
+<!-- C. Interference -->
+<section class="option">
+  <div class="phone wave" id="wave">
+    <canvas class="field"></canvas>
+    <div class="over">
+      <div>
+        <div class="head">
+          <div>
+            <h3 class="name" data-f="name">Deep focus</h3>
+            <p class="use" data-f="use">Studied for attention and memory.</p>
+          </div>
+          <div class="hz"><b data-f="beatNum">40</b><span>Hz beat</span></div>
+        </div>
+        <span class="ev" data-f="evCap">Some research</span>
+      </div>
+      <div>
+        <p class="hint">Drag the two points apart or together to tune</p>
+        <button class="play" data-on="false">Start 20 minute session</button>
+        <div class="presets" role="group" aria-label="Presets"></div>
+      </div>
+    </div>
+    <div class="src" data-i="0"></div>
+    <div class="src" data-i="1"></div>
+  </div>
+  <div class="caption">
+    <h2>Interference</h2>
+    <p>Each ear's tone is a ripple. Where they overlap, bands form and drift at the beat. You tune by moving the two sources.</p>
+  </div>
+</section>
+
+<p class="footnote">The evidence labels are placeholders until the research per preset is done. Visuals move at a slowed rate, never at the beat itself, so nothing flickers at 3 to 30 Hz.</p>
+
+<script>
+const PRESETS = [
+  { id: "sleep",   name: "Sleep",        short: "Sleep",   beat: 2,  use: "Often used to wind down before sleep.",            ev: "little research" },
+  { id: "calm",    name: "Calm",         short: "Calm",    beat: 6,  use: "Often used for meditation and relaxation.",        ev: "mixed results" },
+  { id: "relaxed", name: "Relaxed focus",short: "Relaxed", beat: 10, use: "Often used for calm, steady attention.",           ev: "mixed results" },
+  { id: "focus",   name: "Focus",        short: "Focus",   beat: 18, use: "Often used for active work and concentration.",    ev: "mixed results" },
+  { id: "deep",    name: "Deep focus",   short: "Deep",    beat: 40, use: "Studied for attention and memory.",                ev: "some research" },
+];
+const CARRIER = 300;
+const SESSION = 20 * 60;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cap = s => s[0].toUpperCase() + s.slice(1);
+// Visual speed in cycles per second: slow, rises gently with the beat, never above 0.6.
+const visRate = beat => Math.min(0.6, 0.08 + Math.log2(beat + 1) * 0.09);
+
+/* ---------- Audio: one shared engine, one device playing at a time ---------- */
+const Audio = {
+  ctx: null, nodes: null, owner: null,
+  start(owner, beat) {
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.ctx.resume();
+    if (this.owner && this.owner !== owner) this.owner.stop(true);
+    this.stopNodes();
+    const c = this.ctx, g = c.createGain();
+    g.gain.setValueAtTime(0, c.currentTime);
+    g.gain.linearRampToValueAtTime(0.08, c.currentTime + 1.2);
+    g.connect(c.destination);
+    const mk = (f, pan) => {
+      const o = c.createOscillator(), p = c.createStereoPanner();
+      o.type = "sine"; o.frequency.value = f; p.pan.value = pan;
+      o.connect(p).connect(g); o.start(); return o;
+    };
+    this.nodes = { g, l: mk(CARRIER, -1), r: mk(CARRIER + beat, 1) };
+    this.owner = owner;
+  },
+  setBeat(owner, beat) {
+    if (this.owner === owner && this.nodes) this.nodes.r.frequency.setTargetAtTime(CARRIER + beat, this.ctx.currentTime, 0.2);
+  },
+  stopNodes() {
+    if (!this.nodes) return;
+    const { g, l, r } = this.nodes, t = this.ctx.currentTime;
+    g.gain.cancelScheduledValues(t); g.gain.setTargetAtTime(0, t, 0.15);
+    setTimeout(() => { l.stop(); r.stop(); g.disconnect(); }, 600);
+    this.nodes = null;
+  },
+  stop(owner) { if (this.owner === owner) { this.stopNodes(); this.owner = null; } }
+};
+
+/* ---------- A device = one phone screen with its own state ---------- */
+function Device(root, startPreset, draw, opts = {}) {
+  const st = { preset: PRESETS.find(p => p.id === startPreset), beat: 0, playing: false, elapsed: 0, visible: true, t: 0 };
+  st.beat = st.preset.beat;
+  const f = k => root.querySelectorAll(`[data-f="${k}"]`);
+  const set = (k, v) => f(k).forEach(n => n.textContent = v);
+  const playBtn = root.querySelector(".play");
+  const presetBox = root.querySelector(".presets");
+  const dev = { root, st };
+
+  const icon = on => on
+    ? '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="2" width="4" height="14" rx="1" fill="currentColor"/><rect x="11" y="2" width="4" height="14" rx="1" fill="currentColor"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 2.5v13l11-6.5z" fill="currentColor"/></svg>';
+
+  function render() {
+    const p = st.preset;
+    set("name", st.custom ? "Custom" : p.name);
+    set("use", st.custom ? "Your own beat rate." : p.use);
+    set("ev", p.ev); set("evCap", st.custom ? "No preset" : cap(p.ev));
+    set("left", CARRIER + " Hz"); set("right", (CARRIER + st.beat) + " Hz");
+    set("beat", st.beat + " Hz"); set("beatPlain", st.beat + " Hz"); set("beatNum", st.beat);
+    const left = Math.max(0, SESSION - st.elapsed), mm = String(Math.floor(left / 60)).padStart(2, "0"), ss = String(Math.floor(left % 60)).padStart(2, "0");
+    set("time", `${mm}:${ss} left`); set("clock", `${mm}:${ss}`);
+    const fill = root.querySelector(".fill"); if (fill) fill.style.width = (st.elapsed / SESSION * 100) + "%";
+    playBtn.dataset.on = st.playing;
+    if (opts.textButton) playBtn.textContent = st.playing ? "Pause" : (st.elapsed > 0 ? "Resume session" : "Start 20 minute session");
+    else { playBtn.innerHTML = icon(st.playing); playBtn.setAttribute("aria-label", st.playing ? "Pause" : "Play"); }
+    presetBox.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", !st.custom && b.dataset.id === p.id));
+  }
+  PRESETS.forEach(p => {
+    const b = document.createElement("button");
+    b.textContent = p.short; b.dataset.id = p.id;
+    b.onclick = () => { st.preset = p; st.custom = false; st.beat = p.beat; Audio.setBeat(dev, st.beat); opts.onPreset && opts.onPreset(p); render(); };
+    presetBox.appendChild(b);
+  });
+  playBtn.onclick = () => {
+    st.playing = !st.playing;
+    st.playing ? Audio.start(dev, st.beat) : Audio.stop(dev);
+    render();
+  };
+  dev.stop = () => { st.playing = false; render(); };
+  dev.setBeat = b => { st.beat = b; Audio.setBeat(dev, b); render(); };
+  dev.render = render;
+
+  new IntersectionObserver(es => es.forEach(e => st.visible = e.isIntersecting)).observe(root);
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (st.playing) { st.elapsed = Math.min(SESSION, st.elapsed + dt); if (Math.floor(st.elapsed) !== Math.floor(st.elapsed - dt)) render(); }
+    if (st.visible) { if (!reduce) st.t += dt * (st.playing ? 1 : 0.35); draw(st, dt); }
+    requestAnimationFrame(frame);
+  }
+  render(); requestAnimationFrame(frame);
+  return dev;
+}
+
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1);
+  const w = Math.round(r.width * d), h = Math.round(r.height * d);
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w, h, d };
+}
+
+/* ---------- A. Scope: Lissajous with phosphor persistence ---------- */
+(() => {
+  const root = document.getElementById("scope"), cv = root.querySelector("canvas"), ctx = cv.getContext("2d");
+  Device(root, "focus", st => {
+    const { w, h, d } = fitCanvas(cv);
+    // fade the previous frames instead of clearing: old traces glow out like a scope tube
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = "rgba(0,0,0,0.075)"; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "source-over";
+    const s = Math.min(w, h) * 0.4, cx = w / 2, cy = h / 2;
+    // x follows the left ear, y the right ear. Their phase difference drifts at the (slowed) beat,
+    // so the figure opens from a line to a circle and closes again.
+    const phase = st.t * visRate(st.beat) * Math.PI * 2;
+    const harm = 1 + Math.min(3, Math.floor(st.beat / 12)); // more lobes for faster presets
+    const path = () => {
+      ctx.beginPath();
+      for (let i = 0; i <= 360; i++) {
+        const th = (i / 360) * Math.PI * 2;
+        const x = cx + Math.sin(th) * s, y = cy + Math.sin(th * harm + phase) * s;
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+    };
+    ctx.lineJoin = "round";
+    path(); ctx.strokeStyle = "rgba(191,234,216,0.07)"; ctx.lineWidth = 8 * d; ctx.stroke();
+    path(); ctx.strokeStyle = "rgba(191,234,216,0.9)"; ctx.lineWidth = 1.2 * d; ctx.stroke();
+  });
+})();
+
+/* ---------- B. Orbit ---------- */
+(() => {
+  const root = document.getElementById("orbit"), cv = root.querySelector("canvas"), ctx = cv.getContext("2d");
+  const stars = Array.from({ length: 140 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.1 + 0.2, p: Math.random() * 6 }));
+  let trail = [];
+  Device(root, "calm", (st, dt) => {
+    const { w, h, d } = fitCanvas(cv);
+    ctx.clearRect(0, 0, w, h);
+    for (const s of stars) {
+      const a = 0.25 + 0.35 * (reduce ? 0.5 : (Math.sin(st.t * 0.6 + s.p) + 1) / 2);
+      ctx.fillStyle = `rgba(243,235,221,${a})`; ctx.beginPath(); ctx.arc(s.x * w, s.y * h, s.r * d, 0, 7); ctx.fill();
+    }
+    const cx = w / 2, cy = h * 0.5, R = Math.min(w, h) * 0.24;
+    // timer ring: elapsed share of the session
+    const frac = st.elapsed / SESSION;
+    ctx.strokeStyle = "rgba(158,163,196,0.18)"; ctx.lineWidth = 1 * d;
+    ctx.beginPath(); ctx.arc(cx, cy, R * 1.45, 0, Math.PI * 2); ctx.stroke();
+    if (frac > 0) {
+      ctx.strokeStyle = "rgba(230,200,143,0.7)"; ctx.lineWidth = 1.5 * d;
+      ctx.beginPath(); ctx.arc(cx, cy, R * 1.45, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2); ctx.stroke();
+    }
+    const ang = st.t * visRate(st.beat) * Math.PI * 2;
+    const pA = [cx + Math.cos(ang) * R, cy + Math.sin(ang) * R * 0.92];
+    const pB = [cx - Math.cos(ang) * R, cy - Math.sin(ang) * R * 0.92];
+    trail.push([pA, pB]); if (trail.length > 90) trail.shift();
+    for (let i = 1; i < trail.length; i++) {
+      const a = (i / trail.length) * 0.5;
+      ctx.strokeStyle = `rgba(230,200,143,${a})`; ctx.lineWidth = 2 * d * (i / trail.length);
+      for (const k of [0, 1]) { ctx.beginPath(); ctx.moveTo(...trail[i - 1][k]); ctx.lineTo(...trail[i][k]); ctx.stroke(); }
+    }
+    for (const [p, col] of [[pA, "243,235,221"], [pB, "230,200,143"]]) {
+      const g = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], 26 * d);
+      g.addColorStop(0, `rgba(${col},0.9)`); g.addColorStop(0.15, `rgba(${col},0.45)`); g.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p[0], p[1], 26 * d, 0, 7); ctx.fill();
+      ctx.fillStyle = `rgb(${col})`; ctx.beginPath(); ctx.arc(p[0], p[1], 3.2 * d, 0, 7); ctx.fill();
+    }
+  });
+})();
+
+/* ---------- C. Interference ---------- */
+(() => {
+  const root = document.getElementById("wave"), cv = root.querySelector("canvas"), ctx = cv.getContext("2d");
+  const W = 117, H = 208; cv.width = W; cv.height = H;
+  const img = ctx.createImageData(W, H);
+  const srcEls = [...root.querySelectorAll(".src")];
+  // source positions as fractions of the screen; distance maps to beat
+  const src = [{ x: 0.3, y: 0.56 }, { x: 0.7, y: 0.56 }];
+  const beatToGap = b => 0.12 + (Math.log2(b) / Math.log2(40)) * 0.58;
+  const gapToBeat = g => Math.max(1, Math.min(40, Math.round(Math.pow(2, ((g - 0.12) / 0.58) * Math.log2(40)))));
+  function placeForBeat(b) {
+    const g = beatToGap(b);
+    src[0] = { x: 0.5 - g / 2, y: 0.56 }; src[1] = { x: 0.5 + g / 2, y: 0.56 }; posEls();
+  }
+  function posEls() { srcEls.forEach((el, i) => { el.style.left = (src[i].x * 100) + "%"; el.style.top = (src[i].y * 100) + "%"; }); }
+  const pearl = [232, 238, 240], blue = [126, 166, 194], lilac = [176, 156, 214], deep = [60, 84, 120];
+  const dev = Device(root, "deep", st => {
+    const k = 0.42, wL = st.t * 1.6, wR = st.t * (1.6 + visRate(st.beat) * Math.PI * 2 * 0.25);
+    const ax = src[0].x * W, ay = src[0].y * H, bx = src[1].x * W, by = src[1].y * H;
+    let n = 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const d1 = Math.hypot(x - ax, y - ay), d2 = Math.hypot(x - bx, y - by);
+      const v = Math.cos(d1 * k - wL) / (1 + d1 * 0.012) + Math.cos(d2 * k - wR) / (1 + d2 * 0.012);
+      const I = Math.max(0, Math.min(1, (v + 1.6) / 3.2));
+      const m = x / W, tint = [blue[0] + (lilac[0] - blue[0]) * m, blue[1] + (lilac[1] - blue[1]) * m, blue[2] + (lilac[2] - blue[2]) * m];
+      const e = Math.pow(I, 3);
+      for (let c = 0; c < 3; c++) {
+        let col = pearl[c] + (tint[c] - pearl[c]) * e;
+        if (I > 0.86) col += (deep[c] - col) * (I - 0.86) * 2.2;
+        img.data[n + c] = col;
+      }
+      img.data[n + 3] = 255; n += 4;
+    }
+    ctx.putImageData(img, 0, 0);
+  }, { textButton: true, onPreset: p => placeForBeat(p.beat) });
+  placeForBeat(40);
+  srcEls.forEach((el, i) => {
+    el.addEventListener("pointerdown", e => {
+      el.setPointerCapture(e.pointerId);
+      const r = root.getBoundingClientRect();
+      const move = ev => {
+        src[i] = { x: Math.max(0.08, Math.min(0.92, (ev.clientX - r.left) / r.width)), y: Math.max(0.35, Math.min(0.75, (ev.clientY - r.top) / r.height)) };
+        posEls();
+        const gap = Math.hypot(src[0].x - src[1].x, (src[0].y - src[1].y) * 16 / 9);
+        dev.st.custom = true; dev.setBeat(gapToBeat(gap));
+        const match = PRESETS.find(p => p.beat === dev.st.beat);
+        if (match) { dev.st.custom = false; dev.st.preset = match; dev.render(); }
+      };
+      const up = () => { el.removeEventListener("pointermove", move); el.removeEventListener("pointerup", up); };
+      el.addEventListener("pointermove", move); el.addEventListener("pointerup", up);
+    });
+  });
+})();
+</script>
+</body>
+</html>
