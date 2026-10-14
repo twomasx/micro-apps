@@ -139,8 +139,9 @@ export function createBreathController(
     }
   }
 
-  function cue(kind: CueKind) {
-    deps.cues.play(kind);
+  /** `phaseS` is the length of the phase the cue starts, so the sound never outlasts it. */
+  function cue(kind: CueKind, phaseS?: number) {
+    deps.cues.play(kind, phaseS);
     deps.vibrate(kind);
   }
 
@@ -160,7 +161,7 @@ export function createBreathController(
     if (frame.status === 'running' && key !== lastKey) {
       const { phases } = current;
       const previous = phases[(frame.breath.phaseIndex - 1 + phases.length) % phases.length] ?? null;
-      cue(cueFor(frame.breath.phase, previous));
+      cue(cueFor(frame.breath.phase, previous), frame.breath.phase.ms / 1000);
       lastKey = key;
     }
     emit(frame);

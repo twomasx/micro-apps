@@ -1,6 +1,19 @@
 import { describe, expect, it, vi } from 'vitest';
-import { CUE_TONES, cueFor, scheduleTone } from './cues';
+import {
+  CUES,
+  cueDuration,
+  cueFor,
+  roomImpulse,
+  scheduleBell,
+  scheduleCue,
+  scheduleHum,
+  voiceHarmonics,
+  type BellCue,
+  type HumCue,
+} from './cues';
 import { VIBRATION_PATTERNS } from './haptics';
+
+const hum = (kind: 'in' | 'inAgain' | 'hold' | 'out') => CUES[kind] as HumCue;
 
 describe('cueFor', () => {
   it('gives in, hold and out their own cue', () => {
@@ -15,75 +28,211 @@ describe('cueFor', () => {
   });
 });
 
-describe('cue tones', () => {
-  it('rise for in, stay level for hold, fall for out', () => {
-    expect(CUE_TONES.in.endHz).toBeGreaterThan(CUE_TONES.in.startHz);
-    expect(CUE_TONES.inAgain.endHz).toBeGreaterThan(CUE_TONES.inAgain.startHz);
-    expect(CUE_TONES.hold.endHz).toBe(CUE_TONES.hold.startHz);
-    expect(CUE_TONES.out.endHz).toBeLessThan(CUE_TONES.out.startHz);
-  });
-
-  it('are short, quiet and in a comfortable pitch range', () => {
-    for (const tone of Object.values(CUE_TONES)) {
-      expect(tone.durationS).toBeLessThanOrEqual(2);
-      expect(tone.peak).toBeLessThanOrEqual(0.2);
-      expect(tone.attackS).toBeLessThan(tone.durationS);
-      expect(tone.startHz).toBeGreaterThanOrEqual(300);
-      expect(tone.endHz).toBeLessThanOrEqual(800);
+describe('the cues', () => {
+  it('are a deep hum for every phase, in the range people chant in', () => {
+    for (const kind of ['in', 'inAgain', 'hold', 'out'] as const) {
+      const cue = hum(kind);
+      expect(cue.type).toBe('hum');
+      for (const hz of [cue.startHz, cue.endHz]) {
+        expect(hz).toBeGreaterThanOrEqual(100);
+        expect(hz).toBeLessThanOrEqual(170);
+      }
     }
   });
 
-  it('make breathing out slower and softer than breathing in', () => {
-    expect(CUE_TONES.out.durationS).toBeGreaterThan(CUE_TONES.in.durationS);
-    expect(CUE_TONES.out.attackS).toBeGreaterThan(CUE_TONES.in.attackS);
-    expect(CUE_TONES.out.peak).toBeLessThan(CUE_TONES.in.peak);
+  it('rise and open on the way in, stay level on a hold, sink and close on the way out', () => {
+    expect(hum('in').endHz).toBeGreaterThan(hum('in').startHz);
+    expect(hum('in').brightToHz).toBeGreaterThan(hum('in').brightFromHz);
+    expect(hum('inAgain').endHz).toBeGreaterThan(hum('inAgain').startHz);
+    expect(hum('hold').endHz).toBe(hum('hold').startHz);
+    expect(hum('out').endHz).toBeLessThan(hum('out').startHz);
+    expect(hum('out').brightToHz).toBeLessThan(hum('out').brightFromHz);
+  });
+
+  it('make breathing out the longest and softest, and a hold quieter still', () => {
+    expect(hum('out').durationS).toBeGreaterThan(hum('in').durationS);
+    expect(hum('out').attackS).toBeGreaterThan(hum('in').attackS);
+    expect(hum('out').peak).toBeLessThan(hum('in').peak);
+    expect(hum('hold').peak).toBeLessThan(hum('out').peak);
+  });
+
+  it('keep the end-of-session bell as it was', () => {
+    expect(CUES.done).toEqual({ type: 'bell', startHz: 392, endHz: 392, durationS: 1.6, attackS: 0.1, peak: 0.12 });
   });
 
   it('every cue has a vibration pattern too', () => {
-    expect(Object.keys(VIBRATION_PATTERNS).sort()).toEqual(Object.keys(CUE_TONES).sort());
+    expect(Object.keys(VIBRATION_PATTERNS).sort()).toEqual(Object.keys(CUES).sort());
   });
 });
 
-describe('scheduleTone', () => {
-  function fakeContext() {
-    const param = () => ({
-      setValueAtTime: vi.fn(),
-      linearRampToValueAtTime: vi.fn(),
-      exponentialRampToValueAtTime: vi.fn(),
-    });
-    const oscillator = {
+describe('cueDuration', () => {
+  it('never outlasts a short phase', () => {
+    expect(cueDuration(CUES.in, 4)).toBe(1.8);
+    expect(cueDuration(CUES.inAgain, 1)).toBe(0.9);
+    expect(cueDuration(CUES.hold, 0.5)).toBe(0.45);
+    expect(cueDuration(CUES.done)).toBe(1.6);
+    expect(cueDuration(CUES.out, Number.NaN)).toBe(2.6);
+  });
+});
+
+describe('voiceHarmonics', () => {
+  it('has every overtone, fading, with a lift where a chanting voice carries', () => {
+    const a = voiceHarmonics(16);
+    expect(a).toHaveLength(17);
+    expect(a[0]).toBe(0);
+    expect(a[1]).toBe(1);
+    expect(a[3]!).toBeGreaterThan(a[2]!);
+    expect(a[16]!).toBeLessThan(a[6]!);
+    expect(a[6]!).toBeLessThan(a[5]!);
+  });
+});
+
+function param() {
+  return {
+    value: 0,
+    setValueAtTime: vi.fn(),
+    linearRampToValueAtTime: vi.fn(),
+    exponentialRampToValueAtTime: vi.fn(),
+  };
+}
+
+type FakeParam = ReturnType<typeof param>;
+
+interface FakeOscillator {
+  type: string;
+  frequency: FakeParam;
+  detune: FakeParam;
+  setPeriodicWave: ReturnType<typeof vi.fn>;
+  connect: ReturnType<typeof vi.fn>;
+  disconnect: ReturnType<typeof vi.fn>;
+  start: ReturnType<typeof vi.fn>;
+  stop: ReturnType<typeof vi.fn>;
+  onended: null | (() => void);
+}
+
+function fakeContext() {
+  const oscillators: FakeOscillator[] = [];
+  const nodes: { disconnect: ReturnType<typeof vi.fn> }[] = [];
+  function makeOscillator(): FakeOscillator {
+    const osc: FakeOscillator = {
       type: '',
       frequency: param(),
+      detune: param(),
+      setPeriodicWave: vi.fn(),
       connect: vi.fn((node: unknown) => node),
       disconnect: vi.fn(),
       start: vi.fn(),
       stop: vi.fn(),
-      onended: null as null | (() => void),
+      onended: null,
     };
-    const gain = { gain: param(), connect: vi.fn((node: unknown) => node), disconnect: vi.fn() };
-    const ctx = { currentTime: 10, createOscillator: () => oscillator, createGain: () => gain };
-    return { ctx: ctx as unknown as BaseAudioContext, oscillator, gain };
+    oscillators.push(osc);
+    nodes.push(osc);
+    return osc;
   }
+  function makeNode<T extends object>(extra: T) {
+    const node = { ...extra, connect: vi.fn((next: unknown) => next), disconnect: vi.fn() };
+    nodes.push(node);
+    return node;
+  }
+  const gains: ReturnType<typeof makeNode<{ gain: ReturnType<typeof param> }>>[] = [];
+  const filters: ReturnType<typeof makeNode<{ type: string; Q: { value: number }; frequency: ReturnType<typeof param> }>>[] = [];
+  const ctx = {
+    currentTime: 10,
+    sampleRate: 1000,
+    createOscillator: makeOscillator,
+    createGain: () => {
+      const g = makeNode({ gain: param() });
+      gains.push(g);
+      return g;
+    },
+    createBiquadFilter: () => {
+      const f = makeNode({ type: '', Q: { value: 0 }, frequency: param() });
+      filters.push(f);
+      return f;
+    },
+  };
+  return { ctx: ctx as unknown as BaseAudioContext, oscillators, gains, filters, nodes };
+}
 
-  it('fades in, glides the pitch, fades out and stops itself', () => {
-    const { ctx, oscillator, gain } = fakeContext();
-    const destination = {} as AudioNode;
-    scheduleTone(ctx, destination, CUE_TONES.in, 0.5);
-    expect(oscillator.type).toBe('sine');
-    expect(oscillator.frequency.setValueAtTime).toHaveBeenCalledWith(440, 10.01);
-    expect(oscillator.frequency.exponentialRampToValueAtTime).toHaveBeenCalledWith(587, 10.41);
-    expect(gain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.08, expect.closeTo(10.05, 5));
-    expect(gain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.0001, 10.41);
-    expect(gain.connect).toHaveBeenCalledWith(destination);
-    expect(oscillator.stop).toHaveBeenCalledWith(expect.closeTo(10.46, 5));
-    oscillator.onended?.();
-    expect(oscillator.disconnect).toHaveBeenCalled();
-    expect(gain.disconnect).toHaveBeenCalled();
+describe('scheduleHum', () => {
+  it('sings two detuned voices and a low octave through a moving vowel, then cleans up', () => {
+    const { ctx, oscillators, gains, filters, nodes } = fakeContext();
+    const wave = {} as PeriodicWave;
+    scheduleHum(ctx, {} as AudioNode, hum('in'), 0.5, wave);
+
+    // vibrato, two voices, low octave
+    expect(oscillators).toHaveLength(4);
+    const [vibrato, voiceA, voiceB, low] = oscillators;
+    expect(vibrato!.frequency.value).toBeCloseTo(4.8);
+    expect(voiceA!.setPeriodicWave).toHaveBeenCalledWith(wave);
+    expect(voiceA!.detune.value).toBe(-7);
+    expect(voiceB!.detune.value).toBe(7);
+    expect(low!.type).toBe('sine');
+    expect(voiceA!.frequency.setValueAtTime).toHaveBeenCalledWith(110, 10.01);
+    expect(voiceA!.frequency.exponentialRampToValueAtTime).toHaveBeenCalledWith(146.83, 10.91);
+    expect(low!.frequency.setValueAtTime).toHaveBeenCalledWith(55, 10.01);
+
+    const vowel = filters[0]!;
+    expect(vowel.type).toBe('lowpass');
+    expect(vowel.frequency.setValueAtTime).toHaveBeenCalledWith(550, 10.01);
+    expect(vowel.frequency.exponentialRampToValueAtTime).toHaveBeenCalledWith(1400, expect.closeTo(11.81, 5));
+
+    const amp = gains[0]!;
+    expect(amp.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.13, expect.closeTo(10.36, 5));
+    expect(amp.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.0001, expect.closeTo(11.81, 5));
+
+    for (const osc of oscillators) expect(osc.stop).toHaveBeenCalledWith(expect.closeTo(11.86, 5));
+    low!.onended?.();
+    for (const node of nodes) expect(node.disconnect).toHaveBeenCalled();
   });
 
-  it('keeps a level pitch level', () => {
-    const { ctx, oscillator } = fakeContext();
-    scheduleTone(ctx, {} as AudioNode, CUE_TONES.hold, 1);
-    expect(oscillator.frequency.exponentialRampToValueAtTime).not.toHaveBeenCalled();
+  it('keeps a level note level and shortens to fit a short phase', () => {
+    const { ctx, oscillators, filters } = fakeContext();
+    scheduleHum(ctx, {} as AudioNode, hum('hold'), 1, {} as PeriodicWave, 0.45);
+    expect(oscillators[1]!.frequency.exponentialRampToValueAtTime).not.toHaveBeenCalled();
+    expect(filters[0]!.frequency.exponentialRampToValueAtTime).not.toHaveBeenCalled();
+    expect(oscillators[1]!.stop).toHaveBeenCalledWith(expect.closeTo(10.51, 5));
+  });
+});
+
+describe('scheduleBell', () => {
+  it('fades in and out on one sine note and stops itself', () => {
+    const { ctx, oscillators, gains } = fakeContext();
+    scheduleBell(ctx, {} as AudioNode, CUES.done as BellCue, 0.5);
+    expect(oscillators).toHaveLength(1);
+    expect(oscillators[0]!.type).toBe('sine');
+    expect(oscillators[0]!.frequency.setValueAtTime).toHaveBeenCalledWith(392, 10.01);
+    expect(gains[0]!.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.06, expect.closeTo(10.11, 5));
+    expect(oscillators[0]!.stop).toHaveBeenCalledWith(expect.closeTo(11.66, 5));
+  });
+});
+
+describe('scheduleCue', () => {
+  it('plays the bell for done and a hum for the phases', () => {
+    const bell = fakeContext();
+    scheduleCue(bell.ctx, {} as AudioNode, 'done', 1, {} as PeriodicWave);
+    expect(bell.oscillators).toHaveLength(1);
+    const voice = fakeContext();
+    scheduleCue(voice.ctx, {} as AudioNode, 'out', 1, {} as PeriodicWave, 6);
+    expect(voice.oscillators).toHaveLength(4);
+  });
+});
+
+describe('roomImpulse', () => {
+  it('is two channels of noise that fade to silence', () => {
+    const channels = [new Float32Array(2000), new Float32Array(2000)];
+    const ctx = {
+      sampleRate: 1000,
+      createBuffer: (count: number, length: number) => ({
+        numberOfChannels: count,
+        length,
+        getChannelData: (c: number) => channels[c]!,
+      }),
+    } as unknown as BaseAudioContext;
+    const buffer = roomImpulse(ctx, 2, () => 1);
+    expect(buffer.length).toBe(2000);
+    expect(channels[0]![0]).toBe(1);
+    expect(channels[1]![1000]).toBeCloseTo(0.125);
+    expect(Math.abs(channels[0]![1999]!)).toBeLessThan(1e-6);
   });
 });
