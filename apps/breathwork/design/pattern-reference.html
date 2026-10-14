@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Breathwork design options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;500;700;800&family=Anybody:wdth,wght@50..150,100..900&display=swap" rel="stylesheet">
+<style>
+  :root { --page: #2a2a2d; --page-ink: #ececee; --page-muted: #a7a7ad; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--page); color: var(--page-ink); }
+  body { font-family: "Hanken Grotesk", system-ui, sans-serif; font-size: 16px; line-height: 1.5; padding: 32px 16px 64px; -webkit-font-smoothing: antialiased; }
+  .intro, .option, .footnote { max-width: 380px; margin-left: auto; margin-right: auto; }
+  .intro { margin-bottom: 32px; }
+  .intro h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .intro p, .caption p, .footnote { color: var(--page-muted); font-size: 15px; }
+  .option { margin-bottom: 56px; }
+  .caption { margin-top: 14px; }
+  .caption h2 { font-size: 18px; font-weight: 600; }
+  .phone { position: relative; width: 100%; aspect-ratio: 9 / 16; border-radius: 30px; overflow: hidden; isolation: isolate; user-select: none; -webkit-user-select: none; }
+  .phone canvas { display: block; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+  /* ---------- A. Tide ---------- */
+  .tide { --fog: #e6ecea; --ink: #1c3431; --muted: #5d7470; --sea: #4f8f8a; background: var(--fog); color: var(--ink); font-family: "Hanken Grotesk", sans-serif; }
+  .tide canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tide .layer { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 22px 22px 20px; pointer-events: none; }
+  .tide .layer > * { pointer-events: auto; }
+  .tide .under { color: #fff; }
+  .tide .under .muted { color: rgba(255,255,255,.78); }
+  .tide .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .tide .tabs { display: flex; gap: 4px; }
+  .tide .tabs button { min-height: 44px; padding: 0 10px; border-radius: 999px; font-size: 15px; font-weight: 500; }
+  .tide .tabs button[aria-pressed="true"] { background: var(--ink); color: var(--fog); }
+  .tide .under .tabs button[aria-pressed="true"] { background: #fff; color: var(--sea); }
+  .tide .time { font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .tide .note { font-size: 14px; margin-top: 10px; max-width: 30ch; }
+  .tide .center { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .tide .phase { font-size: 42px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; }
+  .tide .hint { font-size: 17px; margin-top: 8px; }
+  .tide .count { font-size: 96px; font-weight: 300; line-height: 1; margin-top: 18px; font-variant-numeric: tabular-nums; }
+  .tide .go { width: 100%; min-height: 54px; border-radius: 999px; font-size: 17px; font-weight: 600; background: var(--ink); color: var(--fog); }
+  .tide .under .go { background: #fff; color: var(--sea); }
+  .tide .muted { color: var(--muted); }
+
+  /* ---------- B. Pattern ---------- */
+  .pattern { --blue: #2341d6; --white: #f6f7fb; --soft: #b4c2ff; --sun: #ffd45c; background: var(--blue); color: var(--white); font-family: "Outfit", sans-serif; display: flex; flex-direction: column; padding: 22px 20px 18px; gap: 10px; }
+  .pattern .top { display: flex; justify-content: space-between; align-items: baseline; }
+  .pattern .name { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .pattern .time { font-size: 16px; color: var(--soft); font-variant-numeric: tabular-nums; }
+  .pattern .note { font-size: 14px; color: var(--soft); line-height: 1.4; }
+  .pattern .stage { flex: 1; min-height: 0; position: relative; }
+  .pattern .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .pattern .now { display: flex; justify-content: space-between; align-items: flex-end; }
+  .pattern .phase { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+  .pattern .hint { font-size: 16px; color: var(--soft); margin-top: 6px; }
+  .pattern .count { font-size: 64px; font-weight: 400; line-height: .85; color: var(--sun); font-variant-numeric: tabular-nums; }
+  .pattern .row { display: flex; gap: 10px; align-items: center; margin-top: 6px; }
+  .pattern .tabs { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); border: 1.5px solid rgba(246,247,251,.35); border-radius: 14px; overflow: hidden; }
+  .pattern .tabs button { min-height: 48px; font-size: 14px; font-weight: 500; }
+  .pattern .tabs button + button { border-left: 1.5px solid rgba(246,247,251,.35); }
+  .pattern .tabs button[aria-pressed="true"] { background: var(--white); color: var(--blue); }
+  .pattern .go { width: 56px; height: 56px; flex: none; border-radius: 50%; background: var(--sun); color: var(--blue); display: grid; place-items: center; }
+
+  /* ---------- C. Typeform ---------- */
+  .type { --plum: #231220; --rose: #f2c7cf; --muted: #a68797; background: var(--plum); color: var(--rose); font-family: "Anybody", sans-serif; display: flex; flex-direction: column; padding: 24px 22px 20px; }
+  .type .glow { position: absolute; inset: 0; z-index: -1; background: radial-gradient(70% 45% at 50% 46%, rgba(242,199,207,.22), rgba(242,199,207,0) 70%); opacity: 0.2; }
+  .type .top { display: flex; justify-content: space-between; align-items: center; }
+  .type .tabs { display: flex; gap: 14px; }
+  .type .tabs button { min-height: 44px; font-size: 15px; font-variation-settings: "wdth" 90, "wght" 400; color: var(--muted); }
+  .type .tabs button[aria-pressed="true"] { color: var(--rose); font-variation-settings: "wdth" 90, "wght" 650; text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1.5px; }
+  .type .time { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; font-variation-settings: "wdth" 80; }
+  .type .center { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .type .word { font-size: 76px; line-height: 1; white-space: nowrap; font-variation-settings: "wdth" 50, "wght" 300; }
+  .type .hint { font-size: 17px; color: var(--muted); margin-top: 18px; font-variation-settings: "wdth" 100, "wght" 400; }
+  .type .count { font-size: 22px; margin-top: 6px; font-variant-numeric: tabular-nums; font-variation-settings: "wdth" 100, "wght" 500; }
+  .type .note { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 14px; font-variation-settings: "wdth" 100; line-height: 1.4; }
+  .type .track { height: 2px; background: rgba(242,199,207,.18); margin-bottom: 14px; }
+  .type .fill { height: 100%; width: 0; background: var(--rose); }
+  .type .go { width: 100%; min-height: 54px; border-radius: 999px; border: 1.5px solid var(--rose); font-size: 17px; font-variation-settings: "wdth" 110, "wght" 600; }
+  .type .go[data-on="true"] { background: var(--rose); color: var(--plum); }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Breathwork: three design directions</h1>
+  <p>Each one is the main breathing screen at 9:16, running the real timing for each technique. Pick a technique and tap start. On Android you'll also feel a light buzz at each change.</p>
+</div>
+
+<!-- A. Tide -->
+<section class="option">
+  <div class="phone tide" id="tide">
+    <canvas></canvas>
+    <div class="layer over"></div>
+    <div class="layer under" aria-hidden="true"></div>
+  </div>
+  <div class="caption">
+    <h2>Tide</h2>
+    <p>The screen fills with water as you breathe in and drains as you breathe out. You can follow it from the corner of your eye, even with your eyes half closed. The text turns white where the water covers it.</p>
+  </div>
+</section>
+
+<!-- B. Pattern -->
+<section class="option">
+  <div class="phone pattern" id="pattern">
+    <div class="top"><span class="name" data-f="name">Box</span><span class="time" data-f="time">4:00 left</span></div>
+    <p class="note" data-f="note"></p>
+    <div class="stage"><canvas></canvas></div>
+    <div class="now">
+      <div><p class="phase" data-f="phase">Ready</p><p class="hint" data-f="hint">Tap start</p></div>
+      <span class="count" data-f="count"></span>
+    </div>
+    <div class="row">
+      <div class="tabs" role="group" aria-label="Technique"></div>
+      <button class="go" aria-label="Start"></button>
+    </div>
+  </div>
+  <div class="caption">
+    <h2>Pattern</h2>
+    <p>Every technique has its own shape. Box is a square, 4-7-8 is a triangle with sides of 4, 7 and 8, and the cyclic sigh is two short climbs and one long slide. A dot traces it, so you learn the pattern by watching it once.</p>
+  </div>
+</section>
+
+<!-- C. Typeform -->
+<section class="option">
+  <div class="phone type" id="type">
+    <div class="glow"></div>
+    <div class="top"><div class="tabs" role="group" aria-label="Technique"></div><span class="time" data-f="time">4:00</span></div>
+    <div class="center">
+      <p class="word" data-f="phase">Ready</p>
+      <p class="hint" data-f="hint">Sit comfortably</p>
+      <p class="count" data-f="count"></p>
+    </div>
+    <p class="note" data-f="note"></p>
+    <div class="track"><div class="fill"></div></div>
+    <button class="go" data-on="false">Begin</button>
+  </div>
+  <div class="caption">
+    <h2>Typeform</h2>
+    <p>No picture at all. The word is the guide: it stretches wide and gets bolder as you breathe in, holds, then narrows as you breathe out. It runs on one variable font, so it is tiny to load.</p>
+  </div>
+</section>
+
+<p class="footnote">Timing: cyclic sigh 2 s in, 1 s top-up in, 6 s out. Box 4 in, 4 hold, 4 out, 4 hold. 4-7-8 is 4 in, 7 hold, 8 out. The research notes are placeholders until the spec is checked.</p>
+
+<script>
+const TECH = {
+  sigh: { name: "Cyclic sigh", short: "Sigh", minutes: 5,
+    note: "In one study, 5 minutes a day of this improved mood more than mindfulness meditation.",
+    phases: [
+      { k: "in",  label: "Inhale",        word: "Inhale",  hint: "Through your nose",     d: 2, from: 0,    to: 0.72 },
+      { k: "in2", label: "Inhale again",  word: "Again",   hint: "A short top-up breath", d: 1, from: 0.72, to: 1 },
+      { k: "out", label: "Exhale slowly", word: "Exhale",  hint: "Long, through your mouth", d: 6, from: 1, to: 0 } ] },
+  box: { name: "Box", short: "Box", minutes: 4,
+    note: "Often used to steady yourself before something stressful.",
+    phases: [
+      { k: "in",   label: "Inhale", word: "Inhale", hint: "Through your nose", d: 4, from: 0, to: 1 },
+      { k: "hold", label: "Hold",   word: "Hold",   hint: "Lungs full",        d: 4, from: 1, to: 1 },
+      { k: "out",  label: "Exhale", word: "Exhale", hint: "Slow and even",     d: 4, from: 1, to: 0 },
+      { k: "hold0",label: "Hold",   word: "Hold",   hint: "Lungs empty",       d: 4, from: 0, to: 0 } ] },
+  478: { name: "4-7-8", short: "4-7-8", minutes: 4,
+    note: "Often used to wind down before sleep.",
+    phases: [
+      { k: "in",   label: "Inhale", word: "Inhale", hint: "Through your nose",  d: 4, from: 0, to: 1 },
+      { k: "hold", label: "Hold",   word: "Hold",   hint: "Stay relaxed",       d: 7, from: 1, to: 1 },
+      { k: "out",  label: "Exhale", word: "Exhale", hint: "Through your mouth", d: 8, from: 1, to: 0 } ] },
+};
+const ORDER = ["sigh", "box", "478"];
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ease = p => 0.5 - 0.5 * Math.cos(Math.PI * p);
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+let running = null; // only one screen runs at a time
+
+function breathAt(tech, t) {
+  const cycle = tech.phases.reduce((a, p) => a + p.d, 0);
+  let tc = t % cycle, i = 0;
+  while (tc >= tech.phases[i].d) { tc -= tech.phases[i].d; i++; }
+  const ph = tech.phases[i], p = tc / ph.d;
+  return { ph, i, p, left: Math.ceil(ph.d - tc), level: ph.from + (ph.to - ph.from) * ease(p) };
+}
+
+function Device(root, techId, draw, opts = {}) {
+  const st = { tech: TECH[techId], id: techId, on: false, t: 0, visible: true, idle: 0, lastPhase: -1, level: 0, b: null };
+  const dev = { st };
+  const q = s => root.querySelectorAll(s);
+  const set = (k, v) => q(`[data-f="${k}"]`).forEach(n => n.textContent = v);
+  function renderStatic() {
+    set("name", st.tech.name); set("note", st.tech.note);
+    q(".tabs").forEach(box => box.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === st.id)));
+    q(".go").forEach(b => {
+      b.dataset.on = st.on;
+      if (opts.icon) { b.innerHTML = st.on ? '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="2" width="4" height="14" rx="1" fill="currentColor"/><rect x="11" y="2" width="4" height="14" rx="1" fill="currentColor"/></svg>' : '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 2.5v13l11-6.5z" fill="currentColor"/></svg>'; b.setAttribute("aria-label", st.on ? "Pause" : "Start"); }
+      else b.textContent = st.on ? "Pause" : (st.t > 0 ? "Resume" : (opts.startText || "Start"));
+    });
+  }
+  function renderLive() {
+    const total = st.tech.minutes * 60;
+    set("time", (opts.bareTime ? "" : "") + fmt(Math.max(0, total - st.t)) + (opts.bareTime ? "" : " left"));
+    if (st.t === 0 && !st.on) {
+      set("phase", opts.readyWord || "Ready"); set("hint", opts.readyHint || "Tap start"); set("count", "");
+    } else {
+      const b = st.b; set("phase", opts.useWord ? b.ph.word : b.ph.label); set("hint", b.ph.hint); set("count", b.left);
+    }
+  }
+  function select(id) { st.id = id; st.tech = TECH[id]; st.t = 0; st.lastPhase = -1; st.b = breathAt(st.tech, 0); stop(); renderStatic(); renderLive(); }
+  function stop() { st.on = false; if (running === dev) running = null; renderStatic(); }
+  dev.stop = stop;
+  q(".tabs").forEach(box => ORDER.forEach(id => {
+    const b = document.createElement("button"); b.textContent = TECH[id].short; b.dataset.id = id;
+    b.onclick = () => select(id); box.appendChild(b);
+  }));
+  root.addEventListener("click", e => {
+    if (!e.target.closest(".go")) return;
+    if (st.on) { stop(); return; }
+    if (running && running !== dev) running.stop();
+    running = dev; st.on = true; renderStatic();
+  });
+  dev.rebind = () => { renderStatic(); renderLive(); };
+  new IntersectionObserver(es => es.forEach(e => st.visible = e.isIntersecting)).observe(root);
+  st.b = breathAt(st.tech, 0);
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    st.idle += dt;
+    if (st.on) {
+      st.t += dt;
+      if (st.t >= st.tech.minutes * 60) { st.t = 0; stop(); }
+      st.b = breathAt(st.tech, st.t);
+      if (st.b.i !== st.lastPhase) {
+        if (st.lastPhase !== -1 && navigator.vibrate) navigator.vibrate(st.b.ph.k.startsWith("in") ? 30 : st.b.ph.k === "out" ? [18, 70, 18] : 12);
+        st.lastPhase = st.b.i;
+      }
+      st.level = st.b.level;
+      renderLive();
+    } else if (st.t === 0) {
+      // idle: a slow resting swell so the screen isn't dead before start
+      st.level = reduce ? 0.25 : 0.22 + 0.06 * Math.sin(st.idle * 0.9);
+    }
+    if (st.visible) draw(st, dt);
+    requestAnimationFrame(frame);
+  }
+  renderStatic(); renderLive(); requestAnimationFrame(frame);
+  return dev;
+}
+
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1);
+  const w = Math.round(r.width * d), h = Math.round(r.height * d);
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w, h, d };
+}
+
+/* ---------- A. Tide ---------- */
+(() => {
+  const root = document.getElementById("tide"), cv = root.querySelector("canvas"), ctx = cv.getContext("2d");
+  const tpl = `
+    <div class="bar"><div class="tabs" role="group" aria-label="Technique"></div><span class="time" data-f="time">5:00 left</span></div>
+    <p class="note muted" data-f="note"></p>
+    <div class="center"><p class="phase" data-f="phase">Ready</p><p class="hint muted" data-f="hint">Tap start</p><p class="count" data-f="count"></p></div>
+    <button class="go">Start</button>`;
+  const over = root.querySelector(".over"), under = root.querySelector(".under");
+  over.innerHTML = tpl; under.innerHTML = tpl;
+  under.querySelectorAll("button").forEach(b => b.tabIndex = -1);
+  let shown = 0;
+  Device(root, "sigh", (st, dt) => {
+    const { w, h, d } = fitCanvas(cv);
+    shown += (st.level - shown) * Math.min(1, dt * 10);
+    const top = h * (0.92 - 0.8 * shown);
+    ctx.clearRect(0, 0, w, h);
+    const t = st.idle;
+    const amp = reduce ? 0 : 5 * d;
+    const surface = (phase, a) => {
+      ctx.beginPath(); ctx.moveTo(0, h);
+      const yAt = x => top + Math.sin(x / (70 * d) + t * phase) * a + Math.sin(x / (31 * d) - t * phase * 1.7) * a * 0.4;
+      for (let x = 0; x < w; x += 4 * d) ctx.lineTo(x, yAt(x));
+      ctx.lineTo(w, yAt(w));
+      ctx.lineTo(w, h); ctx.closePath();
+    };
+    surface(0.7, amp * 1.3); ctx.fillStyle = "rgba(122,176,170,0.45)"; ctx.fill();
+    surface(1.1, amp);
+    const g = ctx.createLinearGradient(0, top, 0, h); g.addColorStop(0, "#6aa7a1"); g.addColorStop(1, "#3c7a76");
+    ctx.fillStyle = g; ctx.fill();
+    // clip the white copy of the text to the water
+    const r = root.getBoundingClientRect();
+    under.style.clipPath = `inset(${(top / d) / r.height * 100}% 0 0 0)`;
+  });
+})();
+
+/* ---------- B. Pattern ---------- */
+(() => {
+  const root = document.getElementById("pattern"), cv = root.querySelector("canvas"), ctx = cv.getContext("2d");
+  // Each technique is a closed path made of one segment per phase, in unit space.
+  function shape(id) {
+    if (id === "box") return [[[0,1],[0,0]], [[0,0],[1,0]], [[1,0],[1,1]], [[1,1],[0,1]]];
+    if (id === "478") {
+      // triangle with sides 4 (in), 7 (hold), 8 (out)
+      const a = 4, b = 7, c = 8;
+      const x = (a*a + c*c - b*b) / (2 * c), y = Math.sqrt(a*a - x*x);
+      const P0 = [0, 0], P1 = [x, -y], P2 = [c, 0];
+      // in: P0 -> P1 (len 4), hold: P1 -> P2 (len 7), out: P2 -> P0 (len 8)
+      return [[P0, P1], [P1, P2], [P2, P0]].map(s => s.map(([u, v]) => [u / c, 1 + v / c - 0.18]));
+    }
+    // cyclic sigh: two climbs (long then short and steep), then one long slide down
+    return [[[0, 1], [0.32, 0.38]], [[0.32, 0.38], [0.42, 0]], [[0.42, 0], [1, 1], "curve"]];
+  }
+  const pt = (seg, p) => {
+    const [a, b, kind] = seg;
+    if (kind === "curve") { const c = [0.95, 0.1], u = 1 - p; return [u*u*a[0] + 2*u*p*c[0] + p*p*b[0], u*u*a[1] + 2*u*p*c[1] + p*p*b[1]]; }
+    return [a[0] + (b[0] - a[0]) * p, a[1] + (b[1] - a[1]) * p];
+  };
+  Device(root, "box", st => {
+    const { w, h, d } = fitCanvas(cv);
+    ctx.clearRect(0, 0, w, h);
+    const segs = shape(st.id);
+    const side = Math.min(w, h) * 0.78, ox = (w - side) / 2, oy = (h - side) / 2;
+    const map = ([u, v]) => [ox + u * side, oy + v * side];
+    const trace = (seg, p0, p1) => { ctx.beginPath(); for (let i = 0; i <= 40; i++) { const q = map(pt(seg, p0 + (p1 - p0) * i / 40)); i ? ctx.lineTo(...q) : ctx.moveTo(...q); } ctx.stroke(); };
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(246,247,251,0.25)"; ctx.lineWidth = 3 * d;
+    segs.forEach(s => trace(s, 0, 1));
+    const active = st.on || st.t > 0;
+    const i = active ? st.b.i : 0, p = active ? st.b.p : 0;
+    ctx.strokeStyle = "#f6f7fb"; ctx.lineWidth = 5 * d;
+    for (let k = 0; k < i; k++) trace(segs[k], 0, 1);
+    if (p > 0) trace(segs[i], 0, p);
+    // labels for each side's seconds
+    ctx.fillStyle = "rgba(246,247,251,0.75)"; ctx.font = `${13 * d}px Outfit, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    segs.forEach((s, k) => {
+      const m = map(pt(s, 0.5)), c = map([0.5, 0.55]);
+      const dx = m[0] - c[0], dy = m[1] - c[1], L = Math.hypot(dx, dy) || 1;
+      ctx.fillText(st.tech.phases[k].d + "s", m[0] + dx / L * 18 * d, m[1] + dy / L * 18 * d);
+    });
+    const dot = map(pt(segs[i], p));
+    ctx.fillStyle = "rgba(255,212,92,0.25)"; ctx.beginPath(); ctx.arc(dot[0], dot[1], 16 * d, 0, 7); ctx.fill();
+    ctx.fillStyle = "#ffd45c"; ctx.beginPath(); ctx.arc(dot[0], dot[1], 8 * d, 0, 7); ctx.fill();
+  }, { icon: true });
+})();
+
+/* ---------- C. Typeform ---------- */
+(() => {
+  const root = document.getElementById("type"), word = root.querySelector(".word"), glow = root.querySelector(".glow"), fill = root.querySelector(".fill");
+  let shown = 0.2;
+  Device(root, "478", (st, dt) => {
+    shown += (st.level - shown) * Math.min(1, dt * 10);
+    const wdth = 50 + shown * 100, wght = 250 + shown * 550;
+    word.style.fontVariationSettings = `"wdth" ${wdth.toFixed(1)}, "wght" ${wght.toFixed(0)}`;
+    word.style.letterSpacing = (shown * 0.02).toFixed(3) + "em";
+    glow.style.opacity = (0.15 + shown * 0.85).toFixed(3);
+    fill.style.width = ((st.on || st.t > 0) ? st.b.p * 100 : 0) + "%";
+    // keep the widest word inside the screen
+    const max = root.clientWidth - 44;
+    word.style.transform = word.scrollWidth > max ? `scale(${max / word.scrollWidth})` : "";
+  }, { useWord: true, bareTime: true, readyWord: "Breathe", readyHint: "Sit comfortably", startText: "Begin" });
+})();
+</script>
+</body>
+</html>
