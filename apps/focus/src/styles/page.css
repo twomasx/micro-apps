@@ -1,9 +1,15 @@
-/* Plain text pages: science, privacy, unlock, restore. */
+/* Text pages: science, privacy, unlock, restore. Phone first, min-width queries only. */
+
+/* A faint glow at the top, so the pages feel like the same night sky as the player. */
+body:has(.page) {
+  background: radial-gradient(140% 60% at 50% 0%, #141a3d 0%, var(--deep) 60%) no-repeat, var(--deep);
+}
+
 .page {
-  max-width: 38rem;
+  max-width: 40rem;
   margin: 0 auto;
-  padding: calc(28px + env(safe-area-inset-top)) calc(22px + env(safe-area-inset-right))
-    calc(40px + env(safe-area-inset-bottom)) calc(22px + env(safe-area-inset-left));
+  padding: calc(8px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right))
+    calc(40px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
   display: grid;
   gap: 16px;
 }
@@ -13,25 +19,181 @@
   font-weight: 400;
   font-size: 2.75rem;
   line-height: 1.05;
+  color: var(--star);
 }
 
-.page p {
+.page p,
+.page li,
+.page dd {
   color: var(--muted);
 }
 
-.page-link {
+.page a:not([class]) {
+  color: var(--gold);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.page .page-strong {
+  color: var(--ink);
+}
+
+.page-section {
+  display: grid;
+  gap: 14px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+}
+
+.page-section h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.875rem;
+  line-height: 1.15;
+  color: var(--star);
+}
+
+.page-list {
+  display: grid;
+  gap: 8px;
+  padding-left: 1.2em;
+}
+
+.page-list li::marker {
+  color: var(--gold);
+}
+
+.page-link,
+.page-back {
   display: inline-flex;
   align-items: center;
   min-height: 48px;
   color: var(--gold);
 }
 
+.page-back {
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.page-back::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin-right: 10px;
+  border-left: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+
+/* ---------- Evidence ---------- */
+
+.label {
+  display: inline-block;
+  padding: 1px 12px;
+  border: 1px solid rgba(230, 200, 143, 0.4);
+  border-radius: 999px;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.labels {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.labels-row {
+  display: grid;
+  gap: 4px;
+}
+
+.labels dd {
+  margin: 0;
+}
+
+.evidence {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 20px 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(16, 20, 47, 0.55);
+  scroll-margin-top: 16px;
+}
+
+.evidence:target {
+  border-color: rgba(230, 200, 143, 0.45);
+}
+
+.evidence-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.75rem;
+  line-height: 1.1;
+  color: var(--star);
+}
+
+.evidence-hz {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+.evidence-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.sources {
+  display: grid;
+  gap: 14px;
+  margin-top: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.source {
+  display: grid;
+  gap: 4px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(230, 200, 143, 0.3);
+}
+
+.source-cite a {
+  display: inline-block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.source-journal {
+  display: block;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
 @media (min-width: 640px) {
   .page {
-    padding-top: 64px;
+    padding-top: calc(32px + env(safe-area-inset-top));
+    gap: 18px;
   }
 
   .page-title {
-    font-size: 3.5rem;
+    font-size: 3.75rem;
+  }
+
+  .labels-row {
+    grid-template-columns: 11rem 1fr;
+    align-items: baseline;
+  }
+
+  .evidence {
+    padding: 24px 26px;
   }
 }

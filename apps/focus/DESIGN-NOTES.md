@@ -39,13 +39,19 @@ Direction: Orbit. This file lists what was decided, what else was tried, and wha
 ## Open for Roger
 
 1. **Serif.** Cormorant is kept from the reference. Its hairlines are thin at small sizes, so it is only used at 21px and up. Say if you want to see another serif.
-2. **"Evidence: pending" label.** It shows until step 3. After that it reads "Some research", "Mixed results" or "Little research". Should it link to the science page?
+2. **Evidence label links to the science page.** The label under the preset name ("Some research", "Mixed results", "Little research") has a small arrow and opens the science page at that preset. Its tap area is 45px tall. Say if you would rather it stayed plain text.
 3. **Lock marks on Relaxed and Deep.** Small and quiet now. They could be removed, since the "60 second preview" label already says it.
 4. **Preview repeats.** A free user can play the 60 second preview of a locked preset again after it ends. Each time ends with the unlock offer. A limit per day is possible if you want one.
 5. **Changing length or mode during a session** restarts the timer and keeps the sound playing.
 6. **Prime mode is the default mode**, so the left button reads "Prime, 10 min" until you switch to Session in the Length sheet.
 7. **App icon.** Not designed yet. It comes with the final checks step.
-8. **Menu.** The three dots open links to The science, Lifetime unlock, Restore purchase and Privacy. Those pages are placeholders until steps 4 and 5.
+8. **Menu.** The three dots open links to The science, Lifetime unlock, Restore purchase and Privacy.
+
+## Text pages
+
+- The science and privacy pages share one quiet layout: a back link at the top, a large Cormorant title, sections split by a faint line, and the same deep blue with a soft glow at the top. No starfield, so long text stays easy to read.
+- On the science page each preset is a card with its label, the two ear frequencies, the note on how close the studies are, and its sources. Each source shows the authors and year as a link to the paper, the title and journal in italics, and what the study found in plain words.
+- Text is 16px or larger everywhere on these pages. Lines stay under about 70 characters on desktop.
 
 ## Audio route
 

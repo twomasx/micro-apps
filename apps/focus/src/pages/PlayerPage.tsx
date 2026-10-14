@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from '../components/Link';
 import { LockIcon, MenuIcon, PauseIcon, PlayIcon } from '../components/Icons';
 import { Orbit } from '../components/Orbit';
 import { IntroSheet, LengthSheet, MenuSheet, OfferSheet, SoundSheet } from '../components/PlayerSheets';
@@ -77,7 +78,15 @@ export function PlayerPage() {
         <div className="head" data-complete={complete}>
           <h1 className="preset-name">{view.title}</h1>
           <p className="preset-line">{view.line}</p>
-          <p className="chip-row">{view.chip && <span className="chip">{view.chip}</span>}</p>
+          <p className="chip-row">
+            {view.chip && view.chipLink ? (
+              <Link to={view.chipLink} className="chip chip-link">
+                {view.chip}
+              </Link>
+            ) : (
+              view.chip && <span className="chip">{view.chip}</span>
+            )}
+          </p>
         </div>
 
         <Orbit beat={toneOf(state).beat} status={state.status} timer={state.timer} companion={tint.companion}>

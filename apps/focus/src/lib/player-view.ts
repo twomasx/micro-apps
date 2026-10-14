@@ -7,6 +7,8 @@ export interface PlayerView {
   line: string;
   /** Small label under the line, or null for none. */
   chip: string | null;
+  /** App path the label links to, or null. The evidence label opens its part of the science page. */
+  chipLink: string | null;
   clock: string;
   /** Small word under the clock. */
   clockLabel: string;
@@ -34,6 +36,7 @@ export function viewOf(state: PlayerState): PlayerView {
   let title = name;
   let line = `${beat} Hz. ${preset ? preset.wording : 'Your own beat rate.'}`;
   let chip: string | null = null;
+  let chipLink: string | null = null;
   if (state.completed === 'prime') {
     title = 'Prime complete.';
     line = 'Start your work now.';
@@ -44,6 +47,7 @@ export function viewOf(state: PlayerState): PlayerView {
     chip = '60 second preview';
   } else if (preset) {
     chip = preset.evidence ?? 'Evidence: pending';
+    if (preset.evidence) chipLink = `science#${preset.id}`;
   }
 
   let clockLabel = limit.preview ? 'Preview' : prime ? 'Prime' : 'Session';
@@ -57,6 +61,7 @@ export function viewOf(state: PlayerState): PlayerView {
     title,
     line,
     chip,
+    chipLink,
     clock: formatClock(remainingMs(state.timer, state.now)),
     clockLabel,
     modeLabel: prime ? 'Prime' : 'Session',

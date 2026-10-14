@@ -158,6 +158,30 @@
   color: var(--gold);
 }
 
+/* The evidence label opens its part of the science page. The tap area is taller than the label. */
+.chip-link {
+  position: relative;
+  text-decoration: none;
+}
+
+.chip-link::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  border-top: 1.25px solid currentColor;
+  border-right: 1.25px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  opacity: 0.8;
+}
+
+.chip-link::before {
+  content: '';
+  position: absolute;
+  inset: -9px -6px;
+}
+
 /* ---------- Orbit and clock ---------- */
 
 .stage {

@@ -3,6 +3,8 @@ import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { PlayerPage } from './pages/PlayerPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { SciencePage } from './pages/SciencePage';
 
 const SITE_TITLE = 'Focus';
 
@@ -33,6 +35,10 @@ function Page({ route }: { route: Route }) {
         );
       }
       return <PlaceholderPage title={PAGE_TITLES.notFound} text="There is no page at this address." />;
+    case 'science':
+      return <SciencePage />;
+    case 'privacy':
+      return <PrivacyPage />;
     case 'notFound':
       return <PlaceholderPage title={PAGE_TITLES.notFound} text="There is no page at this address." />;
     default:

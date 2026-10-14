@@ -20,8 +20,10 @@ describe('viewOf', () => {
     expect(view.playLabel).toBe('Play');
   });
 
-  it('says the evidence is pending until the research is approved', () => {
-    expect(viewOf(ready()).chip).toBe('Evidence: pending');
+  it('shows the evidence label, linked to its part of the science page', () => {
+    const view = viewOf(ready({ selection: 'calm' }));
+    expect(view.chip).toBe('Some research');
+    expect(view.chipLink).toBe('science#calm');
   });
 
   it('marks a locked preset as a 60 second preview for free users only', () => {
@@ -30,7 +32,8 @@ describe('viewOf', () => {
     expect(free.clock).toBe('01:00');
     expect(free.lengthLabel).toBe('60 s');
     expect(free.clockLabel).toBe('Preview');
-    expect(viewOf(ready({ selection: 'deep' }, true)).chip).toBe('Evidence: pending');
+    expect(free.chipLink).toBeNull();
+    expect(viewOf(ready({ selection: 'deep' }, true)).chip).toBe('Mixed results');
   });
 
   it('shows the headphones line until the first session has started', () => {
