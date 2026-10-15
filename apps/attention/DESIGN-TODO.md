@@ -29,6 +29,8 @@ Decisions built the simplest way for now that need your call. What has been deci
 
 20. **The comparison line** on the result ("Compared with people who took it here: higher than 64% of first quick tests (1,234 people)") is plain gray text. It appears only after 200 first results.
 
+21. **Small gray text is a shade darker** than the spec's gray: #6e6c66 instead of #77756f, so it meets the WCAG AA contrast minimum (4.7:1 against 4.1:1). The two grays look nearly the same. The spec gray is still used for strokes and graphics.
+
 ## Device checks still open
 
 - Android Chrome: tok and bell through the speaker and headphones, the double buzz at the start and the single buzz at the end, the screen staying awake, the dimming during a stretch.

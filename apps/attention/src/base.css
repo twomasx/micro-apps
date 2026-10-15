@@ -7,6 +7,9 @@
   --paper: #f3f3ef;
   --ink: #191919;
   --gray: #77756f;
+  /* Gray for small text: the same hue a shade darker, 4.7:1 on paper (WCAG AA needs 4.5:1;
+     #77756f measures 4.1:1). The spec's gray stays for strokes, hairlines and graphics. */
+  --gray-text: #6e6c66;
   /* Hairlines and the stretch dimming are ink at low strength, not new colors. */
   --hair: rgb(25 25 25 / 0.14);
   --dim: rgb(25 25 25 / 0.07);
@@ -108,7 +111,7 @@ canvas {
 }
 
 .lead {
-  color: var(--gray);
+  color: var(--gray-text);
   margin-top: 8px;
 }
 
@@ -117,7 +120,7 @@ canvas {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .tag {
@@ -126,7 +129,7 @@ canvas {
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--gray);
+  color: var(--gray-text);
   border: 1px solid currentColor;
   border-radius: 2px;
   padding: 0 5px;
@@ -170,7 +173,7 @@ canvas {
   min-width: 44px;
   display: inline-flex;
   align-items: center;
-  color: var(--gray);
+  color: var(--gray-text);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
@@ -230,7 +233,7 @@ canvas {
 
 .day-mark-of {
   font-size: 0.75rem;
-  color: var(--gray);
+  color: var(--gray-text);
   margin-top: 2px;
   letter-spacing: 0.03em;
 }
@@ -270,7 +273,7 @@ canvas {
 
 .stage-time-label {
   font-size: 0.8125rem;
-  color: var(--gray);
+  color: var(--gray-text);
   margin-top: 8px;
   letter-spacing: 0.04em;
 }
@@ -315,7 +318,7 @@ canvas {
 }
 
 .last-session-facts {
-  color: var(--gray);
+  color: var(--gray-text);
   font-size: 0.9375rem;
 }
 
@@ -378,7 +381,7 @@ canvas {
 }
 
 .size-option[data-locked='true'] {
-  color: var(--gray);
+  color: var(--gray-text);
   cursor: default;
   box-shadow: inset 0 0 0 1px var(--hair);
 }
@@ -390,7 +393,7 @@ canvas {
 
 .sizes-note {
   font-size: 0.875rem;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .page-nav {
@@ -405,7 +408,7 @@ canvas {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 /* ---------- Unlock offer ---------- */
@@ -431,7 +434,7 @@ canvas {
 }
 
 .unlock-offer-note {
-  color: var(--gray);
+  color: var(--gray-text);
   font-size: 0.9375rem;
 }
 
@@ -487,7 +490,7 @@ canvas {
 }
 
 .focus-total-of {
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .session .stage {
@@ -523,11 +526,11 @@ canvas {
 }
 
 .session[data-phase='stretch'] .message-line {
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .message-hint {
-  color: var(--gray);
+  color: var(--gray-text);
   font-size: 0.9375rem;
   margin-top: 4px;
 }
@@ -573,12 +576,12 @@ canvas {
   content: counter(step);
   font-family: var(--mincho);
   font-weight: 500;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .intro-sounds,
 .intro-probe {
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 /* ---------- Session complete ---------- */
@@ -607,7 +610,7 @@ canvas {
 
 .fact dt {
   font-size: 0.8125rem;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .fact dd {
@@ -620,11 +623,11 @@ canvas {
 
 .fact-of {
   font-size: 1rem;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .probe-summary {
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .complete .session-actions {
@@ -691,12 +694,12 @@ canvas {
 
 .setting-value {
   font-family: var(--mincho);
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .setting-help {
   font-size: 0.9375rem;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .range {
@@ -846,7 +849,7 @@ canvas {
 
 .length-detail,
 .test-note {
-  color: var(--gray);
+  color: var(--gray-text);
   font-size: 0.9375rem;
 }
 
@@ -908,7 +911,7 @@ canvas {
 }
 
 .sart-feedback[data-kind='correct'] {
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .sart-stage[data-show='digit'] .sart-digit,
@@ -950,13 +953,13 @@ canvas {
 .score-of {
   font-size: 0.875rem;
   font-family: var(--gothic);
-  color: var(--gray);
+  color: var(--gray-text);
   margin-top: 8px;
 }
 
 .score-compare {
   text-align: center;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .result-facts {
@@ -972,7 +975,7 @@ canvas {
   font-family: var(--gothic);
   font-weight: 400;
   font-size: 0.875rem;
-  color: var(--gray);
+  color: var(--gray-text);
   line-height: 1.4;
   margin-top: 4px;
 }
@@ -987,7 +990,7 @@ canvas {
 .result-notes {
   display: grid;
   gap: 10px;
-  color: var(--gray);
+  color: var(--gray-text);
   font-size: 0.9375rem;
 }
 
@@ -1020,7 +1023,7 @@ canvas {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .page-strong {
@@ -1054,7 +1057,7 @@ canvas {
 }
 
 .page-list li::marker {
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 ol.page-list {
@@ -1069,7 +1072,7 @@ ol.page-list {
 .section-help,
 .locked-note,
 .progress-next {
-  color: var(--gray);
+  color: var(--gray-text);
   font-size: 0.9375rem;
 }
 
@@ -1099,7 +1102,7 @@ ol.page-list {
   font-weight: 500;
   font-size: 0.9375rem;
   letter-spacing: 0.06em;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .days {
@@ -1128,7 +1131,7 @@ ol.page-list {
 
 .day-date,
 .day-facts {
-  color: var(--gray);
+  color: var(--gray-text);
   font-size: 0.875rem;
 }
 
@@ -1185,7 +1188,7 @@ ol.page-list {
   font-family: var(--gothic);
   font-weight: 400;
   font-size: 0.875rem;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .chart-x {
@@ -1194,7 +1197,7 @@ ol.page-list {
   font-family: var(--gothic);
   font-weight: 400;
   font-size: 0.8125rem;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .chart-x[data-edge='start'] {
@@ -1219,7 +1222,7 @@ ol.page-list {
   min-height: 44px;
   display: flex;
   align-items: center;
-  color: var(--gray);
+  color: var(--gray-text);
   font-size: 0.9375rem;
   cursor: pointer;
 }
@@ -1270,7 +1273,7 @@ ol.page-list {
 .price-part + .price-part {
   font-size: 1.0625rem;
   font-weight: 500;
-  color: var(--gray);
+  color: var(--gray-text);
 }
 
 .page-status:empty {
@@ -1297,7 +1300,7 @@ ol.page-list {
 }
 
 .code-help {
-  color: var(--gray);
+  color: var(--gray-text);
   font-size: 0.9375rem;
 }
 
@@ -1326,7 +1329,7 @@ ol.page-list {
 }
 
 .code-input::placeholder {
-  color: var(--gray);
+  color: var(--gray-text);
   opacity: 0.6;
 }
 

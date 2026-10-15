@@ -154,3 +154,15 @@ From practice day 6 a free user's Today shows the offer where Begin was, with th
 **The comparison.** Built from first tests of each length only, from the current score version. Until 200 such results exist the answer is "not ready" and the result screen shows nothing. After that it returns how many first results had each score from 0 to 100, and the phone works out "higher than N% of first quick tests (1,234 people)", counting ties as half. The answer is cached for an hour at Cloudflare's edge and in the browser.
 
 **Known gap.** Anyone could post made-up summaries that pass the checks and tilt the comparison. There is no account or device id to stop that, by design. If it happens, the fix is on the server (for example a daily cap, or dropping outliers), without changing the app.
+
+## Done checks (step 7, 2026-10-15)
+
+Run against the production build (`pnpm build`, `vite preview` with the functions behind it, service worker on).
+
+- `pnpm typecheck`, `pnpm test`, `pnpm lint`, `pnpm build`: all pass for the whole repo.
+- Main flows at 375, 768 and 1280 px in Chromium: a training session from first visit to session complete, the practice round, a full Quick test in real time (digits 250 ms, one to the next 1150 ms, worst onset 5 ms off), progress, science, privacy, unlock, restore. No console errors, no sideways scroll.
+- JavaScript: one file, 95.9 KB gzipped (budget 150 KB). The sound check page is not in the build.
+- Largest paint on a throttled phone (4x slower CPU, 1.6 Mbps, 150 ms latency, cold cache): about 1.02 s over 3 runs (budget 2.5 s), 177 KB transferred.
+- Accessibility (axe, WCAG 2.1 A and AA): no violations on any page after two fixes. The day mark's label moved into text for screen readers (aria-label is not read on a paragraph). Small gray text uses `--gray-text` #6e6c66 (4.7:1 on paper), because the spec's #77756f measures 4.1:1 and AA needs 4.5:1. The spec gray stays for brush strokes and graphics.
+- Android Back closes the settings sheet and stays on the page. The app opens offline once it has been loaded.
+- During a stretch the top bar and circle row fade to 35% on purpose (eyes are closed). They return to full contrast at the bell.
