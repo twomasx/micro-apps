@@ -154,9 +154,13 @@ export function buildStroke(seed: number, bristleCount = 24, sampleCount = 420):
     });
   }
 
+  return { samples, bristles: makeBristles(random, bristleCount), maxHalf };
+}
+
+function makeBristles(random: () => number, count: number): Bristle[] {
   const bristles: Bristle[] = [];
-  for (let j = 0; j < bristleCount; j++) {
-    const offset = -1 + (2 * (j + 0.5)) / bristleCount + (random() - 0.5) * (1.2 / bristleCount);
+  for (let j = 0; j < count; j++) {
+    const offset = -1 + (2 * (j + 0.5)) / count + (random() - 0.5) * (1.2 / count);
     // The edges of a brush hold less ink than the middle.
     const edge = Math.abs(offset);
     const ink = Math.min(1, Math.max(0, 0.35 + 0.65 * random() - 0.35 * edge * edge));
@@ -168,8 +172,78 @@ export function buildStroke(seed: number, bristleCount = 24, sampleCount = 420):
       runsOut: 0.7 + 0.32 * ink,
     });
   }
+  return bristles;
+}
 
-  return { samples, bristles, maxHalf };
+/** A line stays wet for most of its length and only dries at the very end. */
+export function lineDrynessAt(t: number): number {
+  return 0.9 * smoothstep(0.8, 1, t) ** 1.2;
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+/** Catmull-Rom point between p1 and p2. */
+function catmull(p0: Point, p1: Point, p2: Point, p3: Point, u: number): Point {
+  const u2 = u * u;
+  const u3 = u2 * u;
+  const f = (a: number, b: number, c: number, d: number) =>
+    0.5 * (2 * b + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u2 + (-a + 3 * b - 3 * c + d) * u3);
+  return { x: f(p0.x, p1.x, p2.x, p3.x), y: f(p0.y, p1.y, p2.y, p3.y) };
+}
+
+/**
+ * A brushed line through `points` (in drawing units, like CSS pixels), for the charts.
+ * Smooth through every point, with the same press, wobble, ragged edge and dry end as the enso.
+ */
+export function buildLineStroke(points: readonly Point[], seed: number, width: number, bristleCount = 10): Stroke {
+  const random = seededRandom(seed);
+  const noiseSeed = Math.floor(random() * 1e6);
+  const dense: Point[] = [];
+  if (points.length >= 2) {
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(0, i - 1)]!;
+      const p1 = points[i]!;
+      const p2 = points[i + 1]!;
+      const p3 = points[Math.min(points.length - 1, i + 2)]!;
+      const steps = Math.max(4, Math.ceil(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 1.5));
+      for (let k = 0; k < steps; k++) dense.push(catmull(p0, p1, p2, p3, k / steps));
+    }
+    dense.push(points[points.length - 1]!);
+  }
+  const lengths = [0];
+  for (let i = 1; i < dense.length; i++) {
+    lengths.push(lengths[i - 1]! + Math.hypot(dense[i]!.x - dense[i - 1]!.x, dense[i]!.y - dense[i - 1]!.y));
+  }
+  const total = lengths.at(-1) || 1;
+  const samples: StrokeSample[] = [];
+  let maxHalf = 0;
+  for (let i = 0; i < dense.length; i++) {
+    const t = lengths[i]! / total;
+    const a = dense[Math.max(0, i - 1)]!;
+    const b = dense[Math.min(dense.length - 1, i + 1)]!;
+    const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    const nx = (b.y - a.y) / len;
+    const ny = -(b.x - a.x) / len;
+    // A hand never holds a line perfectly straight.
+    const drift = (valueNoise(noiseSeed + 3, lengths[i]! / 40) - 0.5) * width * 0.35;
+    const half = (widthAt(Math.max(t, 0.02), valueNoise(noiseSeed, lengths[i]! / 60)) / (STROKE_WIDTH / 2)) * (width / 2);
+    maxHalf = Math.max(maxHalf, half);
+    samples.push({
+      t,
+      x: dense[i]!.x + nx * drift,
+      y: dense[i]!.y + ny * drift,
+      nx,
+      ny,
+      half,
+      outer: 1 + 0.1 * (valueNoise(noiseSeed + 1, lengths[i]! / 6) - 0.5),
+      inner: 1 + 0.1 * (valueNoise(noiseSeed + 2, lengths[i]! / 6) - 0.5),
+      dryness: lineDrynessAt(t),
+    });
+  }
+  return { samples, bristles: makeBristles(random, bristleCount), maxHalf };
 }
 
 /**

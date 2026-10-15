@@ -20,6 +20,10 @@ Decisions built the simplest way for now that need your call. What has been deci
 13. **"Timing on this screen"** is shown to everyone, folded away under the result. It could be hidden from users and kept for the admin dashboard.
 14. **The Stop link** stays on screen during the test. Taps on it never count as answers.
 
+15. **Progress runs down the page.** The spec says "weeks of circles like a scroll". On desktop it could run sideways like a real hand scroll, with days as columns. Vertical is the simpler start and works the same on every screen.
+16. **Free history** shows practice days 1 to 5 and the latest test, with one line about the unlock. The longest-stretch chart and the circles for those days stay visible.
+17. **The progress charts** sit above the circles. The circles could come first, with the charts after.
+
 ## Device checks still open
 
 - Android Chrome: tok and bell through the speaker and headphones, the double buzz at the start and the single buzz at the end, the screen staying awake, the dimming during a stretch.

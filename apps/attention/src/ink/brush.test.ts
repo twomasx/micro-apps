@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bodyShare, bristleInks, buildStroke, drynessAt, STROKE_WIDTH, SWEEP_MAX, SWEEP_MIN, valueNoise, widthAt } from './brush';
+import { bodyShare, bristleInks, buildLineStroke, buildStroke, drynessAt, lineDrynessAt, STROKE_WIDTH, SWEEP_MAX, SWEEP_MIN, valueNoise, widthAt } from './brush';
 
 describe('enso brush', () => {
   it('draws the same stroke for the same seed, and a different one for another', () => {
@@ -63,5 +63,37 @@ describe('enso brush', () => {
       expect(v).toBeLessThanOrEqual(1);
       expect(Math.abs(valueNoise(11, x + 0.01) - v)).toBeLessThan(0.05);
     }
+  });
+});
+
+describe('ink line', () => {
+  const points = [
+    { x: 0, y: 50 },
+    { x: 100, y: 20 },
+    { x: 200, y: 40 },
+  ];
+
+  it('passes close to every point', () => {
+    const { samples } = buildLineStroke(points, 3, 4);
+    for (const p of points) {
+      const nearest = Math.min(...samples.map((s) => Math.hypot(s.x - p.x, s.y - p.y)));
+      expect(nearest).toBeLessThan(3);
+    }
+  });
+
+  it('is wet for most of its length and dry only at the end', () => {
+    expect(lineDrynessAt(0.5)).toBe(0);
+    expect(lineDrynessAt(0.8)).toBe(0);
+    expect(lineDrynessAt(1)).toBeGreaterThan(0.8);
+  });
+
+  it('keeps about the width asked for', () => {
+    const { maxHalf } = buildLineStroke(points, 3, 6);
+    expect(maxHalf).toBeGreaterThan(2.5);
+    expect(maxHalf).toBeLessThan(5);
+  });
+
+  it('draws nothing for a single point', () => {
+    expect(buildLineStroke([{ x: 0, y: 0 }], 1, 4).samples).toEqual([]);
   });
 });

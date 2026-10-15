@@ -122,3 +122,15 @@ These are frame times: when the browser started drawing a frame, not when light 
 **Look.** Digits in Shippori Mincho, five sizes from 40% to 100% of the largest (which is 60% of the screen width, at most 340 px). The original used a Symbol typeface. The mask is a thin ink circle with an X, drawn as a plain line rather than a brush stroke, so it reads the same every time and never competes with the digits. Nothing else is on screen during the test except a small Stop link.
 
 **Result.** The attention score in large Mincho inside a full brush enso, then the parts it is built from, with taps on a 3 first and marked as the main measure.
+
+## Progress, science and privacy (step 4)
+
+**Progress reads like a hand scroll.** Charts first (the longest stretch held by day, then each test length's scores), then every circle, day by day, in program weeks of 5 practice days as in the study. Each day is a thin rule, the day number in Mincho, its date in gray, then all its circles in one wrapped block. Days without practice don't appear, so there are never gaps or missed-day marks.
+
+**One canvas per day, not one per circle.** Thirty days can hold over a thousand circles. Each day's block is a single canvas, drawn only once it scrolls into view, and small circles use a lighter stroke (140 samples, 7 bristles) that looks the same at 22 px.
+
+**Ink line charts.** The same brush as the enso, drawn along a smooth curve through the values: a press at the start, a slight hand wobble, ragged edges and a short dry end. Ink dots (8 px) mark each value. Following charting practice: one series per chart, so the heading names it and there is no legend. One axis. A faint baseline. Only the first, highest and last values are printed, and an end label moves below its dot when the line rises away from it, so the line never runs through it. Tap or hover anywhere to read any value, with a ring on the chosen dot. "Show the numbers" opens a plain table, which screen readers also get.
+
+**Scales.** Stretch lengths start at zero, so twice as long sits twice as high. Scores use a window in steps of 10 around your results (at least 20 points tall, inside 0 to 100), so a real change of a few points is visible without filling the chart.
+
+**Science page.** Every number is from the paper, and each chance figure is in plain words ("about 1 time in 60"). It says where we differ from the study: daily time, the test used (SART, not the TOVA), and what is ours (the limits, tick probes, weekly tests). A test keeps the worked score example in step with the scoring code.

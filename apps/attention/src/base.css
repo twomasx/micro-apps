@@ -997,3 +997,247 @@ canvas {
     max-width: none;
   }
 }
+
+/* ---------- Reading pages: science, privacy, progress ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.page {
+  gap: 22px;
+  padding-bottom: calc(40px + var(--safe-bottom));
+}
+
+.page-back,
+.page-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--gray);
+}
+
+.page-strong {
+  font-family: var(--mincho);
+  font-weight: 700;
+  font-size: 1.1875rem;
+  line-height: 1.45;
+}
+
+.page-section {
+  display: grid;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hair);
+  scroll-margin-top: 16px;
+}
+
+.page-section h2,
+.section-title {
+  font-family: var(--mincho);
+  font-weight: 700;
+  font-size: 1.375rem;
+  line-height: 1.3;
+}
+
+.page-list {
+  display: grid;
+  gap: 10px;
+  padding-left: 18px;
+  list-style: disc;
+}
+
+.page-list li::marker {
+  color: var(--gray);
+}
+
+ol.page-list {
+  list-style: decimal;
+}
+
+.sources {
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+
+.section-help,
+.locked-note,
+.progress-next {
+  color: var(--gray);
+  font-size: 0.9375rem;
+}
+
+.locked-note {
+  padding: 12px 14px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+
+/* ---------- Progress ---------- */
+
+.progress-section {
+  display: grid;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hair);
+}
+
+.week {
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.week-title {
+  font-family: var(--mincho);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  letter-spacing: 0.06em;
+  color: var(--gray);
+}
+
+.days {
+  display: grid;
+}
+
+/* Days run down the page like a hand scroll: a thin rule, the day, its circles. */
+.day {
+  display: grid;
+  gap: 8px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.day-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.day-number {
+  font-family: var(--mincho);
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.day-date,
+.day-facts {
+  color: var(--gray);
+  font-size: 0.875rem;
+}
+
+.circle-grid {
+  width: 100%;
+}
+
+/* ---------- Ink charts ---------- */
+
+.chart {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.chart-readout {
+  min-height: 1.55em;
+  font-family: var(--mincho);
+  font-weight: 500;
+}
+
+.chart-plot {
+  position: relative;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+
+.chart-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.chart-value,
+.chart-x {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  font-family: var(--mincho);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.chart-value[data-place='above'] {
+  transform: translate(-50%, calc(-100% - 10px));
+}
+
+.chart-value[data-place='below'] {
+  transform: translate(-50%, 10px);
+}
+
+.chart-readout[data-state='hint'] {
+  font-family: var(--gothic);
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: var(--gray);
+}
+
+.chart-x {
+  bottom: 0;
+  transform: translateX(-50%);
+  font-family: var(--gothic);
+  font-weight: 400;
+  font-size: 0.8125rem;
+  color: var(--gray);
+}
+
+.chart-x[data-edge='start'] {
+  transform: translateX(-18px);
+}
+
+.chart-x[data-edge='end'] {
+  transform: translateX(calc(-100% + 18px));
+}
+
+.chart-marker {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--ink);
+  pointer-events: none;
+}
+
+.chart-table summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--gray);
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.chart-table table {
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.chart-table th,
+.chart-table td {
+  text-align: left;
+  padding: 4px 18px 4px 0;
+  font-weight: 400;
+  border-bottom: 1px solid var(--hair);
+}
+
+.chart-table td {
+  font-family: var(--mincho);
+  font-variant-numeric: lining-nums tabular-nums;
+}

@@ -69,3 +69,11 @@ describe('practice feedback', () => {
     expect(practiceFeedback(t(5))).toBe('missed');
   });
 });
+
+describe('the worked example on the science page', () => {
+  it('comes to 88: 1 tap on twelve 3s, 2 missed of 96, CV 0.20', () => {
+    const raw = 50 * (11 / 12) + 25 * (94 / 96) + 25 * steadiness(0.2);
+    expect(Math.round(raw)).toBe(88);
+    expect(steadiness(0.2)).toBeCloseTo(0.71, 2);
+  });
+});

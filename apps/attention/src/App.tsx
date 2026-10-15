@@ -3,6 +3,9 @@ import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { ProgressPage } from './pages/ProgressPage';
+import { SciencePage } from './pages/SciencePage';
 import { SessionPage } from './pages/SessionPage';
 import { TestPage } from './pages/TestPage';
 import { TodayPage } from './pages/TodayPage';
@@ -34,6 +37,12 @@ function Page({ route }: { route: Route }) {
       return <SessionPage />;
     case 'test':
       return <TestPage />;
+    case 'progress':
+      return <ProgressPage />;
+    case 'science':
+      return <SciencePage />;
+    case 'privacy':
+      return <PrivacyPage />;
     case 'sounds':
       if (SoundsPage) {
         return (
@@ -55,7 +64,10 @@ export function App() {
 
   useEffect(() => {
     document.title = route.name === 'today' ? SITE_TITLE : `${PAGE_TITLES[route.name]} | ${SITE_TITLE}`;
-    if (!window.location.hash) window.scrollTo(0, 0);
+    // A link to a section (science#score) scrolls there once the page is drawn.
+    const hash = window.location.hash.slice(1);
+    if (hash) document.getElementById(hash)?.scrollIntoView();
+    else window.scrollTo(0, 0);
   }, [route]);
 
   return <Page route={route} />;

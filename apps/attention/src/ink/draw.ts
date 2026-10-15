@@ -1,4 +1,4 @@
-import { bodyShare, bristleInks, buildStroke, type Stroke } from './brush';
+import { bodyShare, bristleInks, buildLineStroke, buildStroke, type Stroke } from './brush';
 
 /** The only three colors in the app. Kept in sync with the tokens in base.css. */
 export const PAPER = '#f3f3ef';
@@ -12,7 +12,8 @@ export function strokeFor(seed: number, bristles: number): Stroke {
   const key = `${seed}:${bristles}`;
   let stroke = cache.get(key);
   if (!stroke) {
-    stroke = buildStroke(seed, bristles);
+    // Small circles need far fewer samples along the ring.
+    stroke = buildStroke(seed, bristles, bristles <= 7 ? 140 : bristles <= 12 ? 240 : 420);
     if (cache.size > 400) cache.clear();
     cache.set(key, stroke);
   }
@@ -45,20 +46,63 @@ function mix(a: string, b: string, k: number): string {
 
 /** Paints one enso. The caller clears the canvas. */
 export function drawEnso(ctx: CanvasRenderingContext2D, seed: number, o: DrawOptions): void {
+  // Small circles keep more of their dry tail, or it vanishes below a pixel and they read as a C.
+  paintStroke(ctx, strokeFor(seed, bristlesForRadius(o.radius)), {
+    ox: o.cx,
+    oy: o.cy,
+    scale: o.radius,
+    progress: o.progress,
+    fade: o.fade,
+    small: o.radius < 60,
+  });
+}
+
+/** A brushed chart line through points given in CSS pixels, drawn at `dpr`. */
+export function drawInkLine(
+  ctx: CanvasRenderingContext2D,
+  points: readonly { x: number; y: number }[],
+  o: { seed: number; width: number; dpr: number },
+): void {
+  if (points.length < 2) return;
+  const stroke = buildLineStroke(points, o.seed, o.width);
+  paintStroke(ctx, stroke, { ox: 0, oy: 0, scale: o.dpr, progress: 1, fade: 0, small: true });
+}
+
+/** An ink dot marking a data point, in CSS pixels. */
+export function drawInkDot(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, dpr: number): void {
+  ctx.save();
+  ctx.fillStyle = INK;
+  ctx.globalAlpha = 0.96;
+  ctx.beginPath();
+  ctx.arc(x * dpr, y * dpr, radius * dpr, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+interface PaintOptions {
+  /** Drawing position of the stroke's origin, and its units in canvas pixels. */
+  ox: number;
+  oy: number;
+  scale: number;
+  progress: number;
+  fade: number;
+  /** Thicker hairs and less dryness, for strokes only a few pixels wide. */
+  small: boolean;
+}
+
+function paintStroke(ctx: CanvasRenderingContext2D, stroke: Stroke, o: PaintOptions): void {
   if (o.progress <= 0) return;
-  const stroke = strokeFor(seed, bristlesForRadius(o.radius));
   const { samples, bristles, maxHalf } = stroke;
   const last = Math.min(samples.length - 1, Math.floor(o.progress * (samples.length - 1)));
   const color = mix(INK, GRAY, o.fade);
   // A drifted circle also thins out, so it reads lighter than gray type.
   const alpha = 0.96 - 0.38 * o.fade;
-  // Small circles keep more of their dry tail, or it vanishes below a pixel and they read as a C.
-  const small = o.radius < 60;
+  const small = o.small;
   const dryScale = small ? 0.45 : 1;
   const at = (i: number, side: number) => {
     const s = samples[i]!;
     const d = side * s.half * bodyShare(s.dryness) * (side > 0 ? s.outer : s.inner);
-    return [o.cx + (s.x + s.nx * d) * o.radius, o.cy + (s.y + s.ny * d) * o.radius] as const;
+    return [o.ox + (s.x + s.nx * d) * o.scale, o.oy + (s.y + s.ny * d) * o.scale] as const;
   };
 
   ctx.save();
@@ -84,10 +128,10 @@ export function drawEnso(ctx: CanvasRenderingContext2D, seed: number, o: DrawOpt
     ctx.closePath();
     // Round off the end where the brush landed. Same path, one fill, so no darker overlap.
     const s0 = samples[0]!;
-    const sx = o.cx + s0.x * o.radius;
-    const sy = o.cy + s0.y * o.radius;
-    ctx.moveTo(sx + s0.half * o.radius, sy);
-    ctx.arc(sx, sy, s0.half * o.radius, 0, Math.PI * 2);
+    const sx = o.ox + s0.x * o.scale;
+    const sy = o.oy + s0.y * o.scale;
+    ctx.moveTo(sx + s0.half * o.scale, sy);
+    ctx.arc(sx, sy, s0.half * o.scale, 0, Math.PI * 2);
     ctx.fill();
   }
   if (samples[last]!.dryness <= 0) {
@@ -97,12 +141,12 @@ export function drawEnso(ctx: CanvasRenderingContext2D, seed: number, o: DrawOpt
 
   // The dry part: separate bristles that break into streaks and run out one by one.
   // Bristles overlap a little so the start of the dry part still reads as solid.
-  const lineWidth = Math.max(small ? 1.2 : 0.8, ((maxHalf * 2 * o.radius) / bristles.length) * 1.35);
+  const lineWidth = Math.max(small ? 1.2 : 0.8, ((maxHalf * 2 * o.scale) / bristles.length) * 1.35);
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.lineWidth = lineWidth;
   // Bristles sit inside the stroke's edge, so the dry part is no wider than the body was.
-  const inset = lineWidth / 2 / o.radius;
+  const inset = lineWidth / 2 / o.scale;
   for (const bristle of bristles) {
     ctx.globalAlpha = alpha * (0.7 + 0.3 * bristle.ink);
     ctx.beginPath();
@@ -116,8 +160,8 @@ export function drawEnso(ctx: CanvasRenderingContext2D, seed: number, o: DrawOpt
       }
       // A drying brush splays: bristles spread a little wider than the body was.
       const d = bristle.offset * Math.max(0, s.half * (1 + 0.35 * s.dryness) - inset);
-      const x = o.cx + (s.x + s.nx * d) * o.radius;
-      const y = o.cy + (s.y + s.ny * d) * o.radius;
+      const x = o.ox + (s.x + s.nx * d) * o.scale;
+      const y = o.oy + (s.y + s.ny * d) * o.scale;
       if (pen) ctx.lineTo(x, y);
       else {
         ctx.moveTo(x, y);
