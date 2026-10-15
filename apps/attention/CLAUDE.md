@@ -23,7 +23,7 @@ As with focus and breathwork, Roger picked a direction and wants Claude to desig
 - Sumi ink on cool paper. Paper `#f3f3ef`, ink `#191919`, gray `#77756f` for secondary text and drifted strokes. No other colors. No red seal or colored tags.
 - Fonts: Shippori Mincho for headings and numbers, Zen Kaku Gothic New for everything else. Self-host Latin subsets, as the other apps do.
 - During a stretch, a brush slowly draws an enso (the Zen circle) over the length of the stretch. Held: the circle stays in ink. Drifted: it fades to gray. Each session leaves a row of small circles, one per stretch.
-- Day mark, top right: a thin hand-drawn open circle with the day number inside and "of 42" underneath. Keep this exact idea.
+- Day mark, top right: a thin hand-drawn open circle with the day number inside and "of 30" underneath. Keep this exact idea.
 - The brush stroke should feel hand-made: varying width, slight wobble, a dry-brush end. Canvas or SVG, your choice.
 - The screen should be very calm during a stretch, since eyes are closed. Consider dimming the page slightly while a stretch runs.
 - Things to explore and show Roger: the session-complete moment; a progress page that shows weeks of circles like a scroll; test results drawn as an ink line; how the circle looks on tablet and desktop.
@@ -38,16 +38,16 @@ Note design decisions and alternatives you tried in `DESIGN-NOTES.md`.
 1. A low, soft "tok" sound means a stretch has begun. Vibrate `[15, 60, 15]` on Android.
 2. The user keeps attention on the breath, eyes closed.
 3. At the end, a bright soft bell plays (vibrate once) and the screen asks: "Did you stay with your breath the whole time?" with two buttons: "I drifted" and "I stayed".
-4. Next stretch length: after "I stayed", longer; after "I drifted", shorter. Starting values unless the paper says otherwise: first stretch 15 s, up 10% (at least 1 s), down 15%, never below 10 s or above 10 minutes.
+4. Next stretch length: after "I stayed", longer; after "I drifted", shorter. As in the paper: first stretch 20 s, up 10% (at least 1 s), down 20%. Our limits: never below 10 s or above 10 minutes.
 5. About 3 seconds after answering, the next stretch starts with the "tok".
 
 **Sessions**
 
-- A session is measured in focus time (the sum of stretch lengths), not clock time. Session sizes: 10, 15 or 20 minutes of focus time. When the target is reached, the current stretch finishes and the session ends.
-- The next session starts from the level the last one reached, minus a little (start at 80% of it) as a warm-up.
+- A session is measured in focus time (the sum of stretch lengths), not clock time. Session sizes: 10, 15 or 20 minutes of focus time, or "Follow the study schedule": 20 minutes in weeks 1 and 2 (practice days 1 to 10), 25 in weeks 3 and 4 (days 11 to 20), 30 in weeks 5 and 6 (days 21 to 30 and after). When the target is reached, the current stretch finishes and the session ends.
+- The next session starts at the level the last one reached, with no warm-up, as in the paper.
 - First session: short plain instructions on screen. "Sit comfortably. Close your eyes. Rest your attention on the feeling of your breath. When you notice your mind has wandered, that is normal. Answer honestly when the bell rings."
 - Keep the screen awake during a session (Screen Wake Lock). If the page is hidden, pause the session and say so when the user returns.
-- Missing days never shows a broken streak, a warning or guilt. "Day 1 of 42" counts practice days, not calendar days.
+- Missing days never shows a broken streak, a warning or guilt. "Day 1 of 30" counts practice days, not calendar days. The study had 30 practice days: 5 a week for 6 weeks.
 
 **Sounds** (Web Audio, generated in code, no audio files)
 
@@ -93,7 +93,7 @@ Self-report can be wrong, so in about 1 in 4 stretches a very quiet tick plays a
 **When to take it**
 
 - Prompt for a baseline before the first training session.
-- Prompt once a week during the program (after practice days 7, 14, 21, 28, 35, 42).
+- Prompt once a week during the program (after practice days 5, 10, 15, 20, 25 and 30).
 - The test is always free and can be taken any time.
 - Results over time: a simple ink line chart. When showing change, say plainly: "Scores usually rise a little on a second test just from practice. Compare with your first few results, not just the last one."
 
@@ -109,11 +109,11 @@ Price lives in `config/products.json`: one product, `lifetime`, $6.99 (699 cents
 
 | Free | Lifetime unlock |
 | --- | --- |
-| The attention test, any time, both lengths | The full 42-day program and beyond |
-| Training days 1 to 7 | Session sizes 10, 15 and 20 minutes (free is 10) |
+| The attention test, any time, both lengths | The full 30-day program and beyond |
+| Training days 1 to 5 | Session sizes 10, 15 and 20 minutes, and "Follow the study schedule" (free is 10) |
 | Tick probes | Full progress history: every session's circles, longest stretch by day, all test results |
 
-- After day 7 the free user can still take the test and sees the unlock offer when starting a session.
+- After day 5 the free user can still take the test and sees the unlock offer when starting a session.
 - Unlock code, restore screen and checkout exactly as in focus and breathwork, through `packages/payments`.
 
 ## Honest claims
@@ -129,7 +129,7 @@ Price lives in `config/products.json`: one product, `lifetime`, $6.99 (699 cents
 | `/` | Today: day mark, start a session, the last session's circles, a prompt for this week's test when due. |
 | `/session` | The training loop. |
 | `/test` | Choose Quick or Full, practice round the first time, the test, the result. |
-| `/progress` | History: circles by day, longest stretch over time, test results line (paid beyond day 7). |
+| `/progress` | History: circles by day, longest stretch over time, test results line (paid beyond day 5). |
 | `/unlock` | What the unlock adds, the price, the buy button. Stripe returns here. |
 | `/restore` | Enter an unlock code. |
 | `/science` | The study, how the training adapts, the SART, how the score is calculated, what is experimental. |
