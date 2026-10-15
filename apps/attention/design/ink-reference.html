@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Attention training: Ink</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=Albert+Sans:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --page: #29292c; --page-ink: #ececee; --page-muted: #a7a7ad; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--page); color: var(--page-ink); }
+  body { font-family: "Albert Sans", system-ui, sans-serif; font-size: 16px; line-height: 1.5; padding: 32px 16px 64px; -webkit-font-smoothing: antialiased; }
+  .intro, .option, .footnote { max-width: 380px; margin-left: auto; margin-right: auto; }
+  .intro { margin-bottom: 32px; }
+  .intro h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .intro p, .caption p, .footnote { color: var(--page-muted); font-size: 15px; }
+  .option { margin-bottom: 56px; }
+  .caption { margin-top: 14px; }
+  .caption h2 { font-size: 18px; font-weight: 600; }
+  .phone { position: relative; width: 100%; aspect-ratio: 9 / 16; border-radius: 30px; overflow: hidden; isolation: isolate; user-select: none; -webkit-user-select: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+  [hidden] { display: none !important; }
+  .view { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  canvas { display: block; }
+  .ask { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ask button { min-height: 56px; font-size: 17px; }
+
+  /* ---------- C. Ink ---------- */
+  .ink { --paper: #f3f3ef; --sumi: #191919; --muted: #77756f; --seal: #b3352b; background: var(--paper); color: var(--sumi); font-family: "Zen Kaku Gothic New", sans-serif; }
+  .ink .view { padding: 26px 24px 22px; }
+  .ink .top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .ink h3 { font-family: "Shippori Mincho", serif; font-weight: 700; font-size: 30px; line-height: 1.15; }
+  .ink .day { position: relative; width: 48px; flex: none; display: flex; flex-direction: column; align-items: center; color: var(--sumi); }
+  .ink .day b { position: absolute; top: 0; height: 48px; display: grid; place-items: center; width: 48px; font-family: "Shippori Mincho", serif; font-weight: 500; font-size: 18px; }
+  .ink .day small { font-size: 12px; color: var(--muted); margin-top: 2px; letter-spacing: 0.02em; }
+  .ink .seal { width: 48px; height: 48px; flex: none; border-radius: 6px; background: var(--seal); color: var(--paper); display: grid; place-items: center; font-family: "Shippori Mincho", serif; font-size: 11px; font-weight: 700; line-height: 1.1; text-align: center; transform: rotate(-4deg); }
+  .ink .lead { font-size: 15px; color: var(--muted); margin-top: 8px; }
+  .ink .canvasbox { flex: 1; position: relative; }
+  .ink .canvasbox canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .ink .time { position: absolute; inset: 0; display: grid; place-items: center; font-family: "Shippori Mincho", serif; font-size: 34px; pointer-events: none; }
+  .ink .past { display: flex; gap: 8px; height: 40px; margin-bottom: 14px; }
+  .ink .past canvas { width: 40px; height: 40px; }
+  .ink .msg { font-size: 17px; text-align: center; margin-bottom: 14px; }
+  .ink .go { width: 100%; min-height: 56px; background: var(--sumi); color: var(--paper); font-size: 17px; font-weight: 500; border-radius: 4px; }
+  .ink .ask button { border-radius: 4px; font-weight: 500; }
+  .ink .ask .yes { background: var(--sumi); color: var(--paper); }
+  .ink .ask .no { box-shadow: inset 0 0 0 1.5px var(--sumi); }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Attention training: Ink</h1>
+  <p>Two sounds, with headphones or the speaker on: a low soft "tok" when a stretch begins, and a bright bell when it ends and asks how it went. Android also gives a double buzz at the start and a single buzz at the end.</p>
+</div>
+
+<!-- C. Ink -->
+<section class="option">
+  <div class="phone ink" id="ink">
+    <div class="view">
+      <div class="top"><div><h3>One breath,<br>one circle</h3><p class="lead">The brush draws while you focus.</p></div><span class="day" aria-label="Day 1 of 42"><svg viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><path d="M24 4.5c10.6 0 19 8.3 19 19.2 0 10.7-8.6 19.6-19.3 19.6C13.4 43.3 5 35 5 24.2 5 15.6 10.4 8.4 18 5.9" fill="none" stroke="#191919" stroke-width="1.6" stroke-linecap="round"/></svg><b>1</b><small>of 42</small></span></div>
+      <div class="canvasbox"><canvas data-f="cv"></canvas><span class="time" data-f="big">0:06</span></div>
+      <div class="past" data-f="past"></div>
+      <p class="msg" data-f="msg" hidden></p>
+      <button class="go" data-act="start">Begin</button>
+      <div class="ask" hidden><button class="no" data-act="no">I drifted</button><button class="yes" data-act="yes">I stayed</button></div>
+    </div>
+  </div>
+  <div class="caption">
+    <h2>Ink</h2>
+    <p>Sumi ink on cool paper with a red seal. While you focus, a brush slowly draws an enso, the Zen circle. Hold the stretch and it stays in ink. Drift and it fades to gray. Each session leaves a row of circles, one per stretch.</p>
+  </div>
+</section>
+
+<p class="footnote">Demo timing: stretches start at 6 seconds and change by 25% each answer. The real program starts near 15 seconds, adapts more gently, and runs about 10 to 20 minutes a day.</p>
+
+<script>
+const START = 6, UP = 1.25, DOWN = 0.8, MIN = 4, MAX = 600;
+let active = null;
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+let actx;
+function chime() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume();
+    const t = actx.currentTime, g = actx.createGain(); g.connect(actx.destination);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.12, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.4);
+    [528, 792, 1056].forEach((f, k) => { const o = actx.createOscillator(); o.type = "sine"; o.frequency.value = f; const gg = actx.createGain(); gg.gain.value = [1, .4, .15][k]; o.connect(gg).connect(g); o.start(t); o.stop(t + 2.5); });
+  } catch (e) {}
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+
+function startTone() {
+  // a low, soft wooden "tok" so you know the stretch has begun, distinct from the bright check-in chime
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume();
+    const t = actx.currentTime, g = actx.createGain(); g.connect(actx.destination);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.16, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+    [[196, 1], [392, 0.25], [588, 0.08]].forEach(([f, v]) => { const o = actx.createOscillator(); o.type = "sine"; o.frequency.setValueAtTime(f * 1.03, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.08); const gg = actx.createGain(); gg.gain.value = v; o.connect(gg).connect(g); o.start(t); o.stop(t + 1); });
+  } catch (e) {}
+  if (navigator.vibrate) navigator.vibrate([15, 60, 15]);
+}
+
+function Trainer(root, ui) {
+  const st = { state: "idle", dur: START, t0: 0, log: [], longest: 0 };
+  const goBtn = root.querySelector(".go"), ask = root.querySelector(".ask");
+  let timer;
+  function focus() {
+    st.state = "focus"; st.t0 = performance.now(); goBtn.hidden = true; ask.hidden = true; startTone();
+    ui.focus(st);
+    timer = setTimeout(() => { st.state = "ask"; chime(); ask.hidden = false; ui.ask(st); }, st.dur * 1000);
+  }
+  function answer(yes) {
+    st.log.push({ dur: st.dur, yes }); if (yes) st.longest = Math.max(st.longest, st.dur);
+    const prev = st.dur;
+    st.dur = Math.max(MIN, Math.min(MAX, Math.round(st.dur * (yes ? UP : DOWN))));
+    st.state = "rest"; ask.hidden = true; ui.answer(st, yes, prev);
+    timer = setTimeout(focus, 2200);
+  }
+  root.addEventListener("click", e => {
+    const a = e.target.closest("[data-act]"); if (!a) return;
+    if (a.dataset.act === "start") { if (active && active !== api) active.stop(); active = api; focus(); }
+    if (a.dataset.act === "yes" && st.state === "ask") answer(true);
+    if (a.dataset.act === "no" && st.state === "ask") answer(false);
+  });
+  const api = { st, stop() { clearTimeout(timer); st.state = "idle"; ask.hidden = true; goBtn.hidden = false; goBtn.textContent = "Continue"; ui.idle && ui.idle(st); } };
+  return api;
+}
+const $ = (root, k) => root.querySelector(`[data-f="${k}"]`);
+const progress = st => st.state === "focus" ? Math.min(1, (performance.now() - st.t0) / (st.dur * 1000)) : 0;
+function fit(cv) { const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); const w = Math.round(r.width * d), h = Math.round(r.height * d); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } return { w, h, d }; }
+
+/* ---------- C. Ink ---------- */
+(() => {
+  const root = document.getElementById("ink"), cv = $(root, "cv"), ctx = cv.getContext("2d"), past = $(root, "past"), msg = $(root, "msg"), big = $(root, "big");
+  let last = null;
+  function enso(c, cx, cy, R, p, d, color, seed) {
+    const end = Math.PI * 2 * 0.9 * p, start = -Math.PI * 0.42;
+    for (let a = 0; a < end; a += 0.012) {
+      const w = (R * 0.075) * (0.55 + 0.6 * Math.sin(Math.min(1, a / (end || 1)) * Math.PI) ** 0.6) * (1 + 0.12 * Math.sin(a * 9 + seed));
+      const rr = R * (1 + 0.02 * Math.sin(a * 3 + seed));
+      const x = cx + Math.cos(start + a) * rr, y = cy + Math.sin(start + a) * rr;
+      c.fillStyle = color; c.globalAlpha = 0.18 + 0.5 * (1 - a / (Math.PI * 2));
+      c.beginPath(); c.arc(x, y, w, 0, 7); c.fill();
+    }
+    c.globalAlpha = 1;
+  }
+  function thumb(color, seed) {
+    const t = document.createElement("canvas"); t.width = 80; t.height = 80; enso(t.getContext("2d"), 40, 40, 28, 1, 1, color, seed);
+    past.appendChild(t); while (past.children.length > 7) past.removeChild(past.firstChild);
+  }
+  const tr = Trainer(root, {
+    focus(st) { msg.hidden = false; msg.textContent = "Eyes closed. Stay with your breath."; last = { seed: Math.random() * 10 }; big.textContent = ""; },
+    ask() { msg.textContent = "Did you stay with your breath the whole time?"; },
+    answer(st, yes, prev) {
+      thumb(yes ? "#191919" : "#b9b7b0", last ? last.seed : 0);
+      last = { seed: last ? last.seed : 0, done: true, yes };
+      msg.textContent = yes ? `Held ${fmt(prev)}. Next one is a little longer.` : "That's normal. Next one is a little shorter.";
+      big.textContent = fmt(st.dur);
+    }
+  });
+  (function draw() {
+    const { w, h, d } = fit(cv), st = tr.st; ctx.clearRect(0, 0, w, h);
+    const R = Math.min(w, h) * 0.33, cx = w / 2, cy = h / 2;
+    if (st.state === "focus") enso(ctx, cx, cy, R, progress(st), d, "#191919", last.seed);
+    else if (st.state === "ask" && last) enso(ctx, cx, cy, R, 1, d, "#191919", last.seed);
+    else if (last && last.done) enso(ctx, cx, cy, R, 1, d, last.yes ? "#191919" : "#c9c7c0", last.seed);
+    else { ctx.strokeStyle = "rgba(25,25,25,.08)"; ctx.lineWidth = 1 * d; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke(); }
+    requestAnimationFrame(draw);
+  })();
+})();
+</script>
+</body>
+</html>
