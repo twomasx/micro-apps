@@ -2,12 +2,13 @@ import { lazy, Suspense, useEffect } from 'react';
 import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { ProgressPage } from './pages/ProgressPage';
+import { RestorePage } from './pages/RestorePage';
 import { SciencePage } from './pages/SciencePage';
 import { SessionPage } from './pages/SessionPage';
 import { TestPage } from './pages/TestPage';
+import { UnlockPage } from './pages/UnlockPage';
 import { TodayPage } from './pages/TodayPage';
 
 const SITE_TITLE = 'Attention';
@@ -52,10 +53,12 @@ function Page({ route }: { route: Route }) {
         );
       }
       return <NotFoundPage />;
+    case 'unlock':
+      return <UnlockPage sessionId={route.sessionId} />;
+    case 'restore':
+      return <RestorePage />;
     case 'notFound':
       return <NotFoundPage />;
-    default:
-      return <PlaceholderPage title={PAGE_TITLES[route.name]} />;
   }
 }
 

@@ -24,9 +24,13 @@ Decisions built the simplest way for now that need your call. What has been deci
 16. **Free history** shows practice days 1 to 5 and the latest test, with one line about the unlock. The longest-stretch chart and the circles for those days stay visible.
 17. **The progress charts** sit above the circles. The circles could come first, with the charts after.
 
+18. **The unlock page** has no brush stroke: just the list, the price in Mincho and the button. A full enso by the price would tie it to the rest of the app.
+19. **The offer on Today** replaces Begin from practice day 6. It could instead keep Begin visible and show the offer when it is pressed.
+
 ## Device checks still open
 
 - Android Chrome: tok and bell through the speaker and headphones, the double buzz at the start and the single buzz at the end, the screen staying awake, the dimming during a stretch.
 - iPhone Safari: the sounds with the silent switch on (they are set to play through it, as in breathwork).
 - How the brush looks on a real phone screen at 3x density (the canvas draws at 2x at most, to save battery).
+- A real purchase flow on the phone after deploy: Stripe's page, the return, the code, restore on another device.
 - The test's timing on a real phone: open "Timing on this screen" under a result. On 90 Hz and 120 Hz screens, digits show for 244 to 256 ms.

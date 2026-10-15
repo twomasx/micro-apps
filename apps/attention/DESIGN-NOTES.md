@@ -134,3 +134,13 @@ These are frame times: when the browser started drawing a frame, not when light 
 **Scales.** Stretch lengths start at zero, so twice as long sits twice as high. Scores use a window in steps of 10 around your results (at least 20 points tall, inside 0 to 100), so a real change of a few points is visible without filling the chart.
 
 **Science page.** Every number is from the paper, and each chance figure is in plain words ("about 1 time in 60"). It says where we differ from the study: daily time, the test used (SART, not the TOVA), and what is ours (the limits, tick probes, weekly tests). A test keeps the worked score example in step with the scoring code.
+
+## Payments (step 5)
+
+Same as breathwork: Stripe Checkout through `packages/payments`, the unlock confirmed only by the server (the webhook, or the return page asking Stripe directly), a 16-character unlock code made from the purchase, and a restore page. Nothing in `packages/` changed.
+
+**Free:** the test (both lengths), the tick probes, practice days 1 to 5 with 10 minute sessions, and the history of those days with the latest test. **Unlock ($6.99 once):** every day after day 5, 15 and 20 minute sessions and the study schedule, and the full history.
+
+From practice day 6 a free user's Today shows the offer where Begin was, with the test still one tap away. Opening `/session` directly shows the same offer. The paid session sizes stay visible but grayed, with one line about the unlock. A saved paid size falls back to 10 minutes if the device is not unlocked.
+
+**Checked end to end in Stripe test mode, 2026-10-15:** Buy, Stripe's checkout ("Attention lifetime unlock, $6.99"), pay with the 4242 test card, back to the unlock page with a code, sizes unlocked, then the code typed in lowercase with spaces on a second browser unlocks it too. A malformed code gets the format hint. An unsigned webhook gets 400.

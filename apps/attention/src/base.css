@@ -1241,3 +1241,77 @@ ol.page-list {
   font-family: var(--mincho);
   font-variant-numeric: lining-nums tabular-nums;
 }
+
+/* ---------- Unlock and restore ---------- */
+
+.price-big {
+  font-family: var(--mincho);
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.page-status:empty {
+  display: none;
+}
+
+.code-card {
+  display: grid;
+  gap: 10px;
+  padding: 18px 0;
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+}
+
+.code {
+  font-family: var(--mincho);
+  font-weight: 700;
+  /* One line at 320 px: the code reads as one thing to copy. */
+  font-size: clamp(1.0625rem, 5.4vw, 1.5rem);
+  letter-spacing: 0.04em;
+  font-variant-numeric: lining-nums;
+  white-space: nowrap;
+  user-select: all;
+}
+
+.code-help {
+  color: var(--gray);
+  font-size: 0.9375rem;
+}
+
+.code-form {
+  display: grid;
+  gap: 10px;
+}
+
+.field-label {
+  font-weight: 500;
+}
+
+.code-input {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mincho);
+  font-size: 1.25rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.code-input::placeholder {
+  color: var(--gray);
+  opacity: 0.6;
+}
+
+.code-input[aria-invalid='true'] {
+  box-shadow: inset 0 0 0 2.5px var(--ink);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
