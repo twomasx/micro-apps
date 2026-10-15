@@ -7,8 +7,7 @@
     {
       "binding": "DB",
       "database_name": "micro-attention",
-      // Placeholder until deploy (step 8). Replace with the real id (see D1_DATABASE_ID in .env.example).
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "06687a75-5da8-4dce-9535-185589abe577",
       // Local dev and tests use their own SQLite file under this id, never the real database.
       "preview_database_id": "00000000-0000-0000-0000-000000000000"
     }

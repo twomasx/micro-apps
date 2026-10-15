@@ -67,13 +67,14 @@ describe('withoutInjection', () => {
 });
 
 describe('pages', () => {
-  it('the home page names the site and links to the personality test and breathwork', async () => {
+  it('the home page names the site and links to the personality test, breathwork and attention', async () => {
     const response = homePage();
     expect(response.status).toBe(200);
     const html = await response.text();
     expect(html).toContain('<h1>PolymadLabs</h1>');
     expect(html).toContain('href="/personality/"');
     expect(html).toContain('<a href="/breathwork/">Breathwork</a>');
+    expect(html).toContain('<a href="/attention/">Attention training</a>');
   });
 
   it('coming soon is a 200 with a link to the personality test', async () => {

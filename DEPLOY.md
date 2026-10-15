@@ -119,6 +119,34 @@ Four secrets live in the `micro-breathwork` Pages project:
 
 Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-breathwork`, then deploy again.
 
+## Deploy the attention app
+
+First deployed on Oct 15, 2026. From `apps/attention`:
+
+```bash
+pnpm build
+pnpm exec wrangler pages deploy dist --project-name micro-attention --branch main
+```
+
+Run the four checks from the repo root first. D1 database `micro-attention` (id `06687a75-5da8-4dce-9535-185589abe577`) has two tables: `purchases` and `test_results`. Apply a new file in `apps/attention/migrations/` with `pnpm exec wrangler d1 migrations apply DB --remote` before deploying the code that needs it.
+
+### Secrets
+
+Four secrets live in the `micro-attention` Pages project:
+
+| Name | Value |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | The same test mode key as the other apps. |
+| `STRIPE_WEBHOOK_SECRET` | The signing secret of the attention webhook (see Stripe below). Saved at `~/.config/polymadlabs/attention-stripe-webhook-secret`. |
+| `UNLOCK_CODE_SECRET` | 64 hex characters, its own. **Never change it**, or every code already sold stops working. Saved at `~/.config/polymadlabs/attention-unlock-code-secret`. |
+| `PUBLIC_ORIGIN` | `https://polymadlabs.com` |
+
+Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-attention`, then deploy again. Right after secrets change, the first few requests can still reach the deployment from before.
+
+### Test results
+
+`POST /attention/api/tests` stores anonymous test summaries and `GET /attention/api/norms?length=quick|full` serves the comparison, cached for an hour. Don't take real tests on polymadlabs.com to check a deploy: every result there counts toward the comparison that users see. Check the API with a bad body instead (it answers 400), or delete check rows afterwards with `pnpm exec wrangler d1 execute DB --remote --command "DELETE FROM test_results WHERE id = '...'"`.
+
 ## Deploy the router
 
 From `router`:
@@ -134,6 +162,8 @@ pnpm exec wrangler deploy --env=""        # production: polymadlabs.com and www
 2. In `router/wrangler.jsonc`, add the app to `LIVE_APPS` and set its `<APP>_ORIGIN` to the real Pages address. Do this in both the top-level `vars` and the `preview` `vars`.
 3. Deploy the router to preview, check the app there, then deploy production.
 
+For a minute or so after a router deploy, some requests still reach the old version, so an app that was just turned on can answer 404 now and then. Wait until checks pass several times in a row before calling it broken.
+
 ## Stripe
 
 - Test mode. The code refuses a key that does not start with `sk_test_`. Going live needs a change in `packages/payments/src/stripe.ts` as well as live keys.
@@ -141,6 +171,7 @@ pnpm exec wrangler deploy --env=""        # production: polymadlabs.com and www
 - If the webhook is ever recreated, it gets a new signing secret: put it in `STRIPE_WEBHOOK_SECRET` and deploy again.
 - Focus webhook: `https://polymadlabs.com/focus/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.
 - Breathwork webhook: `https://polymadlabs.com/breathwork/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQVAQIbd3re6uBdkogYUm05`. Signing secret at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`.
+- Attention webhook: `https://polymadlabs.com/attention/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQyQJIbd3re6uBdJJZSk73e`. Signing secret at `~/.config/polymadlabs/attention-stripe-webhook-secret`.
 - Every webhook gets the checkout events of every app on the account. Each app ignores sessions it did not create.
 - Local development uses the Stripe CLI and its own secret. See "Testing payments locally" in `apps/personality/CLAUDE.md` and `apps/focus/CLAUDE.md`.
 
@@ -200,6 +231,19 @@ Passed on Oct 14, 2026 in headless Chromium, through the preview router and then
 
 One test purchase from that check is in the production database (`cs_test_a1iypjsyee...`, test mode), and one unpaid `pending` row from a direct API check.
 
+### Check attention
+
+Passed on Oct 15, 2026 in headless Chromium, through the preview router and then polymadlabs.com:
+
+1. `curl -s https://polymadlabs.com/attention/api/health` gives `{"ok":true}`. `/attention/progress` and `/attention/science` load directly (200). The home page links to `/attention/`.
+2. At 375px, 768px and 1280px: Today, Begin, the first-session instructions, Begin, a stretch, "I stayed", End, Session ended. Everything loads from polymadlabs.com, the service worker scope is `/attention/`, no console errors, no sideways scroll.
+3. `/attention/unlock` says "$6.99 once. No renewals." Pay with card 4242 4242 4242 4242 (untick Stripe's "save with Link", or it asks for a phone number). You come back to "Thank you. Attention is unlocked on this device." with a code in groups of four. The 15 and 20 minute sizes and the study schedule unlock.
+4. In another browser, `/attention/restore` with that code (lower case and spaces are fine) unlocks it there too. A malformed code gets the format hint.
+5. In Stripe, the `checkout.session.completed` event shows 0 pending webhooks, and the row in D1 `micro-attention` is `paid` with a 64-character hash and no code.
+6. `test_results` on production is still empty (no tests were taken there).
+
+One test purchase from that check is in the production database (`cs_test_a15CDWiO...`, test mode).
+
 ## Undo
 
 - **A bad app deploy:** Pages keeps every deployment. `pnpm exec wrangler pages deployment list --project-name micro-personality` shows them. Roll back in the Cloudflare dashboard (Workers & Pages, `micro-personality`, Deployments), or check out the last good commit and deploy it again.
@@ -208,8 +252,8 @@ One test purchase from that check is in the production database (`cs_test_a1iypj
 
 ## Known gaps
 
-- Nothing has been checked on a real Android phone or in iPhone Safari. For focus this matters most: playing with the screen off and the lock screen controls (see `apps/focus/DESIGN-TODO.md`). For breathwork: tones, vibration and the screen staying awake (see `apps/breathwork/DESIGN-TODO.md`).
-- The home page at `/` links to the personality test and breathwork. Focus is live but not linked from it yet.
+- Nothing has been checked on a real Android phone or in iPhone Safari. For focus this matters most: playing with the screen off and the lock screen controls (see `apps/focus/DESIGN-TODO.md`). For breathwork: tones, vibration and the screen staying awake (see `apps/breathwork/DESIGN-TODO.md`). For attention: the three sounds, vibration, the screen staying awake, and the test's timing on a 90 Hz or 120 Hz screen (see `apps/attention/DESIGN-TODO.md`).
+- The home page at `/` links to the personality test, breathwork and attention. Focus is live but not linked from it yet.
 - Every file in `apps/personality/content/` still says `status: draft`.
 - Cloudflare's Web Analytics is blocked by the router's header, but it is still switched on for the domain. Switch it off in the dashboard (Analytics & Logs, Web Analytics) so the block is not the only thing in the way.
 - Unpaid checkouts leave `pending` rows in `purchases`, in both apps. Nothing clears them yet.

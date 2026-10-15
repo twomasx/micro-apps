@@ -2,7 +2,11 @@
 const HEADERS = { 'content-type': 'text/html; charset=utf-8' };
 const FIRST_APP = { href: '/personality/', label: 'Personality test' };
 /** The apps linked from the home page, in the order they launched. */
-const HOME_APPS = [FIRST_APP, { href: '/breathwork/', label: 'Breathwork' }];
+const HOME_APPS = [
+  FIRST_APP,
+  { href: '/breathwork/', label: 'Breathwork' },
+  { href: '/attention/', label: 'Attention training' },
+];
 
 function page(title: string, body: string, status: number): Response {
   const html = `<!doctype html>

@@ -15,7 +15,7 @@
   // Origins of apps that are not in LIVE_APPS are placeholders.
   "vars": {
     "STRIP_PREFIX": "true",
-    "LIVE_APPS": "personality,focus,breathwork",
+    "LIVE_APPS": "personality,focus,breathwork,attention",
     "CANONICAL_HOST": "polymadlabs.com",
     "PERSONALITY_ORIGIN": "https://micro-personality.pages.dev",
     "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
@@ -44,7 +44,7 @@
       "workers_dev": true,
       "vars": {
         "STRIP_PREFIX": "true",
-        "LIVE_APPS": "personality,focus,breathwork",
+        "LIVE_APPS": "personality,focus,breathwork,attention",
         "PERSONALITY_ORIGIN": "https://micro-personality.pages.dev",
         "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
         "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
