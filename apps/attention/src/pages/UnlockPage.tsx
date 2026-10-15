@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { EnsoCanvas } from '../components/EnsoCanvas';
 import { Link } from '../components/Link';
 import { useSavedUnlock } from '../hooks/useSavedUnlock';
 import { useUnlocked } from '../hooks/useUnlocked';
@@ -55,7 +56,19 @@ function Offer() {
         ))}
       </ul>
       <p className="section-help">{ALWAYS_FREE}</p>
-      <p className="price-big">{priceLine(product)}</p>
+      <div className="price-mark">
+        <EnsoCanvas className="price-enso" seed={42.7} progress={1} />
+        <p className="price-big">
+          {/* "$6.99 once." and "No renewals." on their own lines, so it never breaks mid-phrase. */}
+          {priceLine(product)
+            .split(/(?<=\.) /)
+            .map((part) => (
+              <span key={part} className="price-part">
+                {part}{' '}
+              </span>
+            ))}
+        </p>
+      </div>
       <button type="button" className="button button-primary" onClick={buy} disabled={busy} aria-busy={busy}>
         {busy ? 'Opening checkout' : 'Buy the lifetime unlock'}
       </button>

@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { SartStage } from '../components/SartStage';
 import { useAppData } from '../hooks/useAppData';
 import { useWakeLock } from '../hooks/useWakeLock';
+import { postTestSummary } from '../lib/api';
 import { saveTest, updateSettings } from '../lib/app-data';
 import { randomId } from '../lib/ids';
+import { summaryOf } from '../lib/norms';
 import { navigate } from '../lib/navigation';
 import { dayStatus, localDate } from '../lib/program';
 import type { TestRecord } from '../lib/records';
@@ -75,6 +77,8 @@ export function TestPage() {
       completedDays: dayStatus(data.sessions, localDate(now)).completedDays,
     });
     saveTest(record);
+    // For "compared with people who took it here". Offline is fine: the result stays on this device.
+    postTestSummary(summaryOf(record)).catch(() => undefined);
     setStep({ name: 'result', record });
   };
 

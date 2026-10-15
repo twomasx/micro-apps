@@ -24,8 +24,10 @@ Decisions built the simplest way for now that need your call. What has been deci
 16. **Free history** shows practice days 1 to 5 and the latest test, with one line about the unlock. The longest-stretch chart and the circles for those days stay visible.
 17. **The progress charts** sit above the circles. The circles could come first, with the charts after.
 
-18. **The unlock page** has no brush stroke: just the list, the price in Mincho and the button. A full enso by the price would tie it to the rest of the app.
+18. **The unlock page** now has a small enso by the price (Roger, 2026-10-15). The price sits on two lines: "$6.99 once." and "No renewals." under it in gray.
 19. **The offer on Today** replaces Begin from practice day 6. It could instead keep Begin visible and show the offer when it is pressed.
+
+20. **The comparison line** on the result ("Compared with people who took it here: higher than 64% of first quick tests (1,234 people)") is plain gray text. It appears only after 200 first results.
 
 ## Device checks still open
 

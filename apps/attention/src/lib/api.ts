@@ -1,3 +1,5 @@
+import type { NormsAnswer } from './norms';
+
 /** Calls to this app's functions. All five apps share one domain, so paths start from the base. */
 
 export class ApiError extends Error {
@@ -37,4 +39,23 @@ export function fetchPurchase(sessionId: string): Promise<PurchaseAnswer> {
 export async function checkCode(code: string): Promise<boolean> {
   const { valid } = await getJson<{ valid: boolean }>(`unlock/${encodeURIComponent(code)}`);
   return valid === true;
+}
+
+/** Sends a finished test's anonymous summary. Failing is fine: the result stays on the device. */
+export async function postTestSummary(summary: unknown): Promise<void> {
+  const response = await fetch(apiUrl('tests'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(summary),
+    keepalive: true,
+  });
+  if (!response.ok) throw new ApiError(response.status);
+}
+
+export function fetchNorms(length: 'quick' | 'full'): Promise<NormsAnswer> {
+  // Cached for an hour by the server's headers, so this does not use no-store.
+  return fetch(apiUrl(`norms?length=${length}`)).then((response) => {
+    if (!response.ok) throw new ApiError(response.status);
+    return response.json() as Promise<NormsAnswer>;
+  });
 }

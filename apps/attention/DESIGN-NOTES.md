@@ -144,3 +144,13 @@ Same as breathwork: Stripe Checkout through `packages/payments`, the unlock conf
 From practice day 6 a free user's Today shows the offer where Begin was, with the test still one tap away. Opening `/session` directly shows the same offer. The paid session sizes stay visible but grayed, with one line about the unlock. A saved paid size falls back to 10 minutes if the device is not unlocked.
 
 **Checked end to end in Stripe test mode, 2026-10-15:** Buy, Stripe's checkout ("Attention lifetime unlock, $6.99"), pay with the 4242 test card, back to the unlock page with a code, sizes unlocked, then the code typed in lowercase with spaces on a second browser unlocks it too. A malformed code gets the format hint. An unsigned webhook gets 400.
+
+## Test results on the server (step 6)
+
+**What is sent.** After each test, the score version, the length, which number test of that length this is on the device, and the scores: taps on a 3, missed numbers, early taps, average reaction time, its spread, CV and the attention score. No digits, no tap times, no date or time from the device, no device id. The server adds the day only (no time) and stores no IP address. Sending is tried once. If it fails (offline), the result still shows and stays on the device; it is simply not counted.
+
+**What the server checks.** The version must be the current one. Every count must fit the test length (no more than 12 taps on a 3 in a Quick test). Times must fit the 1150 ms window. The score is worked out again from its parts and must match within 1 point. Anything off is refused with 400 and not stored.
+
+**The comparison.** Built from first tests of each length only, from the current score version. Until 200 such results exist the answer is "not ready" and the result screen shows nothing. After that it returns how many first results had each score from 0 to 100, and the phone works out "higher than N% of first quick tests (1,234 people)", counting ties as half. The answer is cached for an hour at Cloudflare's edge and in the browser.
+
+**Known gap.** Anyone could post made-up summaries that pass the checks and tilt the comparison. There is no account or device id to stop that, by design. If it happens, the fix is on the server (for example a daily cap, or dropping outliers), without changing the app.

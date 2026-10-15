@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
 import { EnsoCanvas } from '../components/EnsoCanvas';
 import { Link } from '../components/Link';
 import type { TestRecord } from '../lib/records';
 import { PHONE_TIMING_NOTE, PRACTICE_EFFECT_NOTE } from '../lib/test-copy';
+import { fetchNorms } from '../lib/api';
 import { navigate } from '../lib/navigation';
+import { percentileFor, type NormsAnswer } from '../lib/norms';
 
 interface TestResultProps {
   record: TestRecord;
@@ -15,6 +18,19 @@ export function TestResult({ record, earlier }: TestResultProps) {
   const s = record.score;
   const goTrials = s.trials - s.threes;
   const first = earlier[0];
+  const [norms, setNorms] = useState<NormsAnswer | null>(null);
+  useEffect(() => {
+    let current = true;
+    fetchNorms(record.length).then(
+      (answer) => current && setNorms(answer),
+      () => undefined,
+    );
+    return () => {
+      current = false;
+    };
+  }, [record.length]);
+  // Shown only once 200 people have taken their first test of this length. Before that, nothing.
+  const percentile = percentileFor(norms, s.score, s.version);
 
   return (
     <main className="screen result">
@@ -35,6 +51,13 @@ export function TestResult({ record, earlier }: TestResultProps) {
         <p className="score-compare">
           Your first {record.length} test: {first.score.score}.{' '}
           {earlier.length > 1 && `Since then: ${earlier.slice(1).map((t) => t.score.score).join(', ')}.`}
+        </p>
+      )}
+
+      {percentile !== null && norms?.ready && (
+        <p className="score-compare" data-kind="others">
+          Compared with people who took it here: higher than {percentile}% of first {record.length} tests (
+          {norms.count.toLocaleString('en-US')} people).
         </p>
       )}
 

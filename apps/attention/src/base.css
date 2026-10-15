@@ -1244,10 +1244,33 @@ ol.page-list {
 
 /* ---------- Unlock and restore ---------- */
 
+.price-mark {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.price-enso {
+  flex: none;
+  width: 72px;
+  height: 72px;
+}
+
 .price-big {
   font-family: var(--mincho);
   font-weight: 700;
   font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.price-part {
+  display: block;
+}
+
+.price-part + .price-part {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: var(--gray);
 }
 
 .page-status:empty {
