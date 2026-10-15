@@ -90,14 +90,35 @@ Vibration (Android): tok `[15, 60, 15]`, bell `40`. The tick does not vibrate: a
 - *Small circles* keep more of their tail and use a thicker hair, or the tail falls under a pixel and they read as the letter C.
 - *Held and drifted.* Held stays in ink. Drifted fades over 1.4 s to gray and a lighter strength, so it still reads as brushwork.
 
-**During a stretch.** The page dims by 7% ink over 2.4 s and the top bar and row fade to 35%. A faint pencil circle shows where the brush will go. The brush redraws only when it has moved about a pixel, so a 5 minute stretch costs almost nothing in battery. At the bell the page brightens in 0.8 s: dimming slowly suits closing your eyes, but opening them should not wait on the screen.
+**During a stretch.** The page dims by 7% ink over 2.4 s and the top bar and row fade to 35%. Only the brush is drawn: Roger dropped the faint pencil guide circle on 2026-10-15 ("I just like to see the brush strokes"). The brush redraws only when it has moved about a pixel, so a 5 minute stretch costs almost nothing in battery. At the bell the page brightens in 0.8 s: dimming slowly suits closing your eyes, but opening them should not wait on the screen.
 
 **Answer buttons.** "I drifted" (outlined) on the left, "I stayed" (filled) on the right, both 64 px tall at the bottom, where a thumb lands right after opening your eyes. Same order as the reference.
 
-**Today.** Title, day mark, a pencil circle with the next stretch length in it, the last session's circles, the test prompt when one is due, then the size choice and Begin. Missed days are never mentioned.
+**Today.** Title, day mark, your last session's final circle (held in ink, drifted in gray) with the next stretch length inside it, or a sample enso before the first session, the last session's circles, the test prompt when one is due, then the size choice and Begin. Missed days are never mentioned.
 
 **Session complete.** Every circle from the session in one wrapped line between two hairlines, like a line of brushwork, then three facts in large Mincho numbers: stretches held, longest held, and where the next session starts. The tick result follows with an "Experimental" tag.
 
 **Tablet and desktop.** The same single column, centered. The circle grows with the screen up to 620 px (sized by the screen's height on wide screens, so it never pushes the buttons off). On desktop during a stretch, the circle sits alone in the middle with nothing else at full strength.
 
 **App icon.** One enso by the same brush on paper, inside the middle 80% so it also works as a maskable Android icon.
+
+## The attention test (step 3)
+
+**Timing.** The test runs on a fixed schedule: digit `i` is due at start + 1.2 s + i × 1150 ms. Each animation frame checks what should be on screen and switches when less than half a frame is left, so every change lands on the frame closest to its target and rounding never adds up into drift. The digit, mask and feedback are written straight to the page on each frame, with no React render in between. Taps use the browser's own event time stamps, which share a clock with the frame times.
+
+Measured in Chromium (headless, 60 Hz), Quick test, 108 digits, 2026-10-15:
+
+| | Target | Measured |
+| --- | --- | --- |
+| Digit on screen, average | 250 ms | 250.0 ms |
+| Digit on screen, worst | 250 ms | 0.1 ms off |
+| One digit to the next, average | 1150 ms | 1150.0 ms |
+| Furthest any digit started from its planned time | 0 | 5 ms |
+
+These are frame times: when the browser started drawing a frame, not when light left the screen. A real screen adds a short, roughly constant delay (one or two frames), which shifts reaction times without changing their spread. That is why the result screen says times are best compared with your own earlier results. At 60 Hz, 250 ms is exactly 15 frames. On 90 Hz and 120 Hz phones it is 22.5 and 30 frames, so a digit shows for 244 to 256 ms on a 90 Hz screen. Every result keeps its own timing figures, shown under "Timing on this screen".
+
+**Tap rules.** A tap belongs to the digit on screen when it happened. A tap time-stamped a moment before the frame that showed the next digit counts for the digit before. Taps in the lead-in and during practice feedback are ignored. Leaving the app or pressing Stop throws the run away: a test with a gap in it can't be scored fairly.
+
+**Look.** Digits in Shippori Mincho, five sizes from 40% to 100% of the largest (which is 60% of the screen width, at most 340 px). The original used a Symbol typeface. The mask is a thin ink circle with an X, drawn as a plain line rather than a brush stroke, so it reads the same every time and never competes with the digits. Nothing else is on screen during the test except a small Stop link.
+
+**Result.** The attention score in large Mincho inside a full brush enso, then the parts it is built from, with taps on a 3 first and marked as the main measure.

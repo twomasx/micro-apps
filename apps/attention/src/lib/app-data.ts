@@ -1,7 +1,8 @@
 import { upsertSession } from './history';
 import type { SessionRecord, TestRecord } from './records';
 import { DEFAULT_SETTINGS, type Settings } from './settings';
-import { loadSessions, loadSettings, saveSessions, saveSettings } from './store';
+import { loadSessions, loadSettings, loadTests, saveSessions, saveSettings, saveTests } from './store';
+import { addTest } from './tests';
 
 /** Everything the screens read, loaded once from this device and kept in memory. */
 export interface AppData {
@@ -30,8 +31,8 @@ export function subscribeAppData(listener: () => void): () => void {
 }
 
 export function loadAppData(): Promise<void> {
-  loading ??= Promise.all([loadSettings(), loadSessions()]).then(([settings, sessions]) => {
-    set({ ...data, loaded: true, settings, sessions });
+  loading ??= Promise.all([loadSettings(), loadSessions(), loadTests()]).then(([settings, sessions, tests]) => {
+    set({ ...data, loaded: true, settings, sessions, tests });
   });
   return loading;
 }
@@ -47,4 +48,10 @@ export function saveSession(record: SessionRecord): void {
   const sessions = upsertSession(data.sessions, record);
   set({ ...data, sessions });
   void saveSessions(sessions);
+}
+
+export function saveTest(record: TestRecord): void {
+  const tests = addTest(data.tests, record);
+  set({ ...data, tests });
+  void saveTests(tests);
 }

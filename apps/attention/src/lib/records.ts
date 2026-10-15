@@ -1,4 +1,5 @@
-import type { SartScore, SartLength } from './sart-score';
+import type { TimingReport } from './sart-runner';
+import type { SartLength, SartScore, SartTrial } from './sart-score';
 
 /** One tick probe inside a stretch. Experimental: never changes the stretch length. */
 export interface ProbeRecord {
@@ -42,4 +43,8 @@ export interface TestRecord {
   /** Practice days finished when the test was taken. Weekly prompts compare against this. */
   afterPracticeDays: number;
   score: SartScore;
+  /** Every digit with its taps. Stays on this device. */
+  trials: SartTrial[];
+  /** How close the screen came to 250 ms and 1150 ms on this run. */
+  timing: TimingReport | null;
 }

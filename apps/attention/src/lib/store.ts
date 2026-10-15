@@ -1,14 +1,16 @@
 import { createStorage, storageKey } from '@micro/platform';
 import { appConfig } from '../../app.config.ts';
 import { sanitizeSessions } from './history';
-import type { SessionRecord } from './records';
+import type { SessionRecord, TestRecord } from './records';
 import { sanitizeSettings, type Settings } from './settings';
+import { sanitizeTests } from './tests';
 
 // IndexedDB can be missing or blocked (some private modes). The app still works then;
 // it only forgets between visits.
 const storage = createStorage(appConfig.name);
 const SETTINGS_KEY = storageKey(appConfig.name, 'settings');
 const SESSIONS_KEY = storageKey(appConfig.name, 'sessions');
+const TESTS_KEY = storageKey(appConfig.name, 'tests');
 
 export async function loadSettings(): Promise<Settings> {
   try {
@@ -39,5 +41,21 @@ export async function saveSessions(sessions: readonly SessionRecord[]): Promise<
     await storage.set(SESSIONS_KEY, sessions);
   } catch {
     // The sessions stay in memory for this visit.
+  }
+}
+
+export async function loadTests(): Promise<TestRecord[]> {
+  try {
+    return sanitizeTests(await storage.get<unknown>(TESTS_KEY));
+  } catch {
+    return [];
+  }
+}
+
+export async function saveTests(tests: readonly TestRecord[]): Promise<void> {
+  try {
+    await storage.set(TESTS_KEY, tests);
+  } catch {
+    // The results stay in memory for this visit.
   }
 }

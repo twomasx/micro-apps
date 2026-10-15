@@ -114,10 +114,9 @@ function SessionRun({ firstTime, ...options }: SessionRunProps) {
               progress={showing.progress}
               drifted={showing.drifted}
               animateFade
-              guide={state.phase === 'stretch'}
             />
           ) : (
-            <EnsoCanvas className="stage-canvas" seed={1} progress={0} guide />
+            <div className="stage-canvas" />
           )}
           {state.phase === 'ready' && (
             <p className="stage-time">

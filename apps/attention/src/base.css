@@ -791,3 +791,209 @@ canvas {
     transition: none;
   }
 }
+
+/* ---------- Attention test ---------- */
+
+.test-intro {
+  gap: 20px;
+}
+
+.test-intro .session-actions {
+  margin-top: auto;
+}
+
+.test-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.lengths {
+  display: grid;
+  gap: 8px;
+}
+
+.length-option {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 12px 16px;
+  min-height: 56px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  cursor: pointer;
+}
+
+.length-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.length-option[data-selected='true'] {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+.length-option:has(input:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.length-name {
+  font-family: var(--mincho);
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.length-detail,
+.test-note {
+  color: var(--gray);
+  font-size: 0.9375rem;
+}
+
+/* The test itself: the whole screen is the tap target. */
+.sart {
+  position: fixed;
+  inset: 0;
+  background: var(--paper);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.sart-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.sart-stage > * {
+  grid-area: 1 / 1;
+}
+
+.sart-stop {
+  position: absolute;
+  top: calc(12px + var(--safe-top));
+  left: calc(var(--gutter) + var(--safe-left));
+  z-index: 1;
+}
+
+.sart-digit {
+  font-family: var(--mincho);
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+  visibility: hidden;
+}
+
+.sart-mask {
+  width: calc(var(--sart-size, 200px) * 0.62);
+  height: calc(var(--sart-size, 200px) * 0.62);
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+  visibility: hidden;
+}
+
+.sart-feedback,
+.sart-lead {
+  font-family: var(--mincho);
+  font-weight: 700;
+  font-size: 1.375rem;
+  text-align: center;
+  padding: 0 var(--gutter);
+  visibility: hidden;
+}
+
+.sart-feedback[data-kind='correct'] {
+  color: var(--gray);
+}
+
+.sart-stage[data-show='digit'] .sart-digit,
+.sart-stage[data-show='mask'] .sart-mask,
+.sart-stage[data-show='feedback'] .sart-feedback,
+.sart-stage[data-show='lead'] .sart-lead {
+  visibility: visible;
+}
+
+/* ---------- Test result ---------- */
+
+.result {
+  gap: 22px;
+}
+
+.score-mark {
+  display: grid;
+  place-items: center;
+}
+
+.score-enso {
+  grid-area: 1 / 1;
+  width: min(68vw, 300px);
+  aspect-ratio: 1;
+}
+
+.score-value {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--mincho);
+  font-weight: 500;
+  font-size: 4rem;
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+}
+
+.score-of {
+  font-size: 0.875rem;
+  font-family: var(--gothic);
+  color: var(--gray);
+  margin-top: 8px;
+}
+
+.score-compare {
+  text-align: center;
+  color: var(--gray);
+}
+
+.result-facts {
+  padding-top: 18px;
+  border-top: 1px solid var(--hair);
+}
+
+.result-facts .fact[data-main='true'] {
+  grid-column: 1 / -1;
+}
+
+.fact dd.fact-note {
+  font-family: var(--gothic);
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: var(--gray);
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.timing summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.result-notes {
+  display: grid;
+  gap: 10px;
+  color: var(--gray);
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 640px) {
+  .test-intro .session-actions,
+  .result .session-actions {
+    max-width: none;
+  }
+}

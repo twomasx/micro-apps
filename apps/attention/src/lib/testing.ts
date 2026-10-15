@@ -28,6 +28,8 @@ export function test(afterPracticeDays: number, overrides: Partial<TestRecord> =
     nth: 1,
     afterPracticeDays,
     score: scoreSart([]),
+    trials: [],
+    timing: null,
     ...overrides,
   };
 }

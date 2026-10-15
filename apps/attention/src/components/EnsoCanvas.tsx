@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useReducedMotion } from '../hooks/useReducedMotion';
-import { drawEnso, drawGuide, fitCanvas } from '../ink/draw';
+import { drawEnso, fitCanvas } from '../ink/draw';
 
 /** How long a drifted circle takes to fade from ink to gray. */
 const FADE_MS = 1400;
@@ -14,8 +14,6 @@ interface EnsoCanvasProps {
   drifted?: boolean;
   /** Fade a drifted circle slowly, as it happens. Off for circles drawn from history. */
   animateFade?: boolean;
-  /** A faint pencil circle under the stroke. */
-  guide?: boolean;
   className?: string;
   label?: string;
 }
@@ -24,12 +22,12 @@ interface EnsoCanvasProps {
  * One enso on a canvas. Redraws when its box changes size. While `progress` is a function,
  * it redraws only when the brush has moved about a pixel, to spare the battery on long stretches.
  */
-export function EnsoCanvas({ seed, progress, drifted = false, animateFade = false, guide = false, className, label }: EnsoCanvasProps) {
+export function EnsoCanvas({ seed, progress, drifted = false, animateFade = false, className, label }: EnsoCanvasProps) {
   const ref = useRef<HTMLCanvasElement>(null);
   const reduced = useReducedMotion();
-  const props = useRef({ seed, progress, guide });
+  const props = useRef({ seed, progress });
   useLayoutEffect(() => {
-    props.current = { seed, progress, guide };
+    props.current = { seed, progress };
   });
   const fade = useRef({ from: drifted ? 1 : 0, to: drifted ? 1 : 0, start: 0 });
 
@@ -51,7 +49,7 @@ export function EnsoCanvas({ seed, progress, drifted = false, animateFade = fals
     let drawn = { progress: -1, fade: -1, w: 0, h: 0 };
 
     const paint = () => {
-      const { w, h, dpr } = fitCanvas(canvas);
+      const { w, h } = fitCanvas(canvas);
       const p = props.current;
       const value = typeof p.progress === 'function' ? p.progress() : p.progress;
       const now = performance.now();
@@ -61,7 +59,6 @@ export function EnsoCanvas({ seed, progress, drifted = false, animateFade = fals
       const moved = Math.abs(value - drawn.progress) >= minStep || (value === 1 && drawn.progress !== 1);
       if (moved || fadeNow !== drawn.fade || w !== drawn.w || h !== drawn.h) {
         ctx.clearRect(0, 0, w, h);
-        if (p.guide) drawGuide(ctx, w / 2, h / 2, radius, dpr);
         drawEnso(ctx, p.seed, { cx: w / 2, cy: h / 2, radius, progress: value, fade: fadeNow });
         drawn = { progress: value, fade: fadeNow, w, h };
       }
@@ -79,7 +76,7 @@ export function EnsoCanvas({ seed, progress, drifted = false, animateFade = fals
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [seed, progress, drifted, guide]);
+  }, [seed, progress, drifted]);
 
   return <canvas ref={ref} className={className} role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : true} />;
 }

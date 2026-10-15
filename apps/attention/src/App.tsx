@@ -4,6 +4,7 @@ import type { Route } from './lib/router';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { SessionPage } from './pages/SessionPage';
+import { TestPage } from './pages/TestPage';
 import { TodayPage } from './pages/TodayPage';
 
 const SITE_TITLE = 'Attention';
@@ -31,6 +32,8 @@ function Page({ route }: { route: Route }) {
       return <TodayPage />;
     case 'session':
       return <SessionPage />;
+    case 'test':
+      return <TestPage />;
     case 'sounds':
       if (SoundsPage) {
         return (

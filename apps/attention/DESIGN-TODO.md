@@ -12,11 +12,17 @@ Decisions built the simplest way for now that need your call. What has been deci
 6. **Android Back during a session** goes back to Today. Every answered stretch is already saved. There is no "are you sure" step.
 7. **The focus total** (2:14 of 10:00) shows at the top all through the session. It could appear only between stretches.
 8. **Session complete** has empty space under the facts on tall phones. It could hold a short line about tomorrow or a link to the progress page.
-9. **The pencil guide circle** shows under the brush during a stretch and on Today. It could be dropped for a bare page.
-10. **Locked sizes** (15, 20, Study) are shown grayed out for free users, with one line about the unlock.
+9. **Locked sizes** (15, 20, Study) are shown grayed out for free users, with one line about the unlock.
+
+10. **Test digits** are in Shippori Mincho. The original SART used a Symbol typeface. A plainer digit (Zen Kaku Gothic New) might be easier to read at a glance.
+11. **The test mask** is a thin ink line, not a brush stroke, so it looks the same every time.
+12. **Practice feedback for a missed number** says "Tap for every number except 3". The spec gave wording only for "Correct" and a tapped 3.
+13. **"Timing on this screen"** is shown to everyone, folded away under the result. It could be hidden from users and kept for the admin dashboard.
+14. **The Stop link** stays on screen during the test. Taps on it never count as answers.
 
 ## Device checks still open
 
 - Android Chrome: tok and bell through the speaker and headphones, the double buzz at the start and the single buzz at the end, the screen staying awake, the dimming during a stretch.
 - iPhone Safari: the sounds with the silent switch on (they are set to play through it, as in breathwork).
 - How the brush looks on a real phone screen at 3x density (the canvas draws at 2x at most, to save battery).
+- The test's timing on a real phone: open "Timing on this screen" under a result. On 90 Hz and 120 Hz screens, digits show for 244 to 256 ms.

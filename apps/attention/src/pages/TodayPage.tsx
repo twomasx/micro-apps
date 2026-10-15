@@ -12,6 +12,7 @@ import { allowedSizes, ALL_SIZES, type SessionSize } from '../lib/limits';
 import { navigate } from '../lib/navigation';
 import { studyMinutes } from '../lib/program';
 import { summarize } from '../lib/session';
+import { seedFor } from '../ink/seed';
 
 function sizeLabel(size: SessionSize): string {
   return size === 'study' ? 'Study' : `${size} min`;
@@ -43,7 +44,13 @@ export function TodayPage() {
       </header>
 
       <section className="stage" aria-label="Next stretch">
-        <EnsoCanvas className="stage-canvas" seed={7.3} progress={0} guide />
+        {/* The last circle you drew, or a sample one before your first session. */}
+        <EnsoCanvas
+          className="stage-canvas"
+          seed={last ? seedFor(last.id, last.stretches.length - 1) : 7.3}
+          progress={1}
+          drifted={last ? !last.stretches.at(-1)!.stayed : false}
+        />
         <p className="stage-time">
           <span className="stage-time-value">{clock(today.level)}</span>
           <span className="stage-time-label">next stretch</span>

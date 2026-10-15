@@ -131,18 +131,6 @@ export function drawEnso(ctx: CanvasRenderingContext2D, seed: number, o: DrawOpt
   ctx.restore();
 }
 
-/** A thin, faint, perfect circle: where the brush will go. */
-export function drawGuide(ctx: CanvasRenderingContext2D, cx: number, cy: number, radius: number, scale: number): void {
-  ctx.save();
-  ctx.strokeStyle = GRAY;
-  ctx.globalAlpha = 0.28;
-  ctx.lineWidth = Math.max(1, scale);
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.restore();
-}
-
 /** Sizes a canvas to its box at the screen's pixel density (at most 2x, to save battery). */
 export function fitCanvas(canvas: HTMLCanvasElement): { w: number; h: number; dpr: number } {
   const rect = canvas.getBoundingClientRect();
