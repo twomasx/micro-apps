@@ -74,3 +74,30 @@ All generated with Web Audio. No audio files.
 - One volume for all three. The tick follows the volume too, so it stays "very quiet" relative to the others.
 
 Vibration (Android): tok `[15, 60, 15]`, bell `40`. The tick does not vibrate: a buzz would make the probe something you feel, not something you notice.
+
+## Ink: the design (step 2)
+
+**Colors.** Paper `#f3f3ef`, ink `#191919`, gray `#77756f`. Nothing else. Hairlines, the stretch dimming and the sheet backdrop are ink at low strength, not new colors.
+
+**Type.** Shippori Mincho (500 and 700) for headings, numbers and the bell's question. Zen Kaku Gothic New (400, 500 and 700) for everything else. Latin subsets only, self-hosted through Fontsource, about 86 KB of woff2 in total.
+
+**The brush.** Canvas, not SVG. A dry-brush tail needs hundreds of broken hairlines, which canvas draws cheaply and SVG would turn into a large DOM. Each stroke is built from a seed, so the same stretch always draws the same circle: the big one during the stretch, the small one in the row, and later the progress page.
+
+- *Shape.* About 86% to 93% of a circle, starting low on the left and running clockwise, as most enso are brushed. The open gap sits at the lower left. The radius wobbles gently (three slow sine waves) and the hand drifts slightly inward as it closes.
+- *Width.* The brush lands narrow, presses wider just after, then swells and thins with slow noise, about ±17%. The edges are ragged by a few percent.
+- *Ink.* The first ~42% is one solid wet body. After that the body narrows toward the middle while separate bristles take over from the edges, so there is no seam. Each bristle holds a different amount of ink, breaks into streaks of its own length, and runs out at its own point. The edges run dry first, as with a real brush.
+- *Tried and dropped.* All bristles from the start: the body showed fine parallel lines and looked like a vector stroke. Short regular breaks: read as a dashed line, not dry brush. Bristles on the body's edge: they widened the stroke in a visible step where the dry part began. A separate dot where the brush lands: on gray circles two semi-transparent fills overlapped into a darker bead, so the dot is now part of the body path.
+- *Small circles* keep more of their tail and use a thicker hair, or the tail falls under a pixel and they read as the letter C.
+- *Held and drifted.* Held stays in ink. Drifted fades over 1.4 s to gray and a lighter strength, so it still reads as brushwork.
+
+**During a stretch.** The page dims by 7% ink over 2.4 s and the top bar and row fade to 35%. A faint pencil circle shows where the brush will go. The brush redraws only when it has moved about a pixel, so a 5 minute stretch costs almost nothing in battery. At the bell the page brightens in 0.8 s: dimming slowly suits closing your eyes, but opening them should not wait on the screen.
+
+**Answer buttons.** "I drifted" (outlined) on the left, "I stayed" (filled) on the right, both 64 px tall at the bottom, where a thumb lands right after opening your eyes. Same order as the reference.
+
+**Today.** Title, day mark, a pencil circle with the next stretch length in it, the last session's circles, the test prompt when one is due, then the size choice and Begin. Missed days are never mentioned.
+
+**Session complete.** Every circle from the session in one wrapped line between two hairlines, like a line of brushwork, then three facts in large Mincho numbers: stretches held, longest held, and where the next session starts. The tick result follows with an "Experimental" tag.
+
+**Tablet and desktop.** The same single column, centered. The circle grows with the screen up to 620 px (sized by the screen's height on wide screens, so it never pushes the buttons off). On desktop during a stretch, the circle sits alone in the middle with nothing else at full strength.
+
+**App icon.** One enso by the same brush on paper, inside the middle 80% so it also works as a maskable Android icon.

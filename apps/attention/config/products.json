@@ -1,9 +1,9 @@
 {
   "products": [
     {
-      "id": "placeholder",
-      "name": "PLACEHOLDER - replace before selling anything",
-      "amount": 100,
+      "id": "lifetime",
+      "name": "Attention lifetime unlock",
+      "amount": 699,
       "currency": "usd"
     }
   ]

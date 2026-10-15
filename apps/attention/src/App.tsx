@@ -1,25 +1,59 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useRoute } from './hooks/useRoute';
+import type { Route } from './lib/router';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { PlaceholderPage } from './pages/PlaceholderPage';
+import { SessionPage } from './pages/SessionPage';
+import { TodayPage } from './pages/TodayPage';
+
+const SITE_TITLE = 'Attention';
 
 // The sound check page is for development only. It is left out of the production build.
 const SoundsPage = import.meta.env.DEV
   ? lazy(() => import('./pages/SoundsPage').then((module) => ({ default: module.SoundsPage })))
   : null;
 
+const PAGE_TITLES: Record<Exclude<Route['name'], 'today'>, string> = {
+  session: 'Session',
+  test: 'Attention test',
+  progress: 'Progress',
+  unlock: 'Lifetime unlock',
+  restore: 'Restore purchase',
+  science: 'The science',
+  privacy: 'Privacy',
+  sounds: 'Sound check',
+  notFound: 'Page not found',
+};
+
+function Page({ route }: { route: Route }) {
+  switch (route.name) {
+    case 'today':
+      return <TodayPage />;
+    case 'session':
+      return <SessionPage />;
+    case 'sounds':
+      if (SoundsPage) {
+        return (
+          <Suspense fallback={null}>
+            <SoundsPage />
+          </Suspense>
+        );
+      }
+      return <NotFoundPage />;
+    case 'notFound':
+      return <NotFoundPage />;
+    default:
+      return <PlaceholderPage title={PAGE_TITLES[route.name]} />;
+  }
+}
+
 export function App() {
   const route = useRoute();
 
-  if (route.name === 'sounds' && SoundsPage) {
-    return (
-      <Suspense fallback={null}>
-        <SoundsPage />
-      </Suspense>
-    );
-  }
-  return (
-    <main>
-      <h1>Attention</h1>
-      <p>The training screens come in step 2.</p>
-    </main>
-  );
+  useEffect(() => {
+    document.title = route.name === 'today' ? SITE_TITLE : `${PAGE_TITLES[route.name]} | ${SITE_TITLE}`;
+    if (!window.location.hash) window.scrollTo(0, 0);
+  }, [route]);
+
+  return <Page route={route} />;
 }
