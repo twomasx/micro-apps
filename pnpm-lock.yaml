@@ -355,6 +355,12 @@ importers:
 
   apps/intention:
     dependencies:
+      '@fontsource/inter-tight':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/unbounded':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@micro/payments':
         specifier: workspace:*
         version: link:../../packages/payments
@@ -395,6 +401,9 @@ importers:
       vite-plugin-pwa:
         specifier: ^2.0.0
         version: 2.0.0(supports-color@10.2.2)(vite@8.3.4(esbuild@0.28.2)(terser@5.51.2))(workbox-build@7.4.1(supports-color@10.2.2))(workbox-window@7.4.1)
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(jsdom@30.1.2)(vite@8.3.4(esbuild@0.28.2)(terser@5.51.2))
       workbox-window:
         specifier: ^7.4.1
         version: 7.4.1
@@ -1369,8 +1378,14 @@ packages:
   '@fontsource/cormorant@5.3.0':
     resolution: {integrity: sha512-r2xrO2/35L+miyYFaERPRn3TGA8G83fKAR4wGG3s4WC5pLRZ7Cw3brDjr8tRwESCHXgB3r7jZqjfK2kLPv3zrQ==}
 
+  '@fontsource/inter-tight@5.3.0':
+    resolution: {integrity: sha512-uRwIrjKSUcCKIFeO2qm3yECA9phwge6Y1qQZvUmwqFgiIVWUELwwuq7pFlmlpPtO33ZtFQVOXQGNuvna1JPs6A==}
+
   '@fontsource/shippori-mincho@5.3.0':
     resolution: {integrity: sha512-S41kRxQuubAaYss+LeXu0IOc02RQwsPaJbR1cWZx4VV15hXaYZViH3WAve9HpDVFqKYd/BVk86Bg7lp9ytV3KQ==}
+
+  '@fontsource/unbounded@5.3.0':
+    resolution: {integrity: sha512-pPD6hsTnjoQRr6pCsqMHbHBfauB4LZygCNQEUJHu+CO2wzDFHqELEFSG7sTwo5Z5Gr4q3OK0fIILOXBJDv6lcw==}
 
   '@fontsource/zen-kaku-gothic-new@5.3.1':
     resolution: {integrity: sha512-L69mE6bkzeVK3UdTenxOmCIWvTwMxohJRNm1dAj+W+UiCULQ91b7M77ENVw+pjGmFL6zKPFYFeH3g8x2ugAJNw==}
@@ -4519,7 +4534,11 @@ snapshots:
 
   '@fontsource/cormorant@5.3.0': {}
 
+  '@fontsource/inter-tight@5.3.0': {}
+
   '@fontsource/shippori-mincho@5.3.0': {}
+
+  '@fontsource/unbounded@5.3.0': {}
 
   '@fontsource/zen-kaku-gothic-new@5.3.1': {}
 

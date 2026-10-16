@@ -51,7 +51,7 @@ Note design decisions and alternatives you tried in `DESIGN-NOTES.md`.
 
 1. The user taps Begin. The client asks the server to start a run.
 2. The server creates the run, picks the aim (left or right color) at random, fixes the length, and records the start time. The client never chooses the aim or the bits.
-3. During the run the client asks for the next batch of bits about every 250 ms. The server generates each batch at the moment it is requested (no batches made in advance), with `crypto.getRandomValues`, timestamps it, and adds it to the run.
+3. The run is one streamed response (Server-Sent Events), not polling. Every 250 ms the server generates the bits the clock allows since the start (no batches made in advance), with `crypto.getRandomValues`, timestamps them and sends them. The run is written to D1 at the start and once at the end. If the connection drops (`request.signal`, which needs the `enable_request_signal` compatibility flag), the bits so far are saved and the run is abandoned. The client plays each batch back bit by bit at 200 a second.
 4. The server never hands out bits faster than real time, so a 20-second run always takes 20 seconds.
 5. Standard run: 20 seconds at 200 bits a second, 4,000 bits. Store all the raw bits (about 500 bytes a run).
 6. **Every started run counts.** Stopping early never removes a run. An abandoned run is saved with the bits it had and counts in every total. Show the abandonment rate on the global page.
@@ -60,7 +60,7 @@ Note design decisions and alternatives you tried in `DESIGN-NOTES.md`.
 **Scoring**
 
 - Each bit is +1 (a 1) or −1 (a 0). The running total is the deviation.
-- Run score: z = deviation × aim ÷ √(bits), so positive always means "toward your color". 1 bits favor the right-hand color.
+- Run score: z = deviation × aim ÷ √(planned length in bits), so positive always means "toward your color". 1 bits favor the right-hand color. For a complete run this is deviation ÷ √(bits). Dividing an abandoned run by its planned length, not the bits it got, means stopping when ahead cannot lift the totals (see `src/lib/scoring.ts` and the stop-when-ahead simulation). The live score on screen uses the bits so far.
 - "1 in X by chance": one-sided, from the normal distribution. Copy: "About 1 in 6 runs pull this far toward Glacier by chance. Normal." Above 1 in 20: "Interesting, but one run proves nothing."
 - Combining runs (your lifetime total, the global total, Intention Hour totals): Stouffer's method, the sum of the z scores divided by the square root of the number of runs.
 - Lifetime total wording: "After 40 runs your total is −0.80: within chance." At or below −1.96: "Below chance, which researchers call psi-missing. Chance alone does this about 1 time in 40." At or above +1.96: the same, mirrored.
@@ -116,9 +116,7 @@ Price lives in `config/products.json`: one product, `labpass`, $4.99 (499 cents)
 
 ## API and data
 
-- `POST /api/runs`: start a run. Returns `{ runId, aim, lengthBits, source }`.
-- `POST /api/runs/:id/bits`: the next batch. Returns `{ bits, n, deviation }`. Refuses if requested faster than real time.
-- `POST /api/runs/:id/finish`: closes a run early (it still counts). Runs also close on their own when full.
+- `POST /api/runs` with `{ deviceId, kind, seconds? }`: starts a run and answers with one `text/event-stream`: `start` `{ runId, aim, lengthBits, source, bitsPerSecond }`, then `bits` `{ bits, n, deviation }` about every 250 ms, then `end` `{ status, n, deviation, z }`. A body with an `aim` is refused. Closing the connection stops the run early (it still counts). A row still `running` 30 s past its planned end counts as abandoned. Shapes live in `src/lib/protocol.ts`.
 - `GET /api/runs/:id`: a run's result.
 - `GET /api/global`, `GET /api/hour`: totals, cached.
 - Payment routes as in the other apps.

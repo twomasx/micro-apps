@@ -3,6 +3,8 @@
   "name": "micro-intention",
   "pages_build_output_dir": "dist",
   "compatibility_date": "2026-10-01",
+  // request.signal aborts when the browser disconnects, so a run stopped early is saved as abandoned.
+  "compatibility_flags": ["enable_request_signal"],
   "d1_databases": [
     {
       "binding": "DB",
