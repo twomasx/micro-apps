@@ -23,3 +23,12 @@ export const CLOSED_LABEL = 'Unlocks open soon';
 export function isClosedResponse(status: number): boolean {
   return status === 503;
 }
+
+/**
+ * True on a staging address: staging.polymadlabs.com, staging.<project>.pages.dev, or later
+ * staging.<an app's own domain>. Production hostnames never start with "staging.", so the
+ * TEST MODE label can never show there, and no request is needed to decide.
+ */
+export function isStagingHost(hostname: string): boolean {
+  return hostname.startsWith('staging.');
+}

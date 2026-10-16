@@ -37,3 +37,8 @@ Check on Android Chrome first, then iPhone Safari. Locally at http://localhost:3
 
 - [ ] Stripe Checkout shows the seller as "Roger Tafoya", the Stripe account's public business name, as it does for every app on this account. If you would rather buyers see "PolymadLabs", change it in the Stripe dashboard (Settings, Public details).
 - [ ] Stripe Checkout offers Cash App Pay, Klarna and bank payments besides cards (the account's dynamic payment methods). Fine for a $4.99 one-time purchase?
+
+## Payments across the apps (PAYMENTS.md)
+
+- [ ] **"Unlocks open soon":** while payments are closed (the kill switch), the buy button is disabled, says "Unlocks open soon" and has `data-state="closed"` (open is `data-state="open"`). Style the closed state.
+- [ ] **TEST MODE label:** staging only (`.test-mode-label`, `data-mode="test"`, in `src/components/TestModeLabel.tsx`, shown when the hostname starts with `staging.`). For now it is fixed to the top edge in the middle, in plain system colors, and taps go through it. Production never shows it.

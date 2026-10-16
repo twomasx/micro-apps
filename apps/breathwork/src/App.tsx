@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
+import { TestModeLabel } from './components/TestModeLabel';
 import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
 import { BreathePage } from './pages/BreathePage';
@@ -67,5 +68,10 @@ export function App() {
     if (!window.location.hash) window.scrollTo(0, 0);
   }, [route]);
 
-  return <Page route={route} />;
+  return (
+    <>
+      <TestModeLabel />
+      <Page route={route} />
+    </>
+  );
 }

@@ -9,7 +9,7 @@ A push to GitHub does not deploy anything. Every deploy is a command run from th
 | Piece | Cloudflare resource | Address |
 | --- | --- | --- |
 | Router | Worker `micro-router` | https://polymadlabs.com and https://www.polymadlabs.com |
-| Router, for trying changes | Worker `micro-router-preview` | https://micro-router-preview.micro-router.workers.dev |
+| Router for staging | Worker `micro-router-preview` | https://staging.polymadlabs.com and https://micro-router-preview.micro-router.workers.dev |
 | Personality app | Pages project `micro-personality` | https://micro-personality.pages.dev |
 | Personality database | D1 `micro-personality` | id in `apps/personality/wrangler.jsonc` |
 | Focus app | Pages project `micro-focus` | https://micro-focus.pages.dev |
@@ -210,9 +210,11 @@ The project lives at `micro-landing-b6u.pages.dev`, because `micro-landing` was 
 From `router`:
 
 ```bash
-pnpm exec wrangler deploy --env preview   # try it on the workers.dev address first
+pnpm exec wrangler deploy --env preview   # staging: staging.polymadlabs.com and the workers.dev address
 pnpm exec wrangler deploy --env=""        # production: polymadlabs.com and www
 ```
+
+The preview Worker serves staging, so its app origins are the `staging.micro-<app>.pages.dev` addresses, not production's.
 
 ### Turning on the next app
 
@@ -221,6 +223,43 @@ pnpm exec wrangler deploy --env=""        # production: polymadlabs.com and www
 3. Deploy the router to preview, check the app there, then deploy production.
 
 For a minute or so after a router deploy, some requests still reach the old version, so an app that was just turned on can answer 404 now and then. Wait until checks pass several times in a row before calling it broken.
+
+## Staging
+
+https://staging.polymadlabs.com is a full copy of the site in Stripe test mode, for trying every purchase with test cards before anything goes live. Set up on Oct 16, 2026. See PAYMENTS.md.
+
+| Piece | Where |
+| --- | --- |
+| Router | Worker `micro-router-preview`, custom domain `staging.polymadlabs.com` (wrangler made its DNS record), also https://micro-router-preview.micro-router.workers.dev. It adds `X-Robots-Tag: noindex, nofollow` to everything. |
+| Each app | The `staging` branch of its Pages project: `https://staging.micro-<app>.pages.dev` |
+| Landing page | `https://staging.micro-landing-b6u.pages.dev` |
+| Databases | D1 `micro-<app>-staging`, bound in each app's `wrangler.jsonc` under `env.preview` |
+
+Each app's `wrangler.jsonc` has the production settings at the top and staging under `env.preview`: `PAYMENTS_MODE=test`, `ENVIRONMENT=staging` and the staging database. Pages uses `env.preview` for every branch except `main`.
+
+Staging secrets (set with `--env preview`): `STRIPE_SECRET_KEY` (the test key), `STRIPE_WEBHOOK_SECRET` (the same signing secrets as before, see Stripe below), `UNLOCK_CODE_SECRET` (its own, saved at `~/.config/polymadlabs/<app>-staging-unlock-code-secret`), `PUBLIC_ORIGIN=https://staging.polymadlabs.com` and `PAYMENTS_ENABLED=true`.
+
+```bash
+printf '%s' "$VALUE" | pnpm exec wrangler pages secret put <NAME> --project-name micro-<app> --env preview
+```
+
+### Deploy an app to staging
+
+From `apps/<app>`:
+
+```bash
+pnpm build
+pnpm exec wrangler d1 migrations apply DB --remote --env preview   # when there is a new migration
+pnpm exec wrangler pages deploy dist --project-name micro-<app> --branch staging
+```
+
+The landing page: `../../router/node_modules/.bin/wrangler pages deploy dist --project-name micro-landing --branch staging` from `apps/landing`.
+
+The router: `pnpm exec wrangler deploy --env preview` from `router`.
+
+Staging is the place to try a change before production: deploy it there, check it on https://staging.polymadlabs.com, then deploy to `main`.
+
+If https://staging.polymadlabs.com fails to connect on the Windows machine only some of the time, Windows is still caching the answer from before the name existed. `ipconfig /flushdns` in a Windows terminal clears it.
 
 ## Payments kill switch
 
@@ -242,12 +281,13 @@ curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"
 ## Stripe
 
 - Test mode. The code refuses a key that does not match `PAYMENTS_MODE` (see the kill switch above). Going live is the procedure in PAYMENTS.md section 6, not a code change.
-- Webhook: `https://polymadlabs.com/personality/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UPxeIIbd3re6uBdIm3vv1hN`. Its signing secret was saved on Roger's machine at `~/.config/polymadlabs/stripe-webhook-secret`, outside the repo.
-- If the webhook is ever recreated, it gets a new signing secret: put it in `STRIPE_WEBHOOK_SECRET` and deploy again.
-- Focus webhook: `https://polymadlabs.com/focus/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.
-- Breathwork webhook: `https://polymadlabs.com/breathwork/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQVAQIbd3re6uBdkogYUm05`. Signing secret at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`.
-- Attention webhook: `https://polymadlabs.com/attention/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQyQJIbd3re6uBdJJZSk73e`. Signing secret at `~/.config/polymadlabs/attention-stripe-webhook-secret`.
-- Intention webhook: `https://polymadlabs.com/intention/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UR18BIbd3re6uBd9Rlw0Mum`. Signing secret at `~/.config/polymadlabs/intention-stripe-webhook-secret`.
+- Since Oct 16, 2026 the five test-mode webhooks point at **staging**, not production, and receive `checkout.session.completed`, `charge.refunded` and `charge.dispute.created`. Moving them kept their signing secrets. Production has no webhook until go-live.
+- Personality: `https://staging.polymadlabs.com/personality/api/stripe/webhook`, endpoint id `we_1UPxeIIbd3re6uBdIm3vv1hN`. Signing secret at `~/.config/polymadlabs/stripe-webhook-secret`.
+- Focus: `https://staging.polymadlabs.com/focus/api/stripe/webhook`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.
+- Breathwork: `https://staging.polymadlabs.com/breathwork/api/stripe/webhook`, endpoint id `we_1UQVAQIbd3re6uBdkogYUm05`. Signing secret at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`.
+- Attention: `https://staging.polymadlabs.com/attention/api/stripe/webhook`, endpoint id `we_1UQyQJIbd3re6uBdJJZSk73e`. Signing secret at `~/.config/polymadlabs/attention-stripe-webhook-secret`.
+- Intention: `https://staging.polymadlabs.com/intention/api/stripe/webhook`, endpoint id `we_1UR18BIbd3re6uBd9Rlw0Mum`. Signing secret at `~/.config/polymadlabs/intention-stripe-webhook-secret`.
+- If a webhook is ever recreated, it gets a new signing secret: put it in `STRIPE_WEBHOOK_SECRET` (`--env preview` for staging) and deploy again.
 - Every webhook gets the checkout events of every app on the account. Each app ignores sessions it did not create.
 - Local development uses the Stripe CLI and its own secret. See "Testing payments locally" in `apps/personality/CLAUDE.md` and `apps/focus/CLAUDE.md`.
 

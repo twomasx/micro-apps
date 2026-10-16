@@ -16,5 +16,22 @@
       // Local dev and tests use their own SQLite file under this id, never the real database.
       "preview_database_id": "00000000-0000-0000-0000-000000000000"
     }
-  ]
+  ],
+  // Staging: the `staging` branch, deployed as this project's preview (staging.micro-attention.pages.dev),
+  // served at https://staging.polymadlabs.com/attention/. Stripe test mode, its own database. See PAYMENTS.md.
+  "env": {
+    "preview": {
+      "vars": {
+        "PAYMENTS_MODE": "test",
+        "ENVIRONMENT": "staging"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "micro-attention-staging",
+          "database_id": "a5a621e1-e2aa-4409-b653-12887d4d26e7"
+        }
+      ]
+    }
+  }
 }

@@ -39,20 +39,23 @@
         "LANDING_ORIGIN": "http://localhost:3006"
       }
     },
-    // A copy of production on a workers.dev address, with no domain attached:
-    // `wrangler deploy --env preview`. Use it to try the router before it goes live.
+    // Staging: https://staging.polymadlabs.com (and the workers.dev address), `wrangler deploy --env preview`.
+    // Every path goes to the `staging` branch deployment of its Pages project: Stripe test mode,
+    // staging databases. Router changes are tried here before production. See PAYMENTS.md.
     "preview": {
-      "routes": [],
+      "routes": [{ "pattern": "staging.polymadlabs.com", "custom_domain": true }],
       "workers_dev": true,
       "vars": {
         "STRIP_PREFIX": "true",
         "LIVE_APPS": "personality,focus,breathwork,attention,intention",
-        "PERSONALITY_ORIGIN": "https://micro-personality.pages.dev",
-        "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
-        "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
-        "ATTENTION_ORIGIN": "https://micro-attention.pages.dev",
-        "INTENTION_ORIGIN": "https://micro-intention.pages.dev",
-        "LANDING_ORIGIN": "https://micro-landing-b6u.pages.dev"
+        "CANONICAL_HOST": "staging.polymadlabs.com",
+        "NOINDEX": "true",
+        "PERSONALITY_ORIGIN": "https://staging.micro-personality.pages.dev",
+        "FOCUS_ORIGIN": "https://staging.micro-focus.pages.dev",
+        "BREATHWORK_ORIGIN": "https://staging.micro-breathwork.pages.dev",
+        "ATTENTION_ORIGIN": "https://staging.micro-attention.pages.dev",
+        "INTENTION_ORIGIN": "https://staging.micro-intention.pages.dev",
+        "LANDING_ORIGIN": "https://staging.micro-landing-b6u.pages.dev"
       }
     }
   }

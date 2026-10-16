@@ -25,3 +25,8 @@ For this app Claude made the design (see the spec). These are the choices still 
 
 - [ ] **Android Chrome:** the left-only and right-only tones on `/focus/bench` in dev (no sound in the other ear), 2 minutes with the screen off, and the play and pause controls on the lock screen.
 - [ ] **iPhone Safari:** sound with the ring switch on silent, sound after locking the screen, and the lock screen controls.
+
+## Payments across the apps (PAYMENTS.md)
+
+- [ ] **"Unlocks open soon":** while payments are closed (the kill switch), the buy button is disabled, says "Unlocks open soon" and has `data-state="closed"` (open is `data-state="open"`). Style the closed state.
+- [ ] **TEST MODE label:** staging only (`.test-mode-label`, `data-mode="test"`, in `src/components/TestModeLabel.tsx`, shown when the hostname starts with `staging.`). For now it is fixed to the top edge in the middle, in plain system colors, and taps go through it. Production never shows it.

@@ -16,5 +16,22 @@
       "database_name": "micro-intention",
       "database_id": "8191fe94-bc95-4272-909b-13dedc75002e"
     }
-  ]
+  ],
+  // Staging: the `staging` branch, deployed as this project's preview (staging.micro-intention.pages.dev),
+  // served at https://staging.polymadlabs.com/intention/. Stripe test mode, its own database. See PAYMENTS.md.
+  "env": {
+    "preview": {
+      "vars": {
+        "PAYMENTS_MODE": "test",
+        "ENVIRONMENT": "staging"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "micro-intention-staging",
+          "database_id": "a6e6f7da-aa25-4876-b3ca-387123c9b54b"
+        }
+      ]
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { TestModeLabel } from './components/TestModeLabel.tsx';
 import { useRoute } from './hooks/useRoute.ts';
 import type { Route } from './lib/router.ts';
 import { GlobalPage } from './pages/GlobalPage.tsx';
@@ -49,5 +50,10 @@ export function App() {
     document.title = route.name === 'tug' ? SITE_TITLE : `${PAGE_TITLES[route.name]} · ${SITE_TITLE}`;
     if (route.name !== 'tug') window.scrollTo(0, 0);
   }, [route.name]);
-  return <Page route={route} />;
+  return (
+    <>
+      <TestModeLabel />
+      <Page route={route} />
+    </>
+  );
 }

@@ -102,3 +102,8 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - Intro compare notice: `.intro-compare`, `.intro-compare-title`, `.intro-compare-text`, `.intro-compare-link`, `.intro-compare-own`.
 - Info pages: `main.info[data-page="science|privacy"]`, `.info-title`, `.info-section`, `.info-section-title`, `.prose-list`, `.info-back-link`. Footer: `.site-footer-nav`, `.site-footer-link`.
 - Result: `main.result[data-state][data-type][data-own][data-revealed]`, `.result-title-label`, `.result-type`, `.result-letter` with `--i`, `.result-warning`, `.result-summary`, `ul.axes`, `li.axis[data-axis][data-letter][data-balanced][data-winner="left|right"]` with `--pct` and `--step`, `.axis-headline`, `.axis-pct`, `.axis-name`, `.axis-balance`, `.axis-plain`, `.axis-scale`, `.axis-fill`, `.axis-marker`, `.axis-side[data-letter][data-winner][data-pct]`, `.result-share`, `.result-compare`, `.result-compare-warning`, `.result-message`, `.result-delete`, `.result-take-test`.
+
+## Payments across the apps (PAYMENTS.md)
+
+- [ ] **"Unlocks open soon":** while payments are closed (the kill switch), the buy button is disabled, says "Unlocks open soon" and has `data-state="closed"` (open is `data-state="open"`). Style the closed state.
+- [ ] **TEST MODE label:** staging only (`.test-mode-label`, `data-mode="test"`, in `src/components/TestModeLabel.tsx`, shown when the hostname starts with `staging.`). For now it is fixed to the top edge in the middle, in plain system colors, and taps go through it. Production never shows it.

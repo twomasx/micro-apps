@@ -9,6 +9,8 @@ type Env = {
   CANONICAL_HOST?: string;
   /** The landing page app, served at `/`. */
   LANDING_ORIGIN: string;
+  /** "true" on staging: search engines are asked not to index anything. */
+  NOINDEX?: string;
 } & Record<`${Uppercase<App>}_ORIGIN`, string>;
 
 /** Forwards a request to `path` on an app and fixes redirects so they stay under the app's path. */
@@ -64,8 +66,16 @@ async function handle(request: Request, env: Env): Promise<Response> {
   }
 }
 
+/** Staging is a test copy of the site. Asks search engines to leave it out. */
+export function withNoindex(response: Response): Response {
+  const marked = new Response(response.body, response);
+  marked.headers.set('x-robots-tag', 'noindex, nofollow');
+  return marked;
+}
+
 export default {
   async fetch(request, env): Promise<Response> {
-    return withoutInjection(await handle(request, env));
+    const response = withoutInjection(await handle(request, env));
+    return env.NOINDEX === 'true' ? withNoindex(response) : response;
   },
 } satisfies ExportedHandler<Env>;

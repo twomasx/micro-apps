@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { withoutInjection } from './index.ts';
+import { withNoindex, withoutInjection } from './index.ts';
 import { comingSoonPage, notFoundPage } from './pages.ts';
 import { landingPath, parseLiveApps, route } from './routes.ts';
 
@@ -78,6 +78,15 @@ describe('withoutInjection', () => {
   it('leaves everything that is not HTML alone', () => {
     const json = Response.json({ ok: true }, { headers: { 'cache-control': 'no-store' } });
     expect(withoutInjection(json)).toBe(json);
+  });
+});
+
+describe('withNoindex', () => {
+  it('asks search engines to leave staging out, and keeps the response', async () => {
+    const marked = withNoindex(new Response('ok', { status: 201, headers: { 'content-type': 'text/plain' } }));
+    expect(marked.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(marked.status).toBe(201);
+    expect(await marked.text()).toBe('ok');
   });
 });
 

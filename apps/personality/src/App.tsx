@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { TestModeLabel } from './components/TestModeLabel.tsx';
 import { useRoute } from './hooks/useRoute.ts';
 import type { Route } from './lib/router.ts';
 import { Link } from './components/Link.tsx';
@@ -68,6 +69,7 @@ export function App() {
 
   return (
     <>
+      <TestModeLabel />
       <Page route={route} />
       <footer className="site-footer">
         <nav className="site-footer-nav" aria-label="About this test">

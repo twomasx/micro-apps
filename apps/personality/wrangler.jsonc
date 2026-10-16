@@ -17,5 +17,22 @@
       // Local dev keeps its own SQLite file under .wrangler/, stored under this id.
       "preview_database_id": "00000000-0000-0000-0000-000000000000"
     }
-  ]
+  ],
+  // Staging: the `staging` branch, deployed as this project's preview (staging.micro-personality.pages.dev),
+  // served at https://staging.polymadlabs.com/personality/. Stripe test mode, its own database. See PAYMENTS.md.
+  "env": {
+    "preview": {
+      "vars": {
+        "PAYMENTS_MODE": "test",
+        "ENVIRONMENT": "staging"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "micro-personality-staging",
+          "database_id": "8cd40295-1c1e-4309-8651-3d47e4971a63"
+        }
+      ]
+    }
+  }
 }

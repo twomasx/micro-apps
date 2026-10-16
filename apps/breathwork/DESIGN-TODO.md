@@ -20,3 +20,8 @@ Decisions that are built the simplest way for now and need your call. What has b
 - Android Chrome: tones, vibration and the screen staying awake during a session.
 - iPhone Safari: tones with the silent switch on, and music pausing when a session starts with sound on.
 - Wake lock needs https or localhost. Over plain http on a LAN address it shows "not supported". It will work on polymadlabs.com.
+
+## Payments across the apps (PAYMENTS.md)
+
+- [ ] **"Unlocks open soon":** while payments are closed (the kill switch), the buy button is disabled, says "Unlocks open soon" and has `data-state="closed"` (open is `data-state="open"`). Style the closed state.
+- [ ] **TEST MODE label:** staging only (`.test-mode-label`, `data-mode="test"`, in `src/components/TestModeLabel.tsx`, shown when the hostname starts with `staging.`). For now it is fixed to the top edge in the middle, in plain system colors, and taps go through it. Production never shows it.

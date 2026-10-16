@@ -38,3 +38,8 @@ Decisions built the simplest way for now that need your call. What has been deci
 - How the brush looks on a real phone screen at 3x density (the canvas draws at 2x at most, to save battery).
 - A real purchase flow on the phone after deploy: Stripe's page, the return, the code, restore on another device.
 - The test's timing on a real phone: open "Timing on this screen" under a result. On 90 Hz and 120 Hz screens, digits show for 244 to 256 ms.
+
+## Payments across the apps (PAYMENTS.md)
+
+- [ ] **"Unlocks open soon":** while payments are closed (the kill switch), the buy button is disabled, says "Unlocks open soon" and has `data-state="closed"` (open is `data-state="open"`). Style the closed state.
+- [ ] **TEST MODE label:** staging only (`.test-mode-label`, `data-mode="test"`, in `src/components/TestModeLabel.tsx`, shown when the hostname starts with `staging.`). For now it is fixed to the top edge in the middle, in plain system colors, and taps go through it. Production never shows it.
