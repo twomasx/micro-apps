@@ -32,10 +32,15 @@ export default defineConfig({
         start_url: base,
         scope: base,
         display: 'standalone',
-        // Placeholders. Colours and icons come with each app's own design.
+        // Placeholders. Colours come with each app's own design.
         theme_color: '#ffffff',
         background_color: '#ffffff',
-        icons: [],
+        icons: [
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          // The sliders sit inside the middle 80%, so the same file works as a maskable icon.
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       },
       workbox: {
         cacheId: name,

@@ -16,7 +16,7 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - **Corner radius:** 6px on buttons.
 - **Typeface:** Inter Tight. The paid report is planned in a serif (Editorial direction); that face is not chosen yet.
 - **Intro copy and the three readouts** ("40 questions", "~6 minutes", "$0 for the result") are drafts.
-- **PWA theme color, background color and icons** are still placeholders in `vite.config.ts`.
+- **PWA theme color and background color** are still placeholders (`#ffffff`) in `vite.config.ts`. The icons are done.
 
 ## How the test behaves now
 
@@ -87,7 +87,7 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - **The similarity number is big.** The spec allows it, but decide how much weight it should get next to the four scales.
 - **Compare notice on the intro** is a white box with an accent edge. Same treatment as the messages on the result page.
 - **Footer links** ("The science", "Privacy") sit above the trademark line on every page, including during the test.
-- **Favicon.** There is none. `index.html` has an empty icon link so the browser logs no 404.
+- **Icon.** Roger's four-slider design from the favicons kit, recolored on Oct 15, 2026 to the app's own tokens: paper `#f5f4f0` background, slider tracks in ink `#0d0d0c` at 32% (`--line-strong`), markers in the accent `#1f3bff`. Full-bleed square, no rounded corners. `public/favicon.svg` is the source; the PNGs (180, 192, 512) are rendered from it. Check the tracks are not too faint on your home screen.
 - A share image for results (planned for later in the spec).
 - A result opened by someone else says "This type is INTJ" and offers "Take the test yourself". Check that wording.
 - **Router pages.** `polymadlabs.com/`, the four "Coming soon" pages and the 404 page are plain unstyled HTML in `router/src/pages.ts`. They are yours to design.
