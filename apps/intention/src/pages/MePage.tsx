@@ -27,7 +27,7 @@ export function MePage() {
     <main className="page me">
       <nav className="page-nav">
         <Link to="" className="back-link">
-          Back to the tug
+          Back to Intention
         </Link>
       </nav>
       <h1 className="page-title">Your runs</h1>
@@ -61,7 +61,7 @@ function MeContent({ me, deviceId, code }: Loaded) {
       <>
         <p className="lead">No runs yet. Your runs show here after you pull.</p>
         <p>
-          <Link to="">Go to the tug of war</Link>
+          <Link to="">Start your first run</Link>
         </p>
       </>
     );

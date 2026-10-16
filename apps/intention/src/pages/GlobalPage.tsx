@@ -36,7 +36,7 @@ export function GlobalPage() {
     <main className="page global">
       <nav className="page-nav">
         <Link to="" className="back-link">
-          Back to the tug
+          Back to Intention
         </Link>
       </nav>
       <h1 className="page-title">Everyone's runs</h1>

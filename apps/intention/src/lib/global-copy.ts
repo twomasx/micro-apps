@@ -8,7 +8,7 @@ export const SOURCE_LABELS: Record<string, string> = {
 };
 
 export const KIND_LABELS: Record<string, string> = {
-  tug: 'Tug of war',
+  tug: 'Two colors',
 };
 
 export const WHEN_LABELS: Record<'hour' | 'anytime', string> = {

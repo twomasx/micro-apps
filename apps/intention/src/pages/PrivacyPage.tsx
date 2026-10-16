@@ -6,7 +6,7 @@ export function PrivacyPage() {
     <main className="page prose">
       <nav className="page-nav">
         <Link to="" className="back-link">
-          Back to the tug
+          Back to Intention
         </Link>
       </nav>
       <h1 className="page-title">Privacy</h1>

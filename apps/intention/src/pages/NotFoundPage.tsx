@@ -6,7 +6,7 @@ export function NotFoundPage() {
       <h1 className="page-title">Page not found</h1>
       <p className="lead">There is nothing at this address.</p>
       <p>
-        <Link to="">Go to the tug of war</Link>
+        <Link to="">Go to Intention</Link>
       </p>
     </main>
   );
