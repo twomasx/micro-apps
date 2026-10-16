@@ -1,9 +1,11 @@
 export type {
+  CheckoutInput,
   CheckoutSession,
+  PaymentEvent,
   PaymentsProvider,
   Product,
   PurchaseVerification,
-  WebhookResult,
 } from './types';
-export { createStripePayments, type StripePaymentsOptions } from './stripe';
+export { PriceMismatchError } from './types';
+export { createStripePayments, priceLookupKey, readEvent, type StripePaymentsOptions } from './stripe';
 export * from './settings';

@@ -7,7 +7,9 @@
     ".": "./src/index.ts",
     "./unlock-codes": "./src/unlock-codes.ts",
     "./settings": "./src/settings.ts",
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./server": "./src/server/index.ts",
+    "./testing": "./src/testing.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -20,6 +22,7 @@
     "@cloudflare/workers-types": "^5.20261006.1",
     "@micro/config": "workspace:*",
     "typescript": "~6.0.3",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "wrangler": "^4.149.0"
   }
 }

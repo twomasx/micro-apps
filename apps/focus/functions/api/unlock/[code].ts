@@ -1,5 +1,4 @@
-import { readSettings } from '@micro/payments/settings';
-import { checkUnlockCode } from '../../../server/purchases.ts';
+import { paymentsContext, purchases } from '../../../server/purchases.ts';
 
 export const onRequestGet: PagesFunction<Env, 'code'> = ({ params, env }) =>
-  checkUnlockCode(String(params.code), env.DB, readSettings(env).mode);
+  purchases.unlock(String(params.code), paymentsContext(env));

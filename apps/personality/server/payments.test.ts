@@ -1,17 +1,14 @@
-import type { PaymentsProvider, PaymentsSettings } from '@micro/payments';
+import type { PaymentsSettings } from '@micro/payments';
+import { purchaseStore, type PaymentsContext } from '@micro/payments/server';
+import { eventId, FakeProvider, webhookRequest } from '@micro/payments/testing';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import catalog from '../config/products.json';
 import p1 from '../src/data/items.p1.json';
 import type { CompareResponse } from '../src/lib/compare.ts';
 import type { Report } from '../src/lib/report.ts';
 import { getCompare } from './compare.ts';
-import {
-  createCheckout,
-  getReport,
-  handleStripeWebhook,
-  type CheckoutUrls,
-  type PaymentsFactory,
-} from './payments.ts';
+import { handleStripeWebhook } from '@micro/payments/server';
+import { createCheckout, getReport } from './payments.ts';
 import { createResult, getResult } from './results.ts';
 import { createTestDb, type TestDb } from './testing.ts';
 
@@ -33,36 +30,12 @@ interface PurchaseRow {
   mode: string;
 }
 
-// The database lasts for the whole file, so session ids must never repeat.
-let nextSession = 1;
-
-/** Stands in for Stripe. `paidSessions` is what Stripe would say has been paid. */
-class FakePayments {
-  paidSessions = new Set<string>();
-  urls: CheckoutUrls[] = [];
-  verifyCalls = 0;
-
-  factory: PaymentsFactory = (urls) => {
-    const provider: PaymentsProvider = {
-      createCheckout: async () => {
-        this.urls.push(urls);
-        const sessionId = `cs_test_fake${String(nextSession++).padStart(8, '0')}`;
-        return { sessionId, url: `https://checkout.example/${sessionId}` };
-      },
-      verifyPurchase: async (sessionId) => {
-        this.verifyCalls += 1;
-        return { paid: this.paidSessions.has(sessionId), productId: null };
-      },
-      handleWebhook: async (request) => {
-        if (request.headers.get('stripe-signature') !== 'good') throw new Error('bad signature');
-        const body = (await request.json()) as { sessionId?: string };
-        return body.sessionId
-          ? { type: 'purchase.completed', sessionId: body.sessionId, productId: null }
-          : { type: 'ignored' };
-      },
-    };
-    return provider;
-  };
+/** Stands in for Stripe. */
+class FakePayments extends FakeProvider {
+  /** The return addresses of every checkout started. */
+  get urls() {
+    return this.checkouts.map(({ successUrl, cancelUrl }) => ({ successUrl, cancelUrl }));
+  }
 }
 
 let testDb: TestDb;
@@ -82,6 +55,15 @@ beforeEach(() => {
   fake = new FakePayments();
 });
 
+function context(settings: Partial<PaymentsSettings> = {}): PaymentsContext {
+  const full = { ...SETTINGS, ...settings };
+  return {
+    settings: full,
+    store: purchaseStore({ db, app: 'personality', mode: full.mode }),
+    provider: () => fake,
+  };
+}
+
 /** A result that leans `toward` (1 to 5) the right poles: 4 gives INFP at 75%, 2 gives ESTJ at 75%. */
 async function newResultId(toward = 4): Promise<string> {
   const answers = Object.fromEntries(
@@ -97,12 +79,12 @@ async function newResultId(toward = 4): Promise<string> {
   return ((await response.json()) as { id: string }).id;
 }
 
-function checkout(body: unknown, settings = SETTINGS): Promise<Response> {
+function checkout(body: unknown, settings: Partial<PaymentsSettings> = {}): Promise<Response> {
   const request = new Request('http://127.0.0.1:8801/api/checkout', {
     method: 'POST',
     body: JSON.stringify(body),
   });
-  return createCheckout(request, db, fake.factory, settings, ORIGIN);
+  return createCheckout(request, db, context(settings), ORIGIN);
 }
 
 /** Starts a checkout for the full report and returns its session id. */
@@ -114,18 +96,16 @@ async function startReportCheckout(resultId: string): Promise<string> {
 }
 
 function webhook(sessionId: string | null, signature = 'good'): Promise<Response> {
-  const request = new Request('http://localhost/api/stripe/webhook', {
-    method: 'POST',
-    headers: { 'stripe-signature': signature },
-    body: JSON.stringify(sessionId ? { sessionId } : {}),
-  });
-  return handleStripeWebhook(request, db, fake.factory, 'test');
+  const event = sessionId
+    ? ({ type: 'checkout.completed', eventId: eventId(), sessionId } as const)
+    : ({ type: 'ignored', eventId: eventId(), stripeType: 'customer.created' } as const);
+  return handleStripeWebhook(webhookRequest(event, signature), context());
 }
 
 function report(resultId: string, sessionId?: string): Promise<Response> {
   const query = sessionId ? `?session_id=${sessionId}` : '';
   const request = new Request(`http://localhost/api/results/${resultId}/report${query}`);
-  return getReport(request, resultId, db, fake.factory, 'test');
+  return getReport(request, resultId, db, context());
 }
 
 async function purchases(resultId: string): Promise<PurchaseRow[]> {
@@ -212,7 +192,7 @@ describe('POST /api/checkout', () => {
   it('refuses to sell a report that is already unlocked', async () => {
     const id = await newResultId();
     const sessionId = await startReportCheckout(id);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
     await webhook(sessionId);
 
     const response = await checkout({ product: 'report', resultId: id });
@@ -227,20 +207,37 @@ describe('kill switch and mode', () => {
     const response = await checkout({ product: 'report', resultId }, { ...SETTINGS, enabled: false });
     expect(response.status).toBe(503);
     expect(await purchases(resultId)).toEqual([]);
+    expect((await checkout({ product: 'nope' }, { enabled: false })).status).toBe(503);
   });
 
   it('records the mode, and a purchase unlocks nothing in the other mode', async () => {
     const resultId = await newResultId();
     const sessionId = await startReportCheckout(resultId);
     expect((await purchases(resultId))[0]?.mode).toBe('test');
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
     await webhook(sessionId);
 
     expect(await isUnlocked(resultId)).toBe(true);
     const live = await getResult(resultId, db, 'live');
     expect(((await live.json()) as { unlocked: boolean }).unlocked).toBe(false);
     const request = new Request(`http://localhost/api/results/${resultId}/report`);
-    expect((await getReport(request, resultId, db, fake.factory, 'live')).status).toBe(402);
+    expect((await getReport(request, resultId, db, context({ mode: 'live' }))).status).toBe(402);
+  });
+});
+
+describe('refunds and disputes', () => {
+  it('a full refund locks the report again, a dispute locks the couple report', async () => {
+    const id = await newResultId();
+    const sessionId = await startReportCheckout(id);
+    fake.pay(sessionId);
+    await webhook(sessionId);
+    expect(await isUnlocked(id)).toBe(true);
+
+    const refund = { type: 'charge.refunded', eventId: eventId(), sessionId, paymentIntentId: null, full: true } as const;
+    await handleStripeWebhook(webhookRequest(refund), context());
+    expect(await isUnlocked(id)).toBe(false);
+    expect((await report(id)).status).toBe(402);
+    expect(await purchases(id)).toMatchObject([{ status: 'refunded' }]);
   });
 });
 
@@ -248,7 +245,7 @@ describe('POST /api/stripe/webhook', () => {
   it('unlocks the report when Stripe says the session is paid', async () => {
     const id = await newResultId();
     const sessionId = await startReportCheckout(id);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
 
     expect((await webhook(sessionId)).status).toBe(200);
     expect(await purchases(id)).toMatchObject([{ status: 'paid' }]);
@@ -258,7 +255,7 @@ describe('POST /api/stripe/webhook', () => {
   it('is safe to receive twice', async () => {
     const id = await newResultId();
     const sessionId = await startReportCheckout(id);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
 
     expect((await webhook(sessionId)).status).toBe(200);
     expect((await webhook(sessionId)).status).toBe(200);
@@ -269,7 +266,7 @@ describe('POST /api/stripe/webhook', () => {
   it('rejects a bad signature and unlocks nothing', async () => {
     const id = await newResultId();
     const sessionId = await startReportCheckout(id);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
 
     const response = await webhook(sessionId, 'forged');
     expect(response.status).toBe(400);
@@ -286,7 +283,7 @@ describe('POST /api/stripe/webhook', () => {
 
   it('accepts events it does not use and sessions it never created', async () => {
     expect((await webhook(null)).status).toBe(200);
-    fake.paidSessions.add('cs_test_someoneelse1');
+    fake.pay('cs_test_someoneelse1');
     expect((await webhook('cs_test_someoneelse1')).status).toBe(200);
   });
 });
@@ -308,7 +305,7 @@ describe('GET /api/results/:id/report', () => {
   it('returns the full report after the webhook', async () => {
     const id = await newResultId();
     const sessionId = await startReportCheckout(id);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
     await webhook(sessionId);
 
     const response = await report(id);
@@ -367,7 +364,7 @@ describe('GET /api/results/:id/report', () => {
     );
     const { id } = (await created.json()) as { id: string };
     const sessionId = await startReportCheckout(id);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
 
     const body = (await (await report(id, sessionId)).json()) as Report;
     expect(body.axes[0]?.balanceLabel).toBe('balanced, leans E');
@@ -379,7 +376,7 @@ describe('GET /api/results/:id/report', () => {
     const sessionId = await startReportCheckout(id);
 
     expect((await report(id, sessionId)).status).toBe(402);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
     expect((await report(id, sessionId)).status).toBe(200);
     expect(await purchases(id)).toMatchObject([{ status: 'paid' }]);
 
@@ -393,7 +390,7 @@ describe('GET /api/results/:id/report', () => {
     const paidFor = await newResultId();
     const other = await newResultId();
     const sessionId = await startReportCheckout(paidFor);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
 
     expect((await report(other, sessionId)).status).toBe(402);
     expect(await isUnlocked(other)).toBe(false);
@@ -401,7 +398,7 @@ describe('GET /api/results/:id/report', () => {
 
   it('does not ask Stripe about a session id it never created', async () => {
     const id = await newResultId();
-    fake.paidSessions.add('cs_test_someoneelse1');
+    fake.pay('cs_test_someoneelse1');
     expect((await report(id, 'cs_test_someoneelse1')).status).toBe(402);
     expect((await report(id, 'not a session')).status).toBe(402);
     expect(fake.verifyCalls).toBe(0);
@@ -411,7 +408,7 @@ describe('GET /api/results/:id/report', () => {
 function compare(a: string, b: string, sessionId?: string): Promise<Response> {
   const query = sessionId ? `?session_id=${sessionId}` : '';
   const request = new Request(`http://localhost/api/compare/${a}/${b}${query}`);
-  return getCompare(request, a, b, db, fake.factory, 'test');
+  return getCompare(request, a, b, db, context());
 }
 
 /** Starts a checkout for a pair and returns its session id. */
@@ -463,7 +460,7 @@ describe('GET /api/compare/:a/:b', () => {
     expect(fake.urls.at(-1)?.successUrl).toBe(
       `${ORIGIN}/personality/c/${a}/${b}?session_id={CHECKOUT_SESSION_ID}`,
     );
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
     await webhook(sessionId);
 
     for (const [first, second] of [
@@ -486,7 +483,7 @@ describe('GET /api/compare/:a/:b', () => {
     const a = await newResultId(4);
     const b = await newResultId(2);
     const sessionId = await startPairCheckout('couple', a, b);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
 
     const body = (await (await compare(b, a, sessionId)).json()) as CompareResponse;
     expect(body.unlocked).toBe(true);
@@ -502,7 +499,7 @@ describe('GET /api/compare/:a/:b', () => {
     const mine = await newResultId(4);
     const theirs = await newResultId(2);
     const sessionId = await startPairCheckout('both', mine, theirs);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
     await webhook(sessionId);
 
     const body = (await (await compare(mine, theirs)).json()) as CompareResponse;
@@ -518,7 +515,7 @@ describe('GET /api/compare/:a/:b', () => {
     const b = await newResultId();
     const c = await newResultId();
     const sessionId = await startPairCheckout('couple', a, b);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
 
     expect(((await (await compare(a, c, sessionId)).json()) as CompareResponse).unlocked).toBe(false);
     expect(((await (await compare(a, b)).json()) as CompareResponse).unlocked).toBe(false);
@@ -529,7 +526,7 @@ describe('GET /api/compare/:a/:b', () => {
     const a = await newResultId();
     const b = await newResultId();
     const sessionId = await startPairCheckout('couple', a, b);
-    fake.paidSessions.add(sessionId);
+    fake.pay(sessionId);
     await webhook(sessionId);
 
     const again = await checkout({ product: 'couple', resultId: b, partnerResultId: a });

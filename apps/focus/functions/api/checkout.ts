@@ -1,7 +1,4 @@
-import { readSettings } from '@micro/payments/settings';
-import { createCheckout, stripePayments } from '../../server/purchases.ts';
+import { paymentsContext, purchases } from '../../server/purchases.ts';
 
-export const onRequestPost: PagesFunction<Env> = ({ request, env }) => {
-  const settings = readSettings(env);
-  return createCheckout(request, env.DB, stripePayments(env, settings.mode), settings, env.PUBLIC_ORIGIN);
-};
+export const onRequestPost: PagesFunction<Env> = ({ request, env }) =>
+  purchases.checkout(request, paymentsContext(env), env.PUBLIC_ORIGIN);

@@ -49,6 +49,14 @@ describe('unlockCodeFor', () => {
   it('refuses a short secret', async () => {
     await expect(unlockCodeFor('short', 'cs_test_a')).rejects.toThrow();
   });
+
+  it('gives a new code for each generation and keeps generation 0 as the original', async () => {
+    const original = await unlockCodeFor(SECRET, 'cs_test_a');
+    expect(await unlockCodeFor(SECRET, 'cs_test_a', 0)).toBe(original);
+    const second = await unlockCodeFor(SECRET, 'cs_test_a', 1);
+    expect(second).not.toBe(original);
+    expect(await unlockCodeFor(SECRET, 'cs_test_a', 2)).not.toBe(second);
+  });
 });
 
 describe('hashCode', () => {

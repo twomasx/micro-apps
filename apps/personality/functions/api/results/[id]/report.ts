@@ -1,7 +1,4 @@
-import { readSettings } from '@micro/payments/settings';
-import { getReport, stripePayments } from '../../../../server/payments.ts';
+import { getReport, paymentsContext } from '../../../../server/payments.ts';
 
-export const onRequestGet: PagesFunction<Env, 'id'> = ({ request, params, env }) => {
-  const { mode } = readSettings(env);
-  return getReport(request, String(params.id), env.DB, stripePayments(env, mode), mode);
-};
+export const onRequestGet: PagesFunction<Env, 'id'> = ({ request, params, env }) =>
+  getReport(request, String(params.id), env.DB, paymentsContext(env));

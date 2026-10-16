@@ -54,16 +54,25 @@ function toHex(bytes: Uint8Array): string {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-/** The unlock code for a paid Stripe session. Server only: it needs the secret. */
-export async function unlockCodeFor(secret: string, sessionId: string): Promise<string> {
+/** The HMAC-SHA-256 of `message` with `secret`. Server only. */
+export async function hmac(secret: string, message: string): Promise<Uint8Array> {
   if (secret.length < MIN_SECRET_LENGTH) {
-    throw new Error(`UNLOCK_CODE_SECRET must be at least ${MIN_SECRET_LENGTH} characters`);
+    throw new Error(`The code secret must be at least ${MIN_SECRET_LENGTH} characters`);
   }
   const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [
     'sign',
   ]);
-  const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(sessionId)));
-  return encodeCode(signature.subarray(0, 10));
+  return new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(message)));
+}
+
+/**
+ * The unlock code for a paid Stripe session. Server only: it needs the secret.
+ * `generation` goes up by one each time a leaked code is replaced (scripts/reissue-code.ts).
+ * Generation 0 is the code every buyer got first, so codes sold before reissuing existed still work.
+ */
+export async function unlockCodeFor(secret: string, sessionId: string, generation = 0): Promise<string> {
+  const message = generation === 0 ? sessionId : `${sessionId}:${generation}`;
+  return encodeCode((await hmac(secret, message)).subarray(0, 10));
 }
 
 /** What the database stores in place of the code. `code` must already be normalized. */

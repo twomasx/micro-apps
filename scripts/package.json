@@ -1,0 +1,26 @@
+{
+  "name": "@micro/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "stripe-sync": "tsx stripe-sync.ts",
+    "reconcile": "tsx reconcile.ts",
+    "find-purchase": "tsx find-purchase.ts",
+    "reissue-code": "tsx reissue-code.ts",
+    "reset-devices": "tsx reset-devices.ts"
+  },
+  "dependencies": {
+    "@micro/payments": "workspace:*",
+    "stripe": "^23.0.0"
+  },
+  "devDependencies": {
+    "@micro/config": "workspace:*",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.3"
+  }
+}

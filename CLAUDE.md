@@ -83,7 +83,8 @@ Run an app: `pnpm dev:<app>` (site and functions together). Router: `pnpm dev:ro
 
 ## Packages
 
-- `packages/payments`: `PaymentsProvider` interface (`createCheckout`, `verifyPurchase`, `handleWebhook`) with a Stripe implementation.
+- `packages/payments`: `PaymentsProvider` interface (`createCheckout`, `verifyPurchase`, `handleWebhook`) with a Stripe implementation. `@micro/payments/server` holds the shared purchase logic for Pages Functions (purchases table, Stripe events, refunds, disputes, payment log); `@micro/payments/settings` the kill switch and mode; `@micro/payments/client` browser helpers. See PAYMENTS.md.
+- `scripts`: admin scripts Roger runs in WSL (`pnpm --filter @micro/scripts <name>`): stripe-sync, reconcile, find-purchase, reissue-code.
 - `packages/platform`: web wrappers for haptics, IndexedDB storage, share and audio unlock-on-tap.
 - `packages/config`: shared tsconfig and ESLint config only.
 

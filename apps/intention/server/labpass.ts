@@ -1,5 +1,6 @@
+import { purchaseStore } from '@micro/payments/server';
 import type { PaymentsMode } from '@micro/payments/settings';
-import { hashCode, normalizeCode } from '@micro/payments/unlock-codes';
+import { appConfig } from '../app.config.ts';
 
 /** Requests carry these headers. The device id is random and means nothing outside this app. */
 export const DEVICE_HEADER = 'X-Device-Id';
@@ -17,12 +18,8 @@ export async function hasLabPass(request: Request, db: D1Database, mode: Payment
   return isPaidCode(request.headers.get(UNLOCK_HEADER), db, mode);
 }
 
+/** A refunded or disputed Lab Pass no longer counts. */
 export async function isPaidCode(input: string | null, db: D1Database, mode: PaymentsMode): Promise<boolean> {
-  const code = input ? normalizeCode(input) : null;
-  if (!code) return false;
-  const row = await db
-    .prepare(`SELECT 1 AS found FROM purchases WHERE unlock_code_hash = ? AND status = 'paid' AND mode = ?`)
-    .bind(await hashCode(code), mode)
-    .first();
-  return row !== null;
+  if (!input) return false;
+  return (await purchaseStore({ db, app: appConfig.name, mode }).findByCode(input)) !== null;
 }

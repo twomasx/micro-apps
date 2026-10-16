@@ -291,6 +291,29 @@ curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"
 - Every webhook gets the checkout events of every app on the account. Each app ignores sessions it did not create.
 - Local development uses the Stripe CLI and its own secret. See "Testing payments locally" in `apps/personality/CLAUDE.md` and `apps/focus/CLAUDE.md`.
 
+## Stripe prices
+
+Checkout charges the Stripe price whose lookup key is `<app>:<product id>` (for example `focus:lifetime`), and refuses to start if that price differs from the app's `config/products.json`. The test-mode prices were created on Oct 16, 2026 with:
+
+```bash
+export STRIPE_SECRET_KEY=$(grep '^STRIPE_SECRET_KEY=' apps/focus/.env | cut -d= -f2-)
+pnpm --filter @micro/scripts stripe-sync            # creates missing prices, stops if any differs from config
+pnpm --filter @micro/scripts stripe-sync --check    # only checks
+pnpm --filter @micro/scripts test                   # the same check as a test (skipped when the key is not set)
+```
+
+Stripe prices cannot be edited. To change a price: change `products.json`, archive the old Stripe price (Dashboard, Product catalog), run stripe-sync, deploy.
+
+## Payment tables
+
+Every app's database has `purchases` (status `pending`, `paid`, `refunded` or `disputed`; only `paid` unlocks), `stripe_events` (each Stripe event id handled once) and `payment_log` (every checkout start, webhook, verify, unlock, refund, dispute and failure). See the log with:
+
+```bash
+pnpm exec wrangler d1 execute DB --remote --env preview --command "SELECT at, action, result, session_id FROM payment_log ORDER BY id DESC LIMIT 20"
+```
+
+(without `--env preview` for production).
+
 ## Check a deploy
 
 Quick checks from a terminal:

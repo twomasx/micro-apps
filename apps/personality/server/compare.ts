@@ -1,4 +1,4 @@
-import type { PaymentsMode } from '@micro/payments/settings';
+import type { PaymentsContext } from '@micro/payments/server';
 import {
   bulletLines,
   compareScores,
@@ -10,7 +10,7 @@ import { getQuestions, type QuestionFile } from '../src/lib/questions.ts';
 import type { AxisScore } from '../src/lib/scoring.ts';
 import { getContent } from './content.ts';
 import { error, json } from './http.ts';
-import { confirmSession, type PaymentsFactory } from './payments.ts';
+import { confirmSession } from './payments.ts';
 import { findResult, isCoupleUnlocked, isReportUnlocked } from './results.ts';
 
 /** The couple report for one pair. Only call this after the unlock is confirmed. */
@@ -37,9 +37,9 @@ export async function getCompare(
   aId: string,
   bId: string,
   db: D1Database,
-  payments: PaymentsFactory,
-  mode: PaymentsMode,
+  ctx: PaymentsContext,
 ): Promise<Response> {
+  const { mode } = ctx.settings;
   if (aId === bId) {
     return error(400, 'same_result', 'Compare two different results.');
   }
@@ -54,8 +54,8 @@ export async function getCompare(
   let unlocked = await isCoupleUnlocked(db, a.id, b.id, mode);
   const sessionId = new URL(request.url).searchParams.get('session_id');
   if (!unlocked && sessionId) {
-    await confirmSession(db, payments, sessionId, mode, (purchase) => {
-      const pair = [purchase.result_id, purchase.partner_result_id];
+    await confirmSession(ctx, sessionId, (purchase) => {
+      const pair = [purchase.result_id, purchase.partner_result_id] as unknown[];
       return pair.includes(a.id) && pair.includes(b.id);
     });
     unlocked = await isCoupleUnlocked(db, a.id, b.id, mode);
