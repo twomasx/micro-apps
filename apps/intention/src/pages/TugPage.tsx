@@ -7,6 +7,7 @@ import { ProgressRing } from '../components/ProgressRing.tsx';
 import { TugField } from '../components/TugField.tsx';
 import { useNow } from '../hooks/useNow.ts';
 import { useReducedMotion } from '../hooks/useReducedMotion.ts';
+import { useUnlocked } from '../hooks/useUnlocked.ts';
 import { useWakeLock } from '../hooks/useWakeLock.ts';
 import { hexToRgb } from '../lib/color.ts';
 import {
@@ -18,6 +19,10 @@ import {
 } from '../lib/color-settings.ts';
 import { getDeviceId } from '../lib/device.ts';
 import { hourLine, hourStatus } from '../lib/hour.ts';
+import { navigate } from '../lib/navigation.ts';
+import { STANDARD_SECONDS, type RunSeconds } from '../lib/protocol.ts';
+import { effectiveLength, loadLength, saveLength } from '../lib/run-length.ts';
+import { loadUnlockCode } from '../lib/unlock-store.ts';
 import { shadingFor } from '../lib/readability.ts';
 import { RunSession } from '../lib/run-session.ts';
 import { SCORE_CAPTION, tugText } from '../lib/tug-copy.ts';
@@ -26,7 +31,18 @@ import { SCORE_CAPTION, tugText } from '../lib/tug-copy.ts';
 const HEADLINE_HOLD_MS = 1600;
 
 export function TugPage() {
-  const session = useMemo(() => new RunSession({ kind: 'tug', getDeviceId }), []);
+  const unlocked = useUnlocked();
+  const [savedLength, setSavedLength] = useState<RunSeconds>(STANDARD_SECONDS);
+  useEffect(() => {
+    let live = true;
+    void loadLength().then((saved) => live && setSavedLength(saved));
+    return () => {
+      live = false;
+    };
+  }, []);
+  const seconds = effectiveLength(savedLength, unlocked);
+  const session = useMemo(() => new RunSession({ kind: 'tug', getDeviceId, getUnlockCode: loadUnlockCode }), []);
+  useEffect(() => session.setSeconds(seconds), [session, seconds]);
   useEffect(() => () => session.dispose(), [session]);
   const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot);
   const reducedMotion = useReducedMotion();
@@ -44,7 +60,11 @@ export function TugPage() {
   const now = useNow(1000);
   // While the picker is open, the field previews its colors. Closing it without "Use these" puts the old pair back.
   const [picking, setPicking] = useState<{ left: string; right: string } | null>(null);
-  const shown: ColorChoice = picking ? { kind: 'custom', ...picking } : choice;
+  // Without Lab Pass the "+" opens a sheet that says what it does and what it costs.
+  const [lockedPicker, setLockedPicker] = useState(false);
+  // Your own colors come with Lab Pass. Without it, a saved custom pair shows as the default.
+  const usable: ColorChoice = choice.kind === 'custom' && !unlocked ? DEFAULT_CHOICE : choice;
+  const shown: ColorChoice = picking ? { kind: 'custom', ...picking } : usable;
   const pair = pairFor(shown);
   // A few dozen arithmetic steps: cheap enough for every render.
   const shading = shadingFor(hexToRgb(pair.left.hex), hexToRgb(pair.right.hex));
@@ -75,7 +95,7 @@ export function TugPage() {
     if (phase === 'done') vibrate(15);
   }, [phase]);
 
-  const text = tugText(snapshot, pair, runId !== null && headlineDoneFor !== runId);
+  const text = tugText(snapshot, pair, runId !== null && headlineDoneFor !== runId, seconds);
   const progress = start ? n / start.lengthBits : 0;
   const hour = hourLine(hourStatus(now));
   const style = {
@@ -140,7 +160,11 @@ export function TugPage() {
               className="tug-go"
               data-variant={active ? 'quiet' : 'primary'}
               inert={fanOpen}
-              onClick={() => (active ? session.stop() : void session.begin())}
+              onClick={() => {
+                if (active) session.stop();
+                else if (text.button === 'See Lab Pass') navigate('unlock');
+                else void session.begin();
+              }}
             >
               {text.button}
             </button>
@@ -148,6 +172,7 @@ export function TugPage() {
               open={fanOpen}
               pair={pair}
               hidden={active}
+              customLocked={!unlocked}
               onOpenChange={setFanOpen}
               onPickPreset={(id) => {
                 choose({ kind: 'preset', id });
@@ -156,16 +181,30 @@ export function TugPage() {
               }}
               onPickCustom={() => {
                 setFanOpen(false);
-                const base = pairFor(choice);
+                if (!unlocked) {
+                  setLockedPicker(true);
+                  return;
+                }
+                const base = pairFor(usable);
                 setPicking({ left: base.left.hex, right: base.right.hex });
               }}
             />
           </div>
         </div>
       </div>
-      <MenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MenuSheet
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        unlocked={unlocked}
+        seconds={seconds}
+        onSeconds={(next) => {
+          setSavedLength(next);
+          void saveLength(next);
+        }}
+      />
       <ColorPicker
-        open={picking !== null}
+        open={picking !== null || lockedPicker}
+        locked={lockedPicker}
         left={picking?.left ?? pair.left.hex}
         right={picking?.right ?? pair.right.hex}
         onChange={(left, right) => setPicking({ left, right })}
@@ -173,7 +212,10 @@ export function TugPage() {
           if (picking) choose({ kind: 'custom', ...picking });
           setPicking(null);
         }}
-        onClose={() => setPicking(null)}
+        onClose={() => {
+          setPicking(null);
+          setLockedPicker(false);
+        }}
       />
     </main>
   );

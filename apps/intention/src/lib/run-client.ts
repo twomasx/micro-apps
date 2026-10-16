@@ -15,15 +15,28 @@ export interface RunHandlers {
  * Aborting the signal closes the connection; the server then saves the run as abandoned.
  * Resolves when the stream ends. Throws if the run could not start or the connection broke.
  */
-export async function streamRun(
-  options: { deviceId: string; kind: Kind; seconds?: RunSeconds },
-  handlers: RunHandlers,
-  signal: AbortSignal,
-): Promise<void> {
-  const body: StartRequest = { deviceId: options.deviceId, kind: options.kind, seconds: options.seconds };
+export interface RunOptions {
+  deviceId: string;
+  kind: Kind;
+  seconds?: RunSeconds;
+  /** The saved Lab Pass code, if any. The server checks it. */
+  unlockCode?: string | null;
+}
+
+export async function streamRun(options: RunOptions, handlers: RunHandlers, signal: AbortSignal): Promise<void> {
+  const body: StartRequest = {
+    deviceId: options.deviceId,
+    kind: options.kind,
+    seconds: options.seconds,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
   const response = await fetch(apiUrl('runs'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+      ...(options.unlockCode ? { 'X-Unlock-Code': options.unlockCode } : {}),
+    },
     body: JSON.stringify(body),
     cache: 'no-store',
     signal,

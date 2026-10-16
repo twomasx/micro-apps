@@ -1,5 +1,7 @@
 import { useNow } from '../hooks/useNow.ts';
 import { HOUR, hourStatus, hourWhen } from '../lib/hour.ts';
+import { priceLine } from '../lib/products.ts';
+import { RUN_SECONDS, STANDARD_SECONDS, type RunSeconds } from '../lib/protocol.ts';
 import { downloadCalendar } from './HourPanel.tsx';
 import { Link } from './Link.tsx';
 import { Sheet } from './Sheet.tsx';
@@ -14,10 +16,13 @@ const MENU: readonly [string, string][] = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  unlocked: boolean;
+  seconds: RunSeconds;
+  onSeconds: (seconds: RunSeconds) => void;
 }
 
-/** The way to the other pages from the tug screen. */
-export function MenuSheet({ open, onClose }: Props) {
+/** The way to the other pages from the main screen, the run length and Intention Hour. */
+export function MenuSheet({ open, onClose, unlocked, seconds, onSeconds }: Props) {
   const now = useNow(60_000);
   return (
     <Sheet open={open} onClose={onClose} title="Intention" name="menu">
@@ -31,8 +36,41 @@ export function MenuSheet({ open, onClose }: Props) {
               </Link>
             </li>
           ))}
+          <li>
+            <Link to="unlock" replace className="menu-link">
+              {unlocked ? 'Lab Pass: on' : 'Lab Pass'}
+            </Link>
+          </li>
         </ul>
       </nav>
+
+      <fieldset className="menu-length">
+        <legend>Run length</legend>
+        <div className="segmented">
+          {RUN_SECONDS.map((option) => {
+            const locked = !unlocked && option !== STANDARD_SECONDS;
+            return (
+              <label key={option} className="segment" data-locked={locked}>
+                <input
+                  type="radio"
+                  name="run-length"
+                  value={option}
+                  checked={(unlocked ? seconds : STANDARD_SECONDS) === option}
+                  disabled={locked}
+                  onChange={() => onSeconds(option)}
+                />
+                <span>{option} s</span>
+              </label>
+            );
+          })}
+        </div>
+        {!unlocked && (
+          <p className="menu-note">
+            60 and 120 second runs come with Lab Pass: {priceLine()}
+          </p>
+        )}
+      </fieldset>
+
       <section className="menu-hour">
         <h3>Intention Hour</h3>
         <p>

@@ -50,3 +50,26 @@ export async function fetchMeCsv(deviceId: string, unlockCode: string): Promise<
   if (!response.ok) throw new ApiError(response.status, null);
   return response.blob();
 }
+
+/** Starts a Stripe checkout for Lab Pass. Returns the URL of Stripe's page. */
+export async function startCheckout(): Promise<string> {
+  const { url } = await getJson<{ url: string }>('checkout', {
+    method: 'POST',
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ product: 'labpass' }),
+  });
+  return url;
+}
+
+export type PurchaseAnswer = { paid: true; code: string } | { paid: false };
+
+/** For the page Stripe sends the buyer back to. */
+export function fetchPurchase(sessionId: string): Promise<PurchaseAnswer> {
+  return getJson<PurchaseAnswer>(`purchase/${encodeURIComponent(sessionId)}`, { cache: 'no-store' });
+}
+
+export async function checkCode(code: string): Promise<boolean> {
+  const { valid } = await getJson<{ valid: boolean }>(`unlock/${encodeURIComponent(code)}`, { cache: 'no-store' });
+  return valid === true;
+}

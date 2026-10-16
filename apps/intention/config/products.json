@@ -1,9 +1,9 @@
 {
   "products": [
     {
-      "id": "placeholder",
-      "name": "PLACEHOLDER - replace before selling anything",
-      "amount": 100,
+      "id": "labpass",
+      "name": "Intention Lab Pass",
+      "amount": 499,
       "currency": "usd"
     }
   ]

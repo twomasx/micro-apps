@@ -25,7 +25,12 @@ export interface StartRequest {
   deviceId: string;
   kind: Kind;
   seconds?: RunSeconds;
+  /** The device's time zone, so the free runs reset at its own midnight. */
+  timeZone?: string;
 }
+
+/** Free devices get this many runs a day. Lab Pass has no limit. */
+export const FREE_RUNS_PER_DAY = 5;
 
 export interface StartEvent {
   runId: string;

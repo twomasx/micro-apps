@@ -6,7 +6,11 @@ import '@fontsource/inter-tight/latin-400.css';
 import '@fontsource/inter-tight/latin-500.css';
 import '@fontsource/inter-tight/latin-600.css';
 import { App } from './App';
+import { startUnlockCheck } from './lib/unlock-state.ts';
 import './styles.css';
+
+// Lab Pass: use this device's last answer at once, then ask the server.
+startUnlockCheck();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

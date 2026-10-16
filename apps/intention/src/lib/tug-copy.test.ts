@@ -29,6 +29,19 @@ describe('tug screen text', () => {
     expect(text.button).toBe('Begin');
   });
 
+  it('says the length of the next run', () => {
+    expect(tugText(base, DEFAULT_PAIR, false, 120).line).toBe(
+      'You get one of the two colors at random. For 120 seconds, try to make it spread across the screen.',
+    );
+  });
+
+  it('offers Lab Pass when the free runs are used, with the one-time price', () => {
+    const text = tugText({ ...base, phase: 'error', error: 'daily_limit' }, DEFAULT_PAIR, false);
+    expect(text.line).toBe('You have used your 5 free runs for today. Lab Pass gives unlimited runs: $4.99 once. No renewals.');
+    expect(text.button).toBe('See Lab Pass');
+    expect(tugText({ ...base, phase: 'error', error: 'network' }, DEFAULT_PAIR, false).button).toBe('Try again');
+  });
+
   it('names your real color and its direction', () => {
     const glacier = tugText({ ...base, phase: 'running', start: start('right') }, DEFAULT_PAIR, true);
     expect(glacier.headline).toBe('Pull Glacier across');

@@ -1,8 +1,10 @@
+import { formatCode, hashCode, unlockCodeFor } from '@micro/payments/unlock-codes';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { BitsEvent, EndEvent, RunResult, StartEvent } from '../src/lib/protocol.ts';
 import { runZ } from '../src/lib/scoring.ts';
 import { SseParser, type SseEvent } from '../src/lib/sse.ts';
 import { bitString, packBits, randomBits, unpackBits } from './bits.ts';
+import { UNLOCK_HEADER } from './labpass.ts';
 import { effectiveStatus, getRun, STALE_AFTER_MS, startRun, type Clock, type RunDeps } from './runs.ts';
 import { createTestDb, type TestDb } from './testing.ts';
 
@@ -16,6 +18,7 @@ beforeAll(async () => {
 afterAll(() => testDb.dispose());
 beforeEach(async () => {
   await db.prepare('DELETE FROM runs').run();
+  await db.prepare('DELETE FROM purchases').run();
 });
 
 const DEVICE = 'device0000000001';
@@ -139,7 +142,8 @@ describe('a full run', () => {
     const { deps: d, settled } = deps(jumpingClock(), { db: counting });
     await readEvents(await startRun(post({ deviceId: DEVICE, kind: 'tug' }), d));
     await settled();
-    expect(statements).toEqual(['INSERT', 'UPDATE']);
+    // Reads (the free-run count) are fine; writes happen exactly twice.
+    expect(statements.filter((sql) => sql !== 'SELECT')).toEqual(['INSERT', 'UPDATE']);
   });
 });
 
@@ -293,6 +297,88 @@ describe('Intention Hour', () => {
     // 8:59 pm and 9:10 pm: outside.
     expect(await hourOf(Date.parse('2026-10-16T03:59:00Z'))).toBeNull();
     expect(await hourOf(Date.parse('2026-10-16T04:10:00Z'))).toBeNull();
+  });
+});
+
+describe('free runs and Lab Pass', () => {
+  let code: string;
+  beforeAll(async () => {
+    code = formatCode(await unlockCodeFor('test-secret-of-at-least-32-characters', 'cs_test_runs'));
+  });
+
+  async function paidPass() {
+    await db
+      .prepare(
+        `INSERT INTO purchases (id, stripe_session_id, unlock_code_hash, amount_cents, currency, status, created_at)
+         VALUES ('p1', 'cs_test_runs', ?, 499, 'usd', 'paid', '')`,
+      )
+      .bind(await hashCode(code.replace(/-/g, '')))
+      .run();
+  }
+
+  /** Starts a run at `atMs` and lets it finish. Returns the response status. */
+  async function runAt(atMs: number, body: Record<string, unknown> = {}, headers: Record<string, string> = {}) {
+    let now = atMs;
+    const { deps: d, settled } = deps({ now: () => now, sleep: async (ms) => void (now += ms) });
+    const request = new Request('http://localhost/api/runs', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ deviceId: DEVICE, kind: 'tug', timeZone: 'America/Los_Angeles', ...body }),
+    });
+    const response = await startRun(request, d);
+    if (response.ok) await readEvents(response);
+    await settled();
+    return response;
+  }
+
+  // 10:00 am Pacific on Oct 15.
+  const MORNING = Date.parse('2026-10-15T17:00:00Z');
+
+  it('allows 5 runs a day, stopped or not, then asks for Lab Pass', async () => {
+    for (let i = 0; i < 5; i++) expect((await runAt(MORNING + i * 60_000)).status).toBe(201);
+    const sixth = await runAt(MORNING + 10 * 60_000);
+    expect(sixth.status).toBe(429);
+    expect(await sixth.json()).toMatchObject({ error: 'daily_limit' });
+  });
+
+  it("resets at midnight in the device's own time zone", async () => {
+    for (let i = 0; i < 5; i++) await runAt(MORNING + i * 60_000);
+    // 11:30 pm Pacific the same day: still Oct 15 there.
+    expect((await runAt(Date.parse('2026-10-16T06:30:00Z'))).status).toBe(429);
+    // 12:05 am Pacific on Oct 16.
+    expect((await runAt(Date.parse('2026-10-16T07:05:00Z'))).status).toBe(201);
+  });
+
+  it('Lab Pass has no daily limit', async () => {
+    await paidPass();
+    for (let i = 0; i < 6; i++) {
+      expect((await runAt(MORNING + i * 60_000, {}, { [UNLOCK_HEADER]: code })).status).toBe(201);
+    }
+  });
+
+  it('longer runs need Lab Pass, and then run their full length', async () => {
+    expect((await runAt(MORNING, { seconds: 120 })).status).toBe(403);
+    await paidPass();
+    let now = MORNING;
+    const { deps: d, settled } = deps({ now: () => now, sleep: async (ms) => void (now += ms) });
+    const response = await startRun(
+      new Request('http://localhost/api/runs', {
+        method: 'POST',
+        headers: { [UNLOCK_HEADER]: code },
+        body: JSON.stringify({ deviceId: DEVICE, kind: 'tug', seconds: 60 }),
+      }),
+      d,
+    );
+    const events = await readEvents(response);
+    await settled();
+    expect((JSON.parse(events[0]!.data) as StartEvent).lengthBits).toBe(12_000);
+    expect((JSON.parse(events.at(-1)!.data) as EndEvent).n).toBe(12_000);
+    expect(now - MORNING).toBeGreaterThanOrEqual(60_000);
+  });
+
+  it('an unknown time zone counts the day in UTC', async () => {
+    for (let i = 0; i < 5; i++) await runAt(MORNING + i * 60_000, { timeZone: 'Mars/Olympus' });
+    expect((await runAt(MORNING + 3600_000, { timeZone: 'Mars/Olympus' })).status).toBe(429);
   });
 });
 

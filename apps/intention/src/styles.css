@@ -963,6 +963,176 @@ button {
   padding-right: 0;
 }
 
+/* ---------- Lab Pass ---------- */
+
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--button);
+  color: var(--button-ink);
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button-primary:disabled {
+  opacity: 0.6;
+}
+
+.price {
+  font-weight: 600;
+}
+
+.price-big {
+  margin-top: 24px;
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.price-part {
+  display: block;
+}
+
+.status-line:empty {
+  display: none;
+}
+
+.code-card {
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
+}
+
+.code-card > * + * {
+  margin-top: 10px;
+}
+
+.code-label {
+  display: block;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.code {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  word-break: break-all;
+}
+
+.code-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.code-input {
+  min-height: 52px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+  color: var(--ink);
+  font: inherit;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.code-input::placeholder {
+  color: rgb(255 255 255 / 0.4);
+}
+
+.code-input[aria-invalid='true'] {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.offer {
+  margin-top: 32px;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
+}
+
+.offer > * + * {
+  margin-top: 12px;
+}
+
+.menu-length {
+  margin: 22px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.menu-length legend {
+  padding: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.segment {
+  position: relative;
+}
+
+.segment input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.segment span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+  font-weight: 600;
+}
+
+.segment input:checked + span {
+  background: var(--button);
+  color: var(--button-ink);
+}
+
+.segment input:focus-visible + span {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.segment[data-locked='true'] span {
+  opacity: 0.45;
+}
+
+.menu-note {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--ink-muted);
+}
+
+.picker-locked > * + * {
+  margin-top: 12px;
+}
+
 /* ---------- reading pages ---------- */
 
 .prose section {

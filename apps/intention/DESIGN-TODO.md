@@ -32,3 +32,8 @@ Check on Android Chrome first, then iPhone Safari. Locally at http://localhost:3
 
 - [ ] The science page's five sources were written from the literature as I know it. Please check the page ranges and author lists against the papers before launch.
 - [ ] Your history follows the device, not the Lab Pass code. Restoring Lab Pass on a new phone unlocks the features there, but that phone starts a new list. Linking history to the code would need a decision about privacy. Fine as it is?
+
+## Lab Pass (step 6)
+
+- [ ] Stripe Checkout shows the seller as "Roger Tafoya", the Stripe account's public business name, as it does for every app on this account. If you would rather buyers see "PolymadLabs", change it in the Stripe dashboard (Settings, Public details).
+- [ ] Stripe Checkout offers Cash App Pay, Klarna and bank payments besides cards (the account's dynamic payment methods). Fine for a $4.99 one-time purchase?

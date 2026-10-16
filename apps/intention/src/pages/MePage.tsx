@@ -7,6 +7,7 @@ import { formatCount, formatZ, totalVerdict } from '../lib/copy.ts';
 import { getDeviceId } from '../lib/device.ts';
 import { runDetails, runWhen } from '../lib/me-copy.ts';
 import type { MeAnswer } from '../lib/me-types.ts';
+import { priceLine } from '../lib/products.ts';
 import { loadUnlockCode } from '../lib/unlock-store.ts';
 
 interface Loaded {
@@ -103,6 +104,17 @@ function MeContent({ me, deviceId, code }: Loaded) {
           </li>
         ))}
       </ol>
+
+      {!me.full && (
+        <section className="offer" aria-labelledby="offer-title">
+          <h2 id="offer-title">Your full history</h2>
+          <p>Lab Pass shows every run you have made, your lifetime total and your own running chart, and lets you download it all.</p>
+          <p className="price">{priceLine()}</p>
+          <Link to="unlock" className="button-primary">
+            See Lab Pass
+          </Link>
+        </section>
+      )}
 
       {me.full && code && (
         <p>

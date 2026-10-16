@@ -9,6 +9,8 @@ interface Props {
   pair: ColorPair;
   /** Hidden during a run: colors cannot change while bits are counted. */
   hidden: boolean;
+  /** Your own colors come with Lab Pass. The "+" still opens, to say so. */
+  customLocked: boolean;
   onOpenChange: (open: boolean) => void;
   onPickPreset: (id: string) => void;
   onPickCustom: () => void;
@@ -20,7 +22,7 @@ const COUNT = PRESET_PAIRS.length + 1;
  * The color dot and its fan. Tapping the dot fans the pairs out in an arc with a slight bounce; the last
  * swatch, "+", opens the picker for any two colors. Tapping outside, Escape and Android Back fold it.
  */
-export function ColorFan({ open, pair, hidden, onOpenChange, onPickPreset, onPickCustom }: Props) {
+export function ColorFan({ open, pair, hidden, customLocked, onOpenChange, onPickPreset, onPickCustom }: Props) {
   const dotRef = useRef<HTMLButtonElement>(null);
   const fanRef = useRef<HTMLDivElement>(null);
   // Measured each time the fan opens, so it fits the room left of the dot on any screen.
@@ -76,9 +78,10 @@ export function ColorFan({ open, pair, hidden, onOpenChange, onPickPreset, onPic
         <button
           type="button"
           className="swatch swatch-custom"
-          aria-label="Pick your own two colors"
+          aria-label={customLocked ? 'Pick your own two colors, with Lab Pass' : 'Pick your own two colors'}
           aria-pressed={pair.id === CUSTOM_ID}
           data-selected={pair.id === CUSTOM_ID}
+          data-locked={customLocked}
           style={swatchStyle(layout.spots, COUNT - 1, open, {})}
           onClick={onPickCustom}
         >

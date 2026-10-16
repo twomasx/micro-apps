@@ -133,6 +133,16 @@ A round three-line button at the top right, shown whenever no run is in progress
 - **Privacy** follows the other apps' structure: on this device, on our server, payments, what we don't do. It says plainly that runs cannot be removed from the totals, and why.
 - **A content test** checks the science page, the privacy page and every line the tug screen can say for the writing rules (no em dashes, no exclamation marks) and the banned claims.
 
+## Lab Pass
+
+- **One product,** `labpass`, $4.99 (499 cents) in `config/products.json`. Every price on screen reads "$4.99 once. No renewals."
+- **Checkout, webhook, unlock codes and restore** are attention's, through `packages/payments`, with the product renamed. The server alone decides: the webhook (signature checked) or a direct question to Stripe marks a purchase paid, and every request Lab Pass changes (longer runs, no daily limit, full history, CSV) carries the code and is checked again on the server.
+- **Free runs: 5 a day,** counted on the server per device from midnight in the device's own time zone (sent with each run; an unknown zone counts in UTC). Every started run counts toward it, stopped or not, the same rule as the totals. The sixth run's line says so with the price, and the button becomes "See Lab Pass". Clearing the browser's data gives a new device id and so a fresh 5. That is acceptable for a soft limit with no accounts.
+- **Locked items show what they do and the price:** the "+" swatch opens a sheet that says "Use any two colors you like" with the price and a link; the 60 and 120 second options in the menu are visible but disabled, with the price under them; your runs page shows the last 5 with what Lab Pass adds. No countdowns, no nagging, no pre-ticked anything.
+- **Run length lives in the menu,** as three plain choices (20 s, 60 s, 120 s), saved on the device. The line before a run says the chosen length.
+- **Losing Lab Pass** (a refund, or a code that stops checking out) quietly returns to the free view: a saved custom pair shows as Ember and Glacier, and runs are 20 seconds.
+- **Tested end to end in Stripe test mode:** 5 free runs, the sixth refused with the offer, checkout with the 4242 test card, the code shown on return, 60-second runs, the custom picker, the full history and the CSV, and restoring the code on a second device.
+
 ### Icon
 
 A dark square with a circle split by a curved seam: Ember on the left, Glacier on the right, a thin white line between. The circle sits inside the middle 80%, so the 512 px file is also the maskable icon.

@@ -1,6 +1,7 @@
 import {
   BATCH_MS,
   BITS_PER_SECOND,
+  FREE_RUNS_PER_DAY,
   KINDS,
   lengthBitsFor,
   RUN_SECONDS,
@@ -14,11 +15,12 @@ import {
   type Source,
   type StartEvent,
 } from '../src/lib/protocol.ts';
-import { liveEventKey } from '../src/lib/hour.ts';
+import { liveEventKey, safeTimeZone, startOfDay } from '../src/lib/hour.ts';
 import { runZ, type Aim } from '../src/lib/scoring.ts';
 import { formatSse } from '../src/lib/sse.ts';
 import { bitString, cryptoBytes, packBits, randomBits, unpackBits, type RandomBytes } from './bits.ts';
 import { error, json, randomId } from './http.ts';
+import { hasLabPass } from './labpass.ts';
 
 const SOURCE: Source = 'crypto';
 const MAX_BODY_CHARS = 1_000;
@@ -49,6 +51,7 @@ interface StartInput {
   deviceId: string;
   kind: Kind;
   seconds: RunSeconds;
+  timeZone: string;
 }
 
 function parseStart(text: string): StartInput | Response {
@@ -63,7 +66,7 @@ function parseStart(text: string): StartInput | Response {
   const fields = body as Record<string, unknown>;
   // The server alone picks the aim. A client that tries to choose it is refused, not ignored.
   if ('aim' in fields) return error(400, 'aim_not_allowed', 'The server picks the aim.');
-  const { deviceId, kind, seconds = STANDARD_SECONDS } = fields;
+  const { deviceId, kind, seconds = STANDARD_SECONDS, timeZone } = fields;
   if (typeof deviceId !== 'string' || !DEVICE_ID_PATTERN.test(deviceId)) {
     return error(400, 'invalid_device', 'Send a device id of 12 to 64 lowercase letters and digits.');
   }
@@ -71,9 +74,7 @@ function parseStart(text: string): StartInput | Response {
   if (!RUN_SECONDS.includes(seconds as RunSeconds)) {
     return error(400, 'invalid_length', `Send seconds: ${RUN_SECONDS.join(', ')}.`);
   }
-  // Longer runs come with Lab Pass (build step 6).
-  if (seconds !== STANDARD_SECONDS) return error(403, 'lab_pass_required', 'Longer runs come with Lab Pass.');
-  return { deviceId, kind: kind as Kind, seconds: seconds as RunSeconds };
+  return { deviceId, kind: kind as Kind, seconds: seconds as RunSeconds, timeZone: safeTimeZone(timeZone) };
 }
 
 /** Left or right, from one fresh random byte. */
@@ -96,6 +97,22 @@ export async function startRun(request: Request, deps: RunDeps): Promise<Respons
   const clock = deps.clock ?? realClock;
   const randomBytes = deps.randomBytes ?? cryptoBytes;
   const { db } = deps;
+
+  // Free: 5 runs a day (every started run counts, stopped or not) and 20-second runs.
+  // Lab Pass, shown by a paid unlock code: no limit and longer runs.
+  const longer = input.seconds !== STANDARD_SECONDS;
+  const today = await db
+    .prepare('SELECT COUNT(*) AS runs FROM runs WHERE device_id = ? AND started_ms >= ?')
+    .bind(input.deviceId, startOfDay(clock.now(), input.timeZone))
+    .first<number>('runs');
+  if (longer || (today ?? 0) >= FREE_RUNS_PER_DAY) {
+    if (!(await hasLabPass(request, db))) {
+      return longer
+        ? error(403, 'lab_pass_required', 'Longer runs come with Lab Pass.')
+        : error(429, 'daily_limit', `Free runs are ${FREE_RUNS_PER_DAY} a day. Lab Pass has no limit.`);
+    }
+  }
+
   const runId = randomId();
   const aim = pickAim(randomBytes);
   const lengthBits = lengthBitsFor(input.seconds);

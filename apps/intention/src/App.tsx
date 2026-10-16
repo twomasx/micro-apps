@@ -5,8 +5,10 @@ import { GlobalPage } from './pages/GlobalPage.tsx';
 import { MePage } from './pages/MePage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 import { PrivacyPage } from './pages/PrivacyPage.tsx';
+import { RestorePage } from './pages/RestorePage.tsx';
 import { SciencePage } from './pages/SciencePage.tsx';
 import { TugPage } from './pages/TugPage.tsx';
+import { UnlockPage } from './pages/UnlockPage.tsx';
 
 const SITE_TITLE = 'Intention';
 
@@ -32,6 +34,10 @@ function Page({ route }: { route: Route }) {
       return <SciencePage />;
     case 'privacy':
       return <PrivacyPage />;
+    case 'unlock':
+      return <UnlockPage sessionId={route.sessionId} />;
+    case 'restore':
+      return <RestorePage />;
     default:
       return <NotFoundPage />;
   }

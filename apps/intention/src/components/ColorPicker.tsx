@@ -2,10 +2,14 @@ import { useId } from 'react';
 import { hexToRgb } from '../lib/color.ts';
 import { pairFor } from '../lib/color-settings.ts';
 import { pairCheck } from '../lib/picker.ts';
+import { priceLine } from '../lib/products.ts';
+import { Link } from './Link.tsx';
 import { Sheet } from './Sheet.tsx';
 
 interface Props {
   open: boolean;
+  /** Without Lab Pass the sheet says what the picker does and what it costs, instead of the picker. */
+  locked: boolean;
   left: string;
   right: string;
   onChange: (left: string, right: string) => void;
@@ -14,8 +18,22 @@ interface Props {
 }
 
 /** Pick any two colors. The field behind updates as you pick; Close puts the old pair back. */
-export function ColorPicker({ open, left, right, onChange, onApply, onClose }: Props) {
+export function ColorPicker({ open, locked, left, right, onChange, onApply, onClose }: Props) {
   const id = useId();
+  if (locked) {
+    return (
+      <Sheet open={open} onClose={onClose} title="Pick your two colors" name="picker">
+        <div className="picker picker-locked">
+          <p>Use any two colors you like, not just the presets. This comes with Lab Pass.</p>
+          <p className="price">{priceLine()}</p>
+          {/* The sheet has its own history entry, so the link replaces it. */}
+          <Link to="unlock" replace className="picker-apply">
+            See Lab Pass
+          </Link>
+        </div>
+      </Sheet>
+    );
+  }
   const pair = pairFor({ kind: 'custom', left, right });
   const check = pairCheck(hexToRgb(left), hexToRgb(right));
   return (

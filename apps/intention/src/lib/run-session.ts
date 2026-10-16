@@ -1,5 +1,5 @@
 import { BitPlayback } from './playback.ts';
-import type { EndEvent, Kind, RunResult, StartEvent } from './protocol.ts';
+import type { EndEvent, Kind, RunResult, RunSeconds, StartEvent } from './protocol.ts';
 import { ApiError, fetchRun, streamRun } from './run-client.ts';
 
 /**
@@ -35,6 +35,8 @@ export interface FrameResult {
 export interface RunSessionDeps {
   kind: Kind;
   getDeviceId: () => Promise<string>;
+  /** The saved Lab Pass code, if any. */
+  getUnlockCode?: () => Promise<string | null>;
   stream?: typeof streamRun;
   fetchRun?: typeof fetchRun;
   /** Pause between tries when asking for a stopped run's saved result. */
@@ -63,6 +65,7 @@ export class RunSession {
   private pendingEnd: EndEvent | null = null;
   private lastEmit = 0;
   private shown: FrameResult = { n: 0, deviation: 0, newBits: [] };
+  private seconds: RunSeconds | undefined;
 
   constructor(private readonly deps: RunSessionDeps) {}
 
@@ -76,6 +79,11 @@ export class RunSession {
   private set(patch: Partial<RunSnapshot>): void {
     this.snapshot = { ...this.snapshot, ...patch };
     for (const listener of this.listeners) listener();
+  }
+
+  /** The length the next run asks for. The server checks that it is allowed. */
+  setSeconds(seconds: RunSeconds): void {
+    this.seconds = seconds;
   }
 
   get active(): boolean {
@@ -93,9 +101,12 @@ export class RunSession {
     const stream = this.deps.stream ?? streamRun;
     let started = false;
     try {
-      const deviceId = await this.deps.getDeviceId();
+      const [deviceId, unlockCode] = await Promise.all([
+        this.deps.getDeviceId(),
+        this.deps.getUnlockCode?.() ?? Promise.resolve(null),
+      ]);
       await stream(
-        { deviceId, kind: this.deps.kind },
+        { deviceId, kind: this.deps.kind, seconds: this.seconds, unlockCode },
         {
           onStart: (start) => {
             started = true;

@@ -67,6 +67,23 @@ export function zonedTime(year: number, month: number, day: number, hour: number
   return ms;
 }
 
+/** A time zone name the runtime knows, or UTC. */
+export function safeTimeZone(zone: unknown): string {
+  if (typeof zone !== 'string' || zone.length > 64) return 'UTC';
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: zone });
+    return zone;
+  } catch {
+    return 'UTC';
+  }
+}
+
+/** The moment the calendar day containing `now` began, in a zone. */
+export function startOfDay(now: number, timeZone: string): number {
+  const p = zoneParts(now, timeZone);
+  return zonedTime(p.year, p.month, p.day, 0, 0, timeZone);
+}
+
 export interface HourEvent {
   /** The event's date in its own zone, like "2026-10-15". Runs in it are tagged with this. */
   key: string;

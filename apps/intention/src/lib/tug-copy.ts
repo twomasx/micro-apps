@@ -1,6 +1,7 @@
 import { formatZ, runVerdict } from './copy.ts';
 import { colorsFor, type ColorPair } from './pairs.ts';
-import { BITS_PER_SECOND } from './protocol.ts';
+import { priceLine } from './products.ts';
+import { BITS_PER_SECOND, FREE_RUNS_PER_DAY, STANDARD_SECONDS } from './protocol.ts';
 import type { RunSnapshot } from './run-session.ts';
 import { liveZ, runZ } from './scoring.ts';
 import { arrowFor } from './tug.ts';
@@ -15,20 +16,31 @@ export interface TugText {
   /** The big score, or null before a run. */
   score: string | null;
   line: string;
-  button: 'Begin' | 'Pull again' | 'Try again' | 'Stop';
+  button: 'Begin' | 'Pull again' | 'Try again' | 'Stop' | 'See Lab Pass';
 }
 
 export const SCORE_CAPTION = 'how far from chance';
 
 const ERROR_LINES: Record<string, string> = {
   network: 'The run could not start. Check your connection and try again.',
+  daily_limit: `You have used your ${FREE_RUNS_PER_DAY} free runs for today. Lab Pass gives unlimited runs: ${priceLine()}`,
+  lab_pass_required: `Longer runs come with Lab Pass: ${priceLine()}`,
 };
+
+/** Errors that Lab Pass answers. The button goes to the Lab Pass page instead of trying again. */
+const LAB_PASS_ERRORS = new Set(['daily_limit', 'lab_pass_required']);
 
 /**
  * @param holdHeadline true for the first moments of a run, so the headline can name your color
  *   before it fades out.
+ * @param seconds the length the next run will be.
  */
-export function tugText(snapshot: RunSnapshot, pair: ColorPair, holdHeadline: boolean): TugText {
+export function tugText(
+  snapshot: RunSnapshot,
+  pair: ColorPair,
+  holdHeadline: boolean,
+  seconds: number = STANDARD_SECONDS,
+): TugText {
   const { phase, start, n, deviation, end, saved, stoppedBy } = snapshot;
   const colors = start ? colorsFor(pair, start.aim) : null;
   const headline = colors ? `Pull ${colors.mine.name} across` : 'Pull your color across';
@@ -44,7 +56,7 @@ export function tugText(snapshot: RunSnapshot, pair: ColorPair, holdHeadline: bo
         score: null,
         line:
           phase === 'idle'
-            ? 'You get one of the two colors at random. For 20 seconds, try to make it spread across the screen.'
+            ? `You get one of the two colors at random. For ${seconds} seconds, try to make it spread across the screen.`
             : 'Starting your run.',
         button: phase === 'idle' ? 'Begin' : 'Stop',
       };
@@ -67,7 +79,7 @@ export function tugText(snapshot: RunSnapshot, pair: ColorPair, holdHeadline: bo
         button: 'Pull again',
       };
     case 'stopped': {
-      const seconds = start ? Math.round(start.lengthBits / BITS_PER_SECOND) : 0;
+      const runSeconds = start ? Math.round(start.lengthBits / BITS_PER_SECOND) : 0;
       const z = saved ? saved.z : start ? runZ(deviation, start.aim, start.lengthBits) : 0;
       return {
         headline,
@@ -77,18 +89,20 @@ export function tugText(snapshot: RunSnapshot, pair: ColorPair, holdHeadline: bo
         line:
           stoppedBy === 'connection'
             ? 'The connection dropped. This run still counts, with the bits it had.'
-            : `You stopped early. This run still counts, scored over its full ${seconds} seconds.`,
+            : `You stopped early. This run still counts, scored over its full ${runSeconds} seconds.`,
         button: 'Pull again',
       };
     }
-    case 'error':
+    case 'error': {
+      const code = snapshot.error ?? 'network';
       return {
         headline,
         headlineVisible: true,
         pill: null,
         score: null,
-        line: ERROR_LINES[snapshot.error ?? 'network'] ?? ERROR_LINES.network!,
-        button: 'Try again',
+        line: ERROR_LINES[code] ?? ERROR_LINES.network!,
+        button: LAB_PASS_ERRORS.has(code) ? 'See Lab Pass' : 'Try again',
       };
+    }
   }
 }
