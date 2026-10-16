@@ -23,9 +23,14 @@ export function runVerdict(z: number, mine: string, other: string): string {
   return k >= INTERESTING ? `${base} Interesting, but one run proves nothing.` : `${base} Normal.`;
 }
 
-/** The line under a combined total (yours, the global one, Intention Hour). */
-export function totalVerdict(z: number, runs: number): string {
-  const lead = `After ${runs} ${runs === 1 ? 'run' : 'runs'} your total is ${formatZ(z)}`;
+/** Whole numbers with thousands separators: 12,400. */
+export function formatCount(n: number): string {
+  return Math.round(n).toLocaleString('en-US');
+}
+
+/** The line under a combined total: yours ("your total"), or everyone's ("the total"). */
+export function totalVerdict(z: number, runs: number, subject = 'your total'): string {
+  const lead = `After ${formatCount(runs)} ${runs === 1 ? 'run' : 'runs'} ${subject} is ${formatZ(z)}`;
   if (z <= -PSI_THRESHOLD) {
     return `${lead}. Below chance, which researchers call psi-missing. Chance alone does this about 1 time in ${oneIn(upperTail(-z))}.`;
   }

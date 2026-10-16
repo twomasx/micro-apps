@@ -21,3 +21,9 @@ Check on Android Chrome first, then iPhone Safari. Locally at http://localhost:3
 - [ ] Android Back closes the fan, then the picker sheet, before it leaves the page.
 - [ ] The color wells in the picker open Android's color picker, and the field behind updates as you pick.
 - [ ] Day and Night: the darker edge shading it needs still looks like the same app.
+
+## Phone review of Intention Hour and the global page (step 4)
+
+- [ ] The Intention Hour line on the home screen in the 3 hours before 9:00 pm Pacific and during the 10 minutes.
+- [ ] Add to calendar on Android: the .ics opens in your calendar app and shows the right local time.
+- [ ] The global chart reads at a glance on the phone.

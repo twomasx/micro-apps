@@ -91,5 +91,6 @@ describe('wording', () => {
       'After 40 runs your total is +1.96. Above chance. Chance alone does this about 1 time in 40.',
     );
     expect(totalVerdict(0.2, 1)).toBe('After 1 run your total is +0.20: within chance.');
+    expect(totalVerdict(0.42, 12400, 'the total')).toBe('After 12,400 runs the total is +0.42: within chance.');
   });
 });

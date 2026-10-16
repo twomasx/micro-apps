@@ -14,6 +14,7 @@ import {
   type Source,
   type StartEvent,
 } from '../src/lib/protocol.ts';
+import { liveEventKey } from '../src/lib/hour.ts';
 import { runZ, type Aim } from '../src/lib/scoring.ts';
 import { formatSse } from '../src/lib/sse.ts';
 import { bitString, cryptoBytes, packBits, randomBits, unpackBits, type RandomBytes } from './bits.ts';
@@ -104,9 +105,20 @@ export async function startRun(request: Request, deps: RunDeps): Promise<Respons
     .prepare(
       `INSERT INTO runs (id, device_id, created_at, started_ms, kind, aim, source, length_bits, n, deviation, z,
          status, hour_event, bits, batch_times, ended_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 'running', NULL, NULL, '[]', NULL)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 'running', ?, NULL, '[]', NULL)`,
     )
-    .bind(runId, input.deviceId, new Date(startedMs).toISOString(), startedMs, input.kind, aim, SOURCE, lengthBits)
+    .bind(
+      runId,
+      input.deviceId,
+      new Date(startedMs).toISOString(),
+      startedMs,
+      input.kind,
+      aim,
+      SOURCE,
+      lengthBits,
+      // Runs that start inside Intention Hour carry its date, and count in its own result too.
+      liveEventKey(startedMs),
+    )
     .run();
 
   const bits = new Uint8Array(lengthBits);

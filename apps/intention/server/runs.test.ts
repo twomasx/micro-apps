@@ -275,6 +275,27 @@ describe('every started run counts', () => {
   });
 });
 
+describe('Intention Hour', () => {
+  async function hourOf(startMs: number) {
+    const { deps: d, settled } = deps({ now: () => startMs, sleep: async () => {} });
+    // A clock that never moves would never finish, so read only the start event and let the run go.
+    const response = await startRun(post({ deviceId: DEVICE, kind: 'tug' }), d);
+    const reader = response.body!.pipeThrough(new TextDecoderStream()).getReader();
+    const { runId } = JSON.parse(new SseParser().push((await reader.read()).value!)[0]!.data) as StartEvent;
+    await reader.cancel();
+    await settled();
+    return db.prepare('SELECT hour_event FROM runs WHERE id = ?').bind(runId).first<string | null>('hour_event');
+  }
+
+  it('tags runs that start inside the window with its date', async () => {
+    // 9:03 pm Pacific on Oct 15, 2026.
+    expect(await hourOf(Date.parse('2026-10-16T04:03:00Z'))).toBe('2026-10-15');
+    // 8:59 pm and 9:10 pm: outside.
+    expect(await hourOf(Date.parse('2026-10-16T03:59:00Z'))).toBeNull();
+    expect(await hourOf(Date.parse('2026-10-16T04:10:00Z'))).toBeNull();
+  });
+});
+
 describe('start requests', () => {
   it.each([
     [{ kind: 'tug' }, 400, 'invalid_device'],

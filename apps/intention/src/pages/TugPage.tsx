@@ -2,8 +2,10 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type C
 import { vibrate } from '@micro/platform';
 import { ColorFan } from '../components/ColorFan.tsx';
 import { ColorPicker } from '../components/ColorPicker.tsx';
+import { MenuSheet } from '../components/MenuSheet.tsx';
 import { ProgressRing } from '../components/ProgressRing.tsx';
 import { TugField } from '../components/TugField.tsx';
+import { useNow } from '../hooks/useNow.ts';
 import { useReducedMotion } from '../hooks/useReducedMotion.ts';
 import { useWakeLock } from '../hooks/useWakeLock.ts';
 import { hexToRgb } from '../lib/color.ts';
@@ -15,6 +17,7 @@ import {
   type ColorChoice,
 } from '../lib/color-settings.ts';
 import { getDeviceId } from '../lib/device.ts';
+import { hourLine, hourStatus } from '../lib/hour.ts';
 import { shadingFor } from '../lib/readability.ts';
 import { RunSession } from '../lib/run-session.ts';
 import { SCORE_CAPTION, tugText } from '../lib/tug-copy.ts';
@@ -37,6 +40,8 @@ export function TugPage() {
     };
   }, []);
   const [fanOpen, setFanOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const now = useNow(1000);
   // While the picker is open, the field previews its colors. Closing it without "Use these" puts the old pair back.
   const [picking, setPicking] = useState<{ left: string; right: string } | null>(null);
   const shown: ColorChoice = picking ? { kind: 'custom', ...picking } : choice;
@@ -72,6 +77,7 @@ export function TugPage() {
 
   const text = tugText(snapshot, pair, runId !== null && headlineDoneFor !== runId);
   const progress = start ? n / start.lengthBits : 0;
+  const hour = hourLine(hourStatus(now));
   const style = {
     '--left': pair.left.hex,
     '--right': pair.right.hex,
@@ -87,10 +93,20 @@ export function TugPage() {
           <button type="button" className="fan-backdrop" aria-label="Close colors" onClick={() => setFanOpen(false)} />
         )}
         <header className="tug-top" inert={fanOpen}>
-          <h1 className="tug-headline" data-visible={text.headlineVisible}>
-            {text.headline}
-          </h1>
-          {start && <ProgressRing progress={progress} complete={phase === 'done'} />}
+          <div className="tug-heading">
+            <h1 className="tug-headline" data-visible={text.headlineVisible}>
+              {text.headline}
+            </h1>
+            {!active && hour && <p className="tug-hour">{hour}</p>}
+          </div>
+          <div className="tug-corner">
+            {start && <ProgressRing progress={progress} complete={phase === 'done'} />}
+            {!active && (
+              <button type="button" className="tug-menu" aria-label="Menu" onClick={() => setMenuOpen(true)}>
+                <span aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </header>
 
         <div className="tug-bottom">
@@ -147,6 +163,7 @@ export function TugPage() {
           </div>
         </div>
       </div>
+      <MenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
       <ColorPicker
         open={picking !== null}
         left={picking?.left ?? pair.left.hex}

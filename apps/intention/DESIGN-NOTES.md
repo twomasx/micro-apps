@@ -93,6 +93,30 @@ Color is never the only cue: the pill names your color and the arrow shows its d
 - **Notes, never blocks.** If the two colors are hard to tell apart for anyone, or for red-green color blindness, the sheet says so in one line. The screen stays readable either way.
 - **Lab Pass:** the spec puts your own colors in Lab Pass. The lock and price on "+" come with payments in step 6.
 
+## Intention Hour
+
+- **Time:** `config/intention-hour.json`, 9:00 pm in the America/Los_Angeles zone for 10 minutes. It stays 9:00 pm on Pacific clocks across daylight saving (tested on the change days).
+- **Tagging:** the server tags a run with the event's date ("2026-10-15") when the run starts inside the window, using the server's clock. A run started at 9:09:59 counts; one at 9:10:00 does not.
+- **Home screen:** a single line under the headline. In the last 3 hours: "Intention Hour starts in 42 min." While live: "Intention Hour is live. 6 min 30 s left." Otherwise nothing, so the screen stays quiet most of the day. Hidden during a run.
+- **Your own time** is shown next to "9:00 pm Pacific" only when it differs ("9:00 pm Pacific (12:00 am your time)").
+- **Add to calendar** downloads `intention-hour.ics`: a daily repeating 10-minute event at 21:00 in the Los Angeles zone, with that zone's daylight saving rules included, so every calendar app shows it at the right local time. It is on the global page and in the menu. No push notifications.
+- **Its own result** on the global page: all Intention Hours combined (Stouffer), then the last 14 one by one with how many runs, how many people and the score. Cached for 1 minute instead of 5, because the event lasts only 10.
+
+## The global page
+
+- **Night style like the app:** the same dark ground, white text, Unbounded for the title and numbers, Inter Tight for the rest. The chart is white on night, so it reads the same whatever pair you use.
+- **The chart** is the running deviation toward each run's own aim over every bit ever made, so it is comparable across both colors. The two shaded bands are where chance keeps it 19 times in 20 (±1.96 √bits) and 99 times in 100 (±2.576 √bits). Two-sided on purpose: a line far below the bands (psi-missing) is as interesting as one far above. The key under the chart names both.
+- **The sentence under the chart** says where the line is at the strength chance allows: inside the shaded area, between the bands ("worth watching, not a finding"), or outside both ("what matters is whether it stays out").
+- **Totals:** runs, people (explained as devices with a random id), bits, the combined score in big type with the total's wording, and the share stopped early, with "They still count."
+- **Splits** by Intention Hour versus any other time, and by random source, as lists rather than wide tables, so they read on a phone. A by-exercise split appears once there is more than one kind.
+- **Runs in progress** wait until they end and are mentioned in one line.
+- **Cache:** 5 minutes (`Cache-Control: public, max-age=300`). The chart sends at most 600 points, thinned evenly, always keeping the first and last.
+- **Scale:** the totals read every run row on each refresh. That is fine for tens of thousands of runs at one query per 5 minutes. Past that, keep running totals in their own table.
+
+## The menu
+
+A round three-line button at the top right, shown whenever no run is in progress. During a run the corner holds only the progress ring, as the spec asks. After a run, the ring with its check sits beside the menu button. The menu is a sheet with the other pages and Intention Hour's time and calendar button. Links in it replace the sheet's history entry, so Back from a page returns to the tug.
+
 ### Icon
 
 A dark square with a circle split by a curved seam: Ember on the left, Glacier on the right, a thin white line between. The circle sits inside the middle 80%, so the 512 px file is also the maskable icon.

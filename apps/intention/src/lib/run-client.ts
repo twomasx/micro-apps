@@ -1,20 +1,8 @@
 import type { BitsEvent, EndEvent, Kind, RunResult, RunSeconds, StartEvent, StartRequest } from './protocol.ts';
+import { ApiError, apiUrl, getJson } from './api.ts';
 import { SseParser } from './sse.ts';
 
-/** Calls to this app's functions. All five apps share one domain, so paths start from the base. */
-function apiUrl(path: string): string {
-  return `${import.meta.env.BASE_URL}api/${path}`;
-}
-
-export class ApiError extends Error {
-  override name = 'ApiError';
-  constructor(
-    readonly status: number,
-    readonly code: string | null,
-  ) {
-    super(`Request failed with status ${status}${code ? ` (${code})` : ''}`);
-  }
-}
+export { ApiError };
 
 export interface RunHandlers {
   onStart: (start: StartEvent) => void;
@@ -57,8 +45,6 @@ export async function streamRun(
   }
 }
 
-export async function fetchRun(runId: string): Promise<RunResult> {
-  const response = await fetch(apiUrl(`runs/${encodeURIComponent(runId)}`), { cache: 'no-store' });
-  if (!response.ok) throw new ApiError(response.status, null);
-  return (await response.json()) as RunResult;
+export function fetchRun(runId: string): Promise<RunResult> {
+  return getJson<RunResult>(`runs/${encodeURIComponent(runId)}`, { cache: 'no-store' });
 }
