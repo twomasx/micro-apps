@@ -20,7 +20,7 @@ A push to GitHub does not deploy anything. Every deploy is a command run from th
 | Attention database | D1 `micro-attention` | id in `apps/attention/wrangler.jsonc` |
 | Intention app | Pages project `micro-intention` | https://micro-intention.pages.dev |
 | Intention database | D1 `micro-intention` | id in `apps/intention/wrangler.jsonc` |
-| Landing page | Pages project `micro-landing` | https://micro-landing.pages.dev (not deployed yet) |
+| Landing page | Pages project `micro-landing` | https://micro-landing-b6u.pages.dev (the name micro-landing was taken on pages.dev, so Cloudflare added -b6u) |
 
 Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. The domain is on the same account. Wrangler on Roger's WSL machine is logged in to it (`pnpm exec wrangler whoami`).
 
@@ -192,16 +192,18 @@ Once real people use the app, only delete rows you made yourself.
 
 ## Deploy the landing page
 
-Not deployed yet. From `apps/landing`, once Roger approves the page:
+First deployed on Oct 15, 2026. From `apps/landing`:
 
 ```bash
 pnpm build
-pnpm exec wrangler pages deploy dist --project-name micro-landing --branch main
+../../router/node_modules/.bin/wrangler pages deploy dist --project-name micro-landing --branch main
 ```
 
-The first deploy creates the Pages project; answer the prompt with `main` as the production branch. There are no functions, secrets or database. Deploy the landing page **before** a router that has `LANDING_ORIGIN`, or `/` breaks until it exists.
+The landing app has no wrangler of its own (no functions), so use the router's. Run it from `apps/landing`, not from `router`: inside `router` wrangler reads the router's `wrangler.jsonc` and refuses. There are no functions, secrets or database.
 
-`dist/404.html` makes Pages answer unknown paths like `/_landing/nope` with a 404 instead of the page.
+The project lives at `micro-landing-b6u.pages.dev`, because `micro-landing` was already taken on pages.dev. It was created with `wrangler pages project create micro-landing --production-branch main --force`. Without `--force`, wrangler 4.149 tries to make a Workers project instead, rewrites the app's files and fails on the workspace. Only the create step needed `--force`; deploys do not.
+
+`dist/404.html` makes Pages answer unknown paths like `/_landing/nope` with a 404 instead of the page. Deploy the landing page **before** a router that points `LANDING_ORIGIN` at a new address, or `/` breaks until it exists.
 
 ## Deploy the router
 
@@ -300,6 +302,10 @@ Passed on Oct 15, 2026 in headless Chromium, through the preview router and then
 6. `test_results` on production is still empty (no tests were taken there).
 
 One test purchase from that check is in the production database (`cs_test_a15CDWiO...`, test mode).
+
+### Check landing
+
+Passed on Oct 15, 2026, with curl and headless Chromium, through the preview router and then polymadlabs.com: `/` serves the page with all five specimens, everything under `/_landing/` loads, `/_landing/nope` and `/nope` are 404, all five app paths still answer 200, `www` redirects, no console errors and no sideways scroll at 375, 768 and 1280 px.
 
 ### Check intention
 

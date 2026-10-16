@@ -22,7 +22,7 @@
     "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
     "ATTENTION_ORIGIN": "https://micro-attention.pages.dev",
     "INTENTION_ORIGIN": "https://micro-intention.pages.dev",
-    "LANDING_ORIGIN": "https://micro-landing.pages.dev"
+    "LANDING_ORIGIN": "https://micro-landing-b6u.pages.dev"
   },
   "env": {
     // Local: forward to each app's Vite server, which already serves under /<app>/.
@@ -52,7 +52,7 @@
         "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
         "ATTENTION_ORIGIN": "https://micro-attention.pages.dev",
         "INTENTION_ORIGIN": "https://micro-intention.pages.dev",
-        "LANDING_ORIGIN": "https://micro-landing.pages.dev"
+        "LANDING_ORIGIN": "https://micro-landing-b6u.pages.dev"
       }
     }
   }
