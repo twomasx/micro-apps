@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Intention: tug of war</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --page: #232326; --page-ink: #ececee; --page-muted: #a3a3aa; --page-line: #3a3a3f; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--page); color: var(--page-ink); }
+  body { font-family: "Inter Tight", system-ui, sans-serif; font-size: 16px; line-height: 1.5; padding: 28px 16px 64px; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 380px; margin: 0 auto; }
+  .intro h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .intro p { color: var(--page-muted); font-size: 15px; margin-bottom: 22px; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+  [hidden] { display: none !important; }
+
+  /* ---------- the phone ---------- */
+  .tug {
+    --a: #f2683c; --b: #7fc8e8;
+    --ink: #ffffff; --muted: rgba(255,255,255,.78); --btn-bg: #ffffff; --btn-ink: #141416;
+    --scrim: 20,20,24; --scrim-top: .38; --scrim-bottom: .55; --chip: rgba(255,255,255,.16); --chip-line: rgba(255,255,255,.35); --blur: 0px;
+    position: relative; width: 100%; aspect-ratio: 9 / 16; border-radius: 30px; overflow: hidden; isolation: isolate;
+    user-select: none; -webkit-user-select: none; color: var(--ink); font-family: "Inter Tight", sans-serif; background: #111;
+  }
+  .tug canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .tug .scrim { position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(var(--scrim), var(--scrim-top)) 0%, rgba(var(--scrim), 0) 26%, rgba(var(--scrim), 0) 58%, rgba(var(--scrim), var(--scrim-bottom)) 100%); }
+  .tug .ui { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 24px 22px 20px; }
+  .tug .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .tug h3 { font-family: "Unbounded", sans-serif; font-weight: 300; font-size: 28px; line-height: 1.08; letter-spacing: -0.02em; }
+  .tug .time { font-family: "Unbounded", sans-serif; font-weight: 400; font-size: 15px; padding-top: 6px; font-variant-numeric: tabular-nums; }
+  .tug .top h3 { transition: opacity 500ms, transform 500ms; }
+  .tug .sides, .tug .score { transition: opacity 400ms; }
+  .tug:not(.running):not(.finished) .sides, .tug:not(.running):not(.finished) .score { opacity: 0; visibility: hidden; height: 0; margin: 0; }
+  .tug .ui > *:not(.actions) { transition: opacity 300ms; }
+  .tug.fanning .ui > *:not(.actions) { opacity: .12; }
+  .tug.running .top h3, .tug.finished .top h3 { opacity: 0; transform: translateY(-8px); }
+  .tug .prog { width: 34px; height: 34px; flex: none; margin-left: auto; color: var(--ink); }
+  .tug .prog [data-f=check] { transition: stroke-dashoffset 500ms 200ms cubic-bezier(.2,0,0,1); }
+  .tug.finished .prog [data-f=check] { stroke-dashoffset: 0; }
+  .tug .actions { display: flex; gap: 10px; align-items: center; }
+  .tug .actions .go { flex: 1; }
+  .tug .fanbtn { width: 56px; height: 56px; flex: none; border-radius: 50%; position: relative; overflow: hidden; box-shadow: 0 0 0 2px rgba(255,255,255,.85), 0 6px 18px rgba(0,0,0,.25); transition: transform 300ms cubic-bezier(.2,0,0,1); }
+  .tug .fanbtn::before, .tug .fanbtn::after { content: ""; position: absolute; top: 0; bottom: 0; width: 50%; }
+  .tug .fanbtn::before { left: 0; background: var(--a); } .tug .fanbtn::after { right: 0; background: var(--b); }
+  .tug .fanbtn[aria-expanded="true"] { transform: rotate(180deg) scale(.9); }
+  .tug.running .fanbtn { opacity: 0; pointer-events: none; width: 0; margin-left: -10px; }
+  .tug .fan { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+  .tug .fan.open { pointer-events: auto; background: radial-gradient(140% 80% at 88% 100%, rgba(10,10,14,.6), rgba(10,10,14,.15) 75%); }
+  .tug .swatch { position: absolute; width: 50px; height: 50px; margin: -25px 0 0 -25px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 8px 20px rgba(0,0,0,.3); transform: translate(0,0) scale(.3); opacity: 0; transition: transform 380ms cubic-bezier(.2,.9,.3,1.25), opacity 220ms; }
+  .tug .swatch::before, .tug .swatch::after { content: ""; position: absolute; top: 0; bottom: 0; width: 50%; }
+  .tug .swatch::before { left: 0; background: var(--pa); } .tug .swatch::after { right: 0; background: var(--pb); }
+  .tug .swatch.custom { display: grid; place-items: center; background: rgba(255,255,255,.18); backdrop-filter: blur(8px); color: #fff; font-size: 24px; }
+  .tug .swatch.custom::before, .tug .swatch.custom::after { display: none; }
+  .tug .swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px #fff, 0 0 0 6px rgba(255,255,255,.35), 0 8px 20px rgba(0,0,0,.3); }
+  .tug .fan.open .swatch { opacity: 1; }
+  .tug .fanname { position: absolute; right: 22px; bottom: 96px; color: #fff; font-size: 14px; font-weight: 500; opacity: 0; transition: opacity 250ms; text-shadow: 0 1px 8px rgba(0,0,0,.4); }
+  .tug .fan.open .fanname { opacity: 1; }
+  .tug .lead { font-size: 15px; color: var(--muted); margin-top: 8px; max-width: 24ch; line-height: 1.4; }
+  .tug .mid { flex: 1; }
+  .tug .sides { display: flex; justify-content: center; }
+  .tug .side.aimpill { text-transform: none; letter-spacing: 0; font-size: 15px; font-weight: 500; padding: 8px 14px; }
+  .tug .side.aimpill b { font-weight: 700; }
+  .tug .side { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; background: var(--chip); box-shadow: inset 0 0 0 1px var(--chip-line); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur)); }
+  .tug .side i { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255,255,255,.6); }
+    .tug .score { text-align: center; margin: 16px 0 4px; }
+  .tug .score b { font-family: "Unbounded", sans-serif; font-weight: 300; font-size: 54px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tug .score span { display: block; font-size: 14px; color: var(--muted); margin-top: 4px; }
+  .tug .line { font-size: 15px; text-align: center; margin: 8px 0 14px; min-height: 44px; line-height: 1.4; }
+  .tug .go { width: 100%; min-height: 56px; border-radius: 999px; background: var(--btn-bg); color: var(--btn-ink); font-size: 17px; font-weight: 600; }
+  .tug .pairs { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
+  .tug .pair { width: 34px; height: 34px; border-radius: 50%; position: relative; overflow: hidden; box-shadow: 0 0 0 1px var(--chip-line); }
+  .tug .pair::before, .tug .pair::after { content: ""; position: absolute; top: 0; bottom: 0; width: 50%; }
+  .tug .pair::before { left: 0; background: var(--pa); } .tug .pair::after { right: 0; background: var(--pb); }
+  .tug .pair[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
+  .tug .pair.custom { display: grid; place-items: center; background: var(--chip); font-size: 18px; line-height: 1; }
+  .tug .pair.custom::before, .tug .pair.custom::after { display: none; }
+  .tug .picker { position: absolute; left: 16px; right: 16px; bottom: 16px; padding: 16px; border-radius: 22px; background: rgba(20,20,24,.82); color: #fff; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .tug .picker h4 { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+  .tug .picker .row { display: flex; gap: 12px; }
+  .tug .picker label { flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: rgba(255,255,255,.75); }
+  .tug .picker input[type=color] { width: 100%; height: 48px; border: 0; border-radius: 12px; padding: 0; background: none; cursor: pointer; }
+  .tug .picker .done { margin-top: 12px; width: 100%; min-height: 48px; border-radius: 999px; background: #fff; color: #141416; font-weight: 600; }
+
+  /* ---------- design lab panel (for Roger, not part of the app) ---------- */
+  .lab { margin-top: 22px; border: 1px solid var(--page-line); border-radius: 18px; padding: 16px; }
+  .lab h2 { font-size: 16px; font-weight: 600; }
+  .lab .note { font-size: 14px; color: var(--page-muted); margin: 4px 0 12px; }
+  .lab h5 { font-size: 13px; font-weight: 600; color: var(--page-muted); margin: 14px 0 8px; }
+  .lab .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .lab .chip { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--page-line); font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+  .lab .chip[aria-pressed="true"] { background: var(--page-ink); color: var(--page); border-color: var(--page-ink); }
+  .lab .chip i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .lab .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lab .grid label { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; border: 1px solid var(--page-line); border-radius: 12px; padding: 6px 6px 6px 12px; }
+  .lab .grid input[type=color] { width: 40px; height: 32px; border: 0; padding: 0; background: none; cursor: pointer; }
+  .lab .out { margin-top: 14px; font-family: ui-monospace, monospace; font-size: 12px; color: var(--page-muted); background: #1b1b1e; border-radius: 10px; padding: 10px; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="intro">
+    <h1>Intention: tug of war</h1>
+    <p>Two colors share the screen. You get one of them at random, and a pull tab in your color sits on the line between them, with arrows showing which way your color has to travel. Every random bit pulls for one color or the other. When the bits favor your color, it spreads across the phone and glows.</p>
+  </div>
+
+  <div class="tug" id="tug">
+    <canvas></canvas>
+    <div class="scrim"></div>
+    <div class="ui">
+      <div class="top">
+        <h3 data-f="title">Pull your color across</h3>
+        <svg class="prog" viewBox="0 0 40 40" role="img" aria-label="Run progress" data-f="prog" style="display:none">
+          <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="2.5"/>
+          <circle data-f="progarc" cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="100.5" transform="rotate(-90 20 20)"/>
+          <path data-f="check" d="M13 20.5l4.5 4.5L27 15.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="22" stroke-dashoffset="22"/>
+        </svg>
+      </div>
+      <div class="mid"></div>
+      <div class="sides"><span class="side aimpill" data-f="aimpill"><i data-f="aimdot" style="background:transparent"></i><span data-f="aimname">Your color is picked when you begin</span></span></div>
+      <div class="score"><b data-f="z">0.00</b><span>how far from chance</span></div>
+      <p class="line" data-f="line">You get one of the two colors at random. Pull it across with your mind for 20 seconds.</p>
+      <div class="actions">
+        <button class="go" data-act="go">Begin</button>
+        <button class="fanbtn" data-act="fan" aria-label="Choose your colors" aria-expanded="false"></button>
+      </div>
+    </div>
+    <div class="fan" data-f="fan" aria-hidden="true"></div>
+    <div class="picker" data-f="picker" hidden>
+      <h4>Pick your two colors</h4>
+      <div class="row"><label>Left<input type="color" data-f="pickA"></label><label>Right<input type="color" data-f="pickB"></label></div>
+      <button class="done" data-act="pickdone">Use these</button>
+    </div>
+  </div>
+
+  <section class="lab" aria-label="Design lab">
+    <h2>Design lab</h2>
+    <p class="note">For you, not part of the app. Switch the screen style and the colors, then copy the settings at the bottom and send them to me.</p>
+    <h5>Screen style (text, buttons, edges)</h5>
+    <div class="chips" data-f="styles"></div>
+    <h5>Color pair</h5>
+    <div class="chips" data-f="labpairs"></div>
+    <h5>Fine tune</h5>
+    <div class="grid">
+      <label>Left color<input type="color" data-k="a"></label>
+      <label>Right color<input type="color" data-k="b"></label>
+      <label>Text<input type="color" data-k="ink"></label>
+      <label>Button<input type="color" data-k="btnBg"></label>
+      <label>Button text<input type="color" data-k="btnInk"></label>
+      <label>Edge shade<input type="color" data-k="scrim"></label>
+    </div>
+    <h5>Motion</h5>
+    <div class="chips" data-f="motion"></div>
+    <h5>Direction cues (pick any)</h5>
+    <div class="chips" data-f="cues"></div>
+    <div class="out" data-f="out"></div>
+  </section>
+</div>
+
+<script>
+const PAIRS = [
+  { name: "Ember and Glacier", a: "#f2683c", b: "#7fc8e8" },
+  { name: "Rose and Navy", a: "#e85d8a", b: "#25366a" },
+  { name: "Saffron and Indigo", a: "#f3b53b", b: "#3d3aa6" },
+  { name: "Peach and Lilac", a: "#f7a07a", b: "#a68bf6" },
+  { name: "Chartreuse and Magenta", a: "#c3dd47", b: "#cf3f95" },
+  { name: "Day and Night", a: "#f1efe9", b: "#1b1b1f" },
+  { name: "Tangerine and Plum", a: "#ff8a3d", b: "#5b2a6e" },
+];
+const STYLES = {
+  Night: { ink: "#ffffff", muted: "rgba(255,255,255,.78)", btnBg: "#ffffff", btnInk: "#141416", scrim: "#141418", top: .38, bottom: .58, chip: "rgba(255,255,255,.16)", chipLine: "rgba(255,255,255,.35)", blur: 0 },
+  Day: { ink: "#141416", muted: "rgba(20,20,22,.72)", btnBg: "#141416", btnInk: "#ffffff", scrim: "#f6f5f2", top: .55, bottom: .75, chip: "rgba(255,255,255,.55)", chipLine: "rgba(20,20,22,.18)", blur: 6 },
+  Frost: { ink: "#ffffff", muted: "rgba(255,255,255,.85)", btnBg: "rgba(255,255,255,.22)", btnInk: "#ffffff", scrim: "#ffffff", top: .12, bottom: .18, chip: "rgba(255,255,255,.22)", chipLine: "rgba(255,255,255,.55)", blur: 14 },
+  Ink: { ink: "#0e0e10", muted: "rgba(14,14,16,.7)", btnBg: "#0e0e10", btnInk: "#f4f3ef", scrim: "#000000", top: 0, bottom: 0, chip: "rgba(255,255,255,.4)", chipLine: "rgba(14,14,16,.3)", blur: 0 },
+  Bare: { ink: "#ffffff", muted: "rgba(255,255,255,.8)", btnBg: "transparent", btnInk: "#ffffff", scrim: "#000000", top: .15, bottom: .3, chip: "transparent", chipLine: "rgba(255,255,255,.7)", blur: 0 },
+};
+const MOTION = { Calm: 0.6, Lively: 1.2, Still: 0 };
+const CUES = { edge: "Edge glow", flow: "Flow", arrow: "Pill arrow", tab: "Tab" };
+const state = { pair: 0, a: PAIRS[0].a, b: PAIRS[0].b, style: "Night", motion: "Calm", custom: {}, cues: { edge: true, flow: false, arrow: true, tab: false } };
+const names = () => state.pair >= 0 ? PAIRS[state.pair].name.split(" and ") : ["your color", "your color"];
+
+const root = document.getElementById("tug");
+const $ = k => document.querySelector(`[data-f="${k}"]`);
+const hexToRgb = h => { const n = parseInt(h.replace("#", ""), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+
+function applyTheme() {
+  const s = { ...STYLES[state.style], ...state.custom };
+  const r = root.style;
+  r.setProperty("--a", state.a); r.setProperty("--b", state.b);
+  r.setProperty("--ink", s.ink); r.setProperty("--muted", s.muted); r.setProperty("--btn-bg", s.btnBg); r.setProperty("--btn-ink", s.btnInk);
+  r.setProperty("--scrim", hexToRgb(s.scrim).join(",")); r.setProperty("--scrim-top", s.top); r.setProperty("--scrim-bottom", s.bottom);
+  r.setProperty("--chip", s.chip); r.setProperty("--chip-line", s.chipLine); r.setProperty("--blur", s.blur + "px");
+  root.querySelector(".go").style.boxShadow = s.btnBg === "transparent" || s.btnBg.startsWith("rgba") ? `inset 0 0 0 1.5px ${s.chipLine}` : "none";
+  document.querySelectorAll("[data-k]").forEach(inp => {
+    const k = inp.dataset.k, v = k === "a" ? state.a : k === "b" ? state.b : k === "scrim" ? s.scrim : s[k];
+    if (/^#[0-9a-f]{6}$/i.test(v)) inp.value = v;
+  });
+  $("pickA").value = state.a; $("pickB").value = state.b;
+  renderChips();
+  $("out").textContent = JSON.stringify({ style: state.style, left: state.a, right: state.b, overrides: state.custom, motion: state.motion, cues: Object.keys(state.cues).filter(k => state.cues[k]) });
+}
+let fanOpen = false;
+function renderFan() {
+  const fan = $("fan"), btn = root.querySelector(".fanbtn");
+  const items = [...PAIRS.map((p, i) => ({ i, p })), { custom: true }];
+  const rr = root.getBoundingClientRect(), br = btn.getBoundingClientRect();
+  const ox = br.left - rr.left + br.width / 2, oy = br.top - rr.top + br.height / 2;
+  const R = Math.min(rr.width * 0.62, 230), start = Math.PI * 1.0, end = Math.PI * 1.5;   // a quarter arc up and to the left
+  fan.innerHTML = items.map((it, k) => {
+    const a = start + (end - start) * (k / (items.length - 1));
+    const x = ox + Math.cos(a) * R, y = oy + Math.sin(a) * R;
+    const dx = fanOpen ? 0 : ox - x, dy = fanOpen ? 0 : oy - y;
+    const style = `left:${x}px;top:${y}px;transition-delay:${fanOpen ? k * 28 : (items.length - k) * 18}ms;transform:translate(${dx}px,${dy}px) scale(${fanOpen ? 1 : .3});` + (it.custom ? "" : `--pa:${it.p.a};--pb:${it.p.b}`);
+    return it.custom
+      ? `<button class="swatch custom" data-act="pick" style="${style}" aria-label="Pick your own two colors" tabindex="${fanOpen ? 0 : -1}">+</button>`
+      : `<button class="swatch" data-pair="${it.i}" data-fanpair="1" style="${style}" aria-pressed="${it.i === state.pair}" aria-label="${it.p.name}" tabindex="${fanOpen ? 0 : -1}"></button>`;
+  }).join("") + `<span class="fanname">${state.pair >= 0 ? PAIRS[state.pair].name : "Your own colors"}</span>`;
+  fan.classList.toggle("open", fanOpen); fan.setAttribute("aria-hidden", !fanOpen); root.classList.toggle("fanning", fanOpen);
+  btn.setAttribute("aria-expanded", fanOpen);
+}
+function setFan(v) { fanOpen = v; renderFan(); }
+function renderChips() {
+  $("styles").innerHTML = Object.keys(STYLES).map(n => `<button class="chip" data-style="${n}" aria-pressed="${n === state.style}">${n}</button>`).join("");
+  $("labpairs").innerHTML = PAIRS.map((p, i) => `<button class="chip" data-pair="${i}" aria-pressed="${i === state.pair}"><i style="background:${p.a}"></i><i style="background:${p.b}"></i>${p.name}</button>`).join("");
+  $("motion").innerHTML = Object.keys(MOTION).map(n => `<button class="chip" data-motion="${n}" aria-pressed="${n === state.motion}">${n}</button>`).join("");
+  $("cues").innerHTML = Object.entries(CUES).map(([k, n]) => `<button class="chip" data-cue="${k}" aria-pressed="${!!state.cues[k]}">${n}</button>`).join("");
+  renderFan();
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("button");
+  if (!t) { if (fanOpen && e.target.closest(".fan")) setFan(false); return; }
+  if (t.dataset.style) { state.style = t.dataset.style; state.custom = {}; applyTheme(); }
+  if (t.dataset.pair != null) { state.pair = +t.dataset.pair; state.a = PAIRS[state.pair].a; state.b = PAIRS[state.pair].b; applyTheme(); }
+  if (t.dataset.motion) { state.motion = t.dataset.motion; applyTheme(); }
+  if (t.dataset.cue) { state.cues[t.dataset.cue] = !state.cues[t.dataset.cue]; applyTheme(); setAimLabel(); }
+  if (t.dataset.act === "fan") { setFan(!fanOpen); return; }
+  if (t.dataset.fanpair) { setTimeout(() => setFan(false), 260); }
+  if (t.dataset.act === "pick") { setFan(false); $("picker").hidden = false; }
+  if (t.dataset.act === "pickdone") { $("picker").hidden = true; }
+});
+$("pickA").addEventListener("input", e => { state.a = e.target.value; state.pair = -1; applyTheme(); });
+$("pickB").addEventListener("input", e => { state.b = e.target.value; state.pair = -1; applyTheme(); });
+document.querySelectorAll("[data-k]").forEach(inp => inp.addEventListener("input", () => {
+  const k = inp.dataset.k;
+  if (k === "a") { state.a = inp.value; state.pair = -1; } else if (k === "b") { state.b = inp.value; state.pair = -1; }
+  else state.custom[k] = inp.value;
+  applyTheme();
+}));
+
+/* ---------- the trial ---------- */
+const DURATION = 20, TICK = 100, BITS = 20;
+const erf = x => { const s = Math.sign(x), a = Math.abs(x), t = 1 / (1 + 0.3275911 * a); return s * (1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a)); };
+const phi = z => 0.5 * (1 + erf(z / Math.SQRT2));
+const oneIn = z => { const p = 1 - phi(z); return p >= 0.5 ? null : Math.max(1, Math.round(1 / p)); };
+const fmtZ = z => (z >= 0 ? "+" : "") + z.toFixed(2);
+function verdict(z) {
+  const k = oneIn(z);
+  if (k == null || k < 2) return "No pull toward your aim. This is what chance looks like.";
+  if (k < 20) return `About 1 in ${k} runs pull this far your way by chance. Normal.`;
+  return `About 1 in ${k} runs get this far by chance. Interesting, but one run proves nothing.`;
+}
+var run = { on: false, aim: 1, n: 0, dev: 0, z: 0, t0: 0, motes: [] };
+let timer;
+function tick() {
+  const b = new Uint8Array(BITS); crypto.getRandomValues(b);
+  for (const v of b) { const x = v & 1; run.n++; run.dev += x ? 1 : -1; }
+  for (let i = 0; i < 6; i++) run.motes.push({ side: (b[i] & 1) ? 1 : -1, life: 0, y: Math.random(), wob: Math.random() * 6.28 });
+  run.z = run.dev * run.aim / Math.sqrt(run.n);
+  $("z").textContent = fmtZ(run.z);
+  const left = Math.max(0, DURATION - (performance.now() - run.t0) / 1000);
+  if (left <= 0) {
+    run.on = false; root.querySelector(".go").textContent = "Pull again"; root.querySelector(".go").hidden = false;
+    $("line").textContent = verdict(run.z).replace("your aim", names()[run.aim > 0 ? 1 : 0]).replace("your way", "toward " + names()[run.aim > 0 ? 1 : 0]);
+    root.classList.remove("running"); root.classList.add("finished"); $("prog").setAttribute("aria-label", "Run complete"); if (navigator.vibrate) navigator.vibrate(run.z > 1.65 ? [30, 60, 30] : 20);
+    return;
+  }
+  timer = setTimeout(tick, TICK);
+}
+function setAimLabel() {
+  if (!run.on && !run.n) return;
+  const nm = names()[run.aim > 0 ? 1 : 0], arrow = run.aim > 0 ? "←" : "→";
+  $("aimname").innerHTML = `Your color: <b>${nm}</b>${state.cues.arrow ? ` <span aria-hidden="true" style="opacity:.85">${arrow}</span>` : ""}`;
+}
+root.querySelector(".go").addEventListener("click", () => {
+  if (run.on) return;
+  Object.assign(run, { on: true, aim: Math.random() < 0.5 ? 1 : -1, n: 0, dev: 0, z: 0, t0: performance.now(), motes: [] });
+  const nm = names()[run.aim > 0 ? 1 : 0];
+  $("aimdot").style.background = run.aim > 0 ? state.b : state.a;
+  setAimLabel();
+  $("title").textContent = `Pull ${nm} across`;
+  $("line").textContent = `Hold ${nm} in mind. Watch it spread for 20 seconds.`;
+  root.querySelector(".go").hidden = true; $("z").textContent = "+0.00";
+  setFan(false); root.classList.add("running"); root.classList.remove("finished"); $("prog").style.display = "block"; $("prog").setAttribute("aria-label", "Run in progress");
+  timer = setTimeout(tick, 400);
+});
+
+/* ---------- the full-screen field ---------- */
+const cv = root.querySelector("canvas"), ctx = cv.getContext("2d");
+let seam = 0, t = 0, last = performance.now();
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function fit() { const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); const w = Math.round(r.width * d), h = Math.round(r.height * d); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } return { w, h, d }; }
+const mix = (c, k) => c.map(v => Math.round(v + (255 - v) * k));
+const shade = (c, k) => c.map(v => Math.round(v * (1 - k)));
+(function draw(now) {
+  const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now;
+  const speed = reduce ? 0 : MOTION[state.motion]; t += dt * speed;
+  const { w, h, d } = fit();
+  const A = hexToRgb(state.a), B = hexToRgb(state.b);
+  // raw lean: + means more 1s, which favor the right-hand color, so it spreads and the line moves left
+  const raw = run.n ? run.dev / Math.sqrt(run.n) : 0;
+  const target = Math.max(-1, Math.min(1, raw / 3));
+  seam += (target - seam) * Math.min(1, dt * 2.2);
+  const baseX = w * (0.5 - seam * 0.4);
+  const amp = w * 0.035 * (0.6 + 0.4 * Math.abs(seam)), ampS = w * 0.012;
+  const seamAt = y => baseX + Math.sin(y / h * 5.2 + t * 1.3) * amp + Math.sin(y / h * 13 - t * 0.9) * ampS + Math.sin(y / h * 2.1 - t * 0.4) * amp * 0.8;
+  // the winning side glows, the losing side dims a little, so the winner reads clearly even as the line moves toward it
+  const win = Math.abs(seam), rightWins = seam > 0;
+  const grey = c => { const m = (c[0] + c[1] + c[2]) / 3; return c.map(v => Math.round(v + (m - v) * 0.45 * win)); };
+  const Lc = rightWins ? grey(shade(A, 0.35 * win)) : mix(A, 0.12 * win);
+  const Rc = rightWins ? mix(B, 0.12 * win) : grey(shade(B, 0.35 * win));
+  const gA = ctx.createLinearGradient(0, 0, baseX, h);
+  gA.addColorStop(0, `rgb(${shade(Lc, 0.18)})`); gA.addColorStop(1, `rgb(${mix(Lc, 0.1)})`);
+  ctx.fillStyle = gA; ctx.fillRect(0, 0, w, h);
+  const rightPath = () => { ctx.beginPath(); ctx.moveTo(w, 0); ctx.lineTo(seamAt(0), 0); for (let y = 0; y <= h; y += 6 * d) ctx.lineTo(seamAt(y), y); ctx.lineTo(w, h); ctx.closePath(); };
+  const leftPath = () => { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(seamAt(0), 0); for (let y = 0; y <= h; y += 6 * d) ctx.lineTo(seamAt(y), y); ctx.lineTo(0, h); ctx.closePath(); };
+  rightPath();
+  const gB = ctx.createLinearGradient(w, h, baseX, 0);
+  gB.addColorStop(0, `rgb(${shade(Rc, 0.2)})`); gB.addColorStop(1, `rgb(${mix(Rc, 0.1)})`);
+  ctx.fillStyle = gB; ctx.fill();
+  if (win > 0.02) {
+    ctx.save(); (rightWins ? rightPath : leftPath)(); ctx.clip();
+    const cx = rightWins ? baseX + (w - baseX) * 0.45 : baseX * 0.55, col = rightWins ? B : A;
+    const glow = ctx.createRadialGradient(cx, h * 0.5, 0, cx, h * 0.5, h * 0.55);
+    glow.addColorStop(0, `rgba(${mix(col, 0.65)},${0.7 * win})`); glow.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h); ctx.restore();
+  }
+  // the seam itself: a soft bright line
+  ctx.save(); ctx.filter = `blur(${6 * d}px)`; ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 10 * d;
+  ctx.beginPath(); for (let y = 0; y <= h; y += 6 * d) y ? ctx.lineTo(seamAt(y), y) : ctx.moveTo(seamAt(y), y); ctx.stroke(); ctx.restore();
+  ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = 1.2 * d;
+  ctx.beginPath(); for (let y = 0; y <= h; y += 6 * d) y ? ctx.lineTo(seamAt(y), y) : ctx.moveTo(seamAt(y), y); ctx.stroke();
+  // direction cues, all quiet: they only say which way your color is travelling
+  if (run.on || run.n) {
+    const mine = run.aim > 0 ? B : A, dir = run.aim > 0 ? -1 : 1;   // right color travels left, left color travels right
+    const myPath = run.aim > 0 ? rightPath : leftPath;
+    if (state.cues.edge) {
+      ctx.save(); myPath(); ctx.clip();
+      ctx.filter = `blur(${10 * d}px)`; ctx.strokeStyle = `rgba(${mix(mine, 0.7)},0.75)`; ctx.lineWidth = 34 * d;
+      ctx.beginPath(); for (let y = 0; y <= h; y += 6 * d) y ? ctx.lineTo(seamAt(y), y) : ctx.moveTo(seamAt(y), y); ctx.stroke();
+      ctx.restore();
+    }
+    if (state.cues.flow) {
+      ctx.save(); myPath(); ctx.clip();
+      for (let i = 0; i < 9; i++) {
+        const lane = (i + 0.5) / 9, y = h * lane, len = w * 0.22, sp = w * 0.06;
+        const phase = ((t * sp * (0.7 + (i % 3) * 0.15) + i * w * 0.37) % (w + len)) - len;
+        const x = dir > 0 ? phase : w - phase;
+        const g = ctx.createLinearGradient(x - dir * len, y, x, y);
+        g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,0.16)");
+        ctx.strokeStyle = g; ctx.lineWidth = 2 * d; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(x - dir * len, y); ctx.lineTo(x, y); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    if (state.cues.tab) {
+      const ty = h * 0.5, tx = seamAt(ty), tw = 18 * d, th = 44 * d;
+      ctx.fillStyle = `rgb(${mine})`; ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 2 * d;
+      ctx.beginPath(); ctx.roundRect(tx - tw / 2, ty - th / 2, tw, th, tw / 2); ctx.fill(); ctx.stroke();
+      ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath();
+      ctx.moveTo(tx + dir * 2 * d - dir * 5 * d, ty - 6 * d); ctx.lineTo(tx + dir * 2 * d, ty); ctx.lineTo(tx + dir * 2 * d - dir * 5 * d, ty + 6 * d); ctx.stroke();
+    }
+  }
+  // each bit sends a speck of light from the seam into its side
+  run.motes = run.motes.filter(m => (m.life += dt * 0.9) < 1);
+  for (const m of run.motes) {
+    const y = m.y * h, x0 = seamAt(y), dist = (m.side > 0 ? (w - x0) : x0) * 0.55 * m.life;
+    const x = x0 + m.side * dist, yy = y + Math.sin(m.wob + m.life * 3) * 10 * d;
+    ctx.fillStyle = `rgba(255,255,255,${0.8 * (1 - m.life)})`; ctx.beginPath(); ctx.arc(x, yy, 2.2 * d, 0, 7); ctx.fill();
+  }
+  if (run.on) $("progarc").setAttribute("stroke-dashoffset", (100.5 * (1 - Math.min(1, (performance.now() - run.t0) / 1000 / DURATION))).toFixed(1));
+  else if (run.n) $("progarc").setAttribute("stroke-dashoffset", "0");
+  requestAnimationFrame(draw);
+})(performance.now());
+
+document.addEventListener("keydown", e => { if (e.key === "Escape" && fanOpen) setFan(false); });
+addEventListener("resize", () => renderFan());
+applyTheme();
+</script>
+</body>
+</html>
