@@ -27,3 +27,8 @@ Check on Android Chrome first, then iPhone Safari. Locally at http://localhost:3
 - [ ] The Intention Hour line on the home screen in the 3 hours before 9:00 pm Pacific and during the 10 minutes.
 - [ ] Add to calendar on Android: the .ics opens in your calendar app and shows the right local time.
 - [ ] The global chart reads at a glance on the phone.
+
+## Before launch (step 5)
+
+- [ ] The science page's five sources were written from the literature as I know it. Please check the page ranges and author lists against the papers before launch.
+- [ ] Your history follows the device, not the Lab Pass code. Restoring Lab Pass on a new phone unlocks the features there, but that phone starts a new list. Linking history to the code would need a decision about privacy. Fine as it is?

@@ -117,6 +117,22 @@ Color is never the only cue: the pill names your color and the arrow shows its d
 
 A round three-line button at the top right, shown whenever no run is in progress. During a run the corner holds only the progress ring, as the spec asks. After a run, the ring with its check sits beside the menu button. The menu is a sheet with the other pages and Intention Hour's time and calendar button. Links in it replace the sheet's history entry, so Back from a page returns to the tug.
 
+## Your runs
+
+- **Found by the device's random id,** sent in a header (`X-Device-Id`), not in the address, so it stays out of logs and browser history.
+- **Free:** your last 5 runs, newest first, and how many you have in all ("Your last 5 of 23 runs."). **Lab Pass:** every run, your lifetime total (Stouffer) in big type with the total's wording, your own running chart (the global chart's design, with your bits only) and a CSV of every run with every bit. The server decides which, from the unlock code (`X-Unlock-Code`) checked against paid purchases.
+- **Each run shows** when it started in your own time, its score, which side your color was on, and whether it was stopped early, longer than 20 s or during Intention Hour. The color names are not stored with a run (the pair can change), so the list says "Your color was on the right".
+- **"Every bit of this run"** links to the run's raw record on the server. It is plain data, which is the point: nothing is hidden.
+- **Runs in progress** join the list when they end.
+
+## The science and privacy pages
+
+- **The science page stays inside the spec's claims:** PEAR reported very small effects, the three-lab replication did not confirm them, and the 380-study meta-analysis found an extremely small effect that publication bias could explain. Both published replies to the meta-analysis are listed, one on each side. The stance in the lead: "Nobody has proven it. Nobody has proven it impossible either."
+- **Numbers are exact and labeled:** 68% of runs within ±1, 1 in 20 above +1.65, psi-missing at −1.96 (about 1 time in 40), the stop-when-ahead simulation's average (0.005), and what it would take to see an effect of one bit in ten thousand (about 25,000 runs to be expected at the edge of the inner band). That last one is plain arithmetic: 0.0002 × √bits = 1.96.
+- **The random source** is named the way the spec asks, "cryptographic random numbers generated on our server". The page adds "They are not quantum random numbers", because people may assume they are. No other use of "quantum".
+- **Privacy** follows the other apps' structure: on this device, on our server, payments, what we don't do. It says plainly that runs cannot be removed from the totals, and why.
+- **A content test** checks the science page, the privacy page and every line the tug screen can say for the writing rules (no em dashes, no exclamation marks) and the banned claims.
+
 ### Icon
 
 A dark square with a circle split by a curved seam: Ember on the left, Glacier on the right, a thin white line between. The circle sits inside the middle 80%, so the 512 px file is also the maskable icon.

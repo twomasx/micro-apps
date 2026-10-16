@@ -2,7 +2,10 @@ import { useEffect } from 'react';
 import { useRoute } from './hooks/useRoute.ts';
 import type { Route } from './lib/router.ts';
 import { GlobalPage } from './pages/GlobalPage.tsx';
+import { MePage } from './pages/MePage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
+import { PrivacyPage } from './pages/PrivacyPage.tsx';
+import { SciencePage } from './pages/SciencePage.tsx';
 import { TugPage } from './pages/TugPage.tsx';
 
 const SITE_TITLE = 'Intention';
@@ -23,6 +26,12 @@ function Page({ route }: { route: Route }) {
       return <TugPage />;
     case 'global':
       return <GlobalPage />;
+    case 'me':
+      return <MePage />;
+    case 'science':
+      return <SciencePage />;
+    case 'privacy':
+      return <PrivacyPage />;
     default:
       return <NotFoundPage />;
   }

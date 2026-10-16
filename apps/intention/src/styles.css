@@ -963,6 +963,99 @@ button {
   padding-right: 0;
 }
 
+/* ---------- reading pages ---------- */
+
+.prose section {
+  margin-top: 32px;
+}
+
+.prose section > * + * {
+  margin-top: 12px;
+}
+
+.prose p,
+.prose li {
+  line-height: 1.55;
+}
+
+.steps,
+.bullets {
+  padding-left: 22px;
+}
+
+.steps {
+  list-style: decimal;
+}
+
+.bullets {
+  list-style: disc;
+}
+
+.steps li + li,
+.bullets li + li {
+  margin-top: 8px;
+}
+
+.sources {
+  font-size: 15px;
+  color: var(--ink-muted);
+}
+
+.sources li + li {
+  margin-top: 12px;
+}
+
+.prose a,
+.me a:not(.back-link) {
+  text-underline-offset: 3px;
+}
+
+/* ---------- your runs ---------- */
+
+.run-list {
+  margin-top: 24px;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+}
+
+.run-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.12);
+}
+
+.run-when {
+  font-weight: 500;
+}
+
+.run-score {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 22px;
+}
+
+.run-details {
+  grid-column: 1 / -1;
+  font-size: 15px;
+  color: var(--ink-muted);
+}
+
+.run-bits {
+  grid-column: 1 / -1;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+}
+
+.button-secondary:disabled {
+  opacity: 0.6;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

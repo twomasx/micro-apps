@@ -1,29 +1,12 @@
-import { useEffect, useState } from 'react';
 import { GlobalChart } from '../components/GlobalChart.tsx';
 import { HourPanel } from '../components/HourPanel.tsx';
 import { Link } from '../components/Link.tsx';
+import { useLoad } from '../hooks/useLoad.ts';
 import { fetchGlobal, fetchHour } from '../lib/api.ts';
 import { chartVerdict } from '../lib/chart.ts';
 import { formatCount, formatZ, totalVerdict } from '../lib/copy.ts';
 import { abandonedLine, KIND_LABELS, percent, runsByPeople, SOURCE_LABELS, WHEN_LABELS } from '../lib/global-copy.ts';
 import type { GlobalAnswer, Group } from '../lib/totals-types.ts';
-
-type Load<T> = { state: 'loading' } | { state: 'ready'; data: T } | { state: 'error' };
-
-function useLoad<T>(load: () => Promise<T>): Load<T> {
-  const [value, setValue] = useState<Load<T>>({ state: 'loading' });
-  useEffect(() => {
-    let live = true;
-    load().then(
-      (data) => live && setValue({ state: 'ready', data }),
-      () => live && setValue({ state: 'error' }),
-    );
-    return () => {
-      live = false;
-    };
-  }, [load]);
-  return value;
-}
 
 /** One split of the totals, as a list: easier to read on a phone than a wide table. */
 function Split({ title, rows }: { title: string; rows: [string, Group][] }) {

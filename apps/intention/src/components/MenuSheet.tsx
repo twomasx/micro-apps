@@ -4,6 +4,13 @@ import { downloadCalendar } from './HourPanel.tsx';
 import { Link } from './Link.tsx';
 import { Sheet } from './Sheet.tsx';
 
+const MENU: readonly [string, string][] = [
+  ['me', 'Your runs'],
+  ['global', "Everyone's runs"],
+  ['science', 'The science'],
+  ['privacy', 'Privacy'],
+];
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -16,12 +23,14 @@ export function MenuSheet({ open, onClose }: Props) {
     <Sheet open={open} onClose={onClose} title="Intention" name="menu">
       <nav className="menu" aria-label="Pages">
         <ul className="menu-list">
-          <li>
-            {/* The sheet has its own history entry, so links replace it. */}
-            <Link to="global" replace className="menu-link">
-              Everyone's runs
-            </Link>
-          </li>
+          {/* The sheet has its own history entry, so links replace it. */}
+          {MENU.map(([to, label]) => (
+            <li key={to}>
+              <Link to={to} replace className="menu-link">
+                {label}
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
       <section className="menu-hour">
