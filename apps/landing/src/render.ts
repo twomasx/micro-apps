@@ -13,7 +13,7 @@ const escape = (text: string) =>
 function row(e: Experiment): string {
   return `<li class="entry" id="${e.id}">
   <p class="entry-number" aria-hidden="true">${e.number}</p>
-  <figure class="specimen" data-app="${e.id}">${specimens[e.id]()}</figure>
+  <figure class="specimen" data-app="${e.id}" aria-hidden="true">${specimens[e.id]()}</figure>
   <div class="entry-name">
     <h3>${escape(e.name)}</h3>
     <p class="entry-path">${escape(e.path)}</p>

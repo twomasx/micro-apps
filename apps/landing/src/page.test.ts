@@ -107,6 +107,10 @@ describe('specimens', () => {
     expect(STILL_FRAME[id]).toBeTypeOf('number');
   });
 
+  it('hides each whole specimen from screen readers, so a row is announced by its app name', () => {
+    for (const e of experiments) expect(html).toContain(`<figure class="specimen" data-app="${e.id}" aria-hidden="true">`);
+  });
+
   it('never repeats an id across the page', () => {
     const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
     expect(new Set(ids).size).toBe(ids.length);

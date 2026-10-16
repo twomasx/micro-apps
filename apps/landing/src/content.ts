@@ -54,7 +54,7 @@ export const experiments: readonly Experiment[] = [
     name: 'Intention',
     path: '/intention/',
     youDo: 'Tap Begin, get one of two colors at random, and try to move it across the screen for 20 seconds.',
-    youGet: 'Your results compared against chance.',
+    youGet: 'Your results compared against chance. Nobody has proven this, so test it.',
   },
 ];
 
@@ -68,6 +68,6 @@ export const studySheet: readonly [label: string, value: string][] = [
 
 export const protocol: readonly { title: string; text: string }[] = [
   { title: 'Pick an experiment', text: 'Choose the part of your mind you want to measure or train.' },
-  { title: 'Run it on yourself', text: "Every app opens in your phone's browser and works for free." },
+  { title: 'Run it on yourself', text: "Every app opens in your phone's browser and starts free." },
   { title: 'Read your results', text: 'Want the full version? Unlock it once. No subscription.' },
 ];
