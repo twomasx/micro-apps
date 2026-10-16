@@ -27,15 +27,20 @@ export default defineConfig({
       scope: base,
       manifest: {
         id: base,
-        name,
-        short_name: name,
+        name: 'Intention',
+        short_name: 'Intention',
+        description: 'Can your mind move a random number? A tug of war against chance.',
         start_url: base,
         scope: base,
         display: 'standalone',
-        // Placeholders. Colours and icons come with each app's own design.
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        icons: [],
+        theme_color: '#141416',
+        background_color: '#141416',
+        icons: [
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          // The picture sits inside the middle 80%, so the same file works as a maskable icon.
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       },
       workbox: {
         cacheId: name,
