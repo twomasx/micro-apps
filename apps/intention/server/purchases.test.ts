@@ -40,8 +40,13 @@ function checkout(settings: Partial<PaymentsSettings> = {}): Promise<Response> {
   return purchases.checkout(request, context(settings), 'https://example.test');
 }
 
+let nextAddress = 1;
+
 async function check(code: string): Promise<boolean> {
-  return ((await (await purchases.unlock(code, context())).json()) as { valid: boolean }).valid;
+  const request = new Request('http://127.0.0.1/api/unlock/x', {
+    headers: { 'X-Device-Id': 'device000000000001', 'CF-Connecting-IP': `198.51.100.${nextAddress++}` },
+  });
+  return ((await (await purchases.unlock(request, code, context())).json()) as { valid: boolean }).valid;
 }
 
 describe('intention payments', () => {

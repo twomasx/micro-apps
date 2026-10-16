@@ -1,6 +1,6 @@
 import type { MeAnswer } from './me-types.ts';
 import type { GlobalAnswer, HourAnswer } from './totals-types.ts';
-import { passHeaders } from './pass-state.ts';
+import { pass, passHeaders } from './pass-state.ts';
 
 /** Calls to this app's functions. All five apps share one domain, so paths start from the base. */
 export function apiUrl(path: string): string {
@@ -70,7 +70,21 @@ export function fetchPurchase(sessionId: string): Promise<PurchaseAnswer> {
   return getJson<PurchaseAnswer>(`purchase/${encodeURIComponent(sessionId)}`, { cache: 'no-store' });
 }
 
+/** Asks the server about an unlock code, with this device's anonymous id: a code works on up to 5 devices. */
+async function askCode(code: string): Promise<{ valid: boolean; status?: string }> {
+  return getJson<{ valid: boolean; status?: string }>(`unlock/${encodeURIComponent(code)}`, {
+    cache: 'no-store',
+    headers: { 'X-Device-Id': await pass.deviceId() },
+  });
+}
+
 export async function checkCode(code: string): Promise<boolean> {
-  const { valid } = await getJson<{ valid: boolean }>(`unlock/${encodeURIComponent(code)}`, { cache: 'no-store' });
-  return valid === true;
+  return (await askCode(code)).valid === true;
+}
+
+/** For the restore page, which says when a code is already in use on 5 devices. */
+export async function checkCodeForRestore(code: string): Promise<boolean | 'device_limit'> {
+  const answer = await askCode(code);
+  if (answer.valid === true) return true;
+  return answer.status === 'device_limit' ? 'device_limit' : false;
 }

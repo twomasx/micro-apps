@@ -36,3 +36,22 @@ describe('hasLabPass with the all-app pass', () => {
     expect(await hasLabPass(request({ 'X-Pass-Code': 'K7QM-XRP2-9VTD-4HNC', 'X-Device-Id': DEVICE }), testDb.db, { mode: 'test' })).toBe(false);
   });
 });
+
+describe('hasLabPass with its own code', () => {
+  it('works on 5 devices, not a 6th', async () => {
+    const { formatCode, hashCode, unlockCodeFor } = await import('@micro/payments/unlock-codes');
+    const code = formatCode(await unlockCodeFor('test-secret-of-at-least-32-characters', 'cs_test_devices'));
+    await testDb.db
+      .prepare(
+        `INSERT INTO purchases (id, stripe_session_id, unlock_code_hash, amount_cents, currency, status, created_at)
+         VALUES ('pd', 'cs_test_devices', ?, 499, 'usd', 'paid', '')`,
+      )
+      .bind(await hashCode(code.replace(/-/g, '')))
+      .run();
+    const ask = (n: number) =>
+      hasLabPass(request({ 'X-Unlock-Code': code, 'X-Device-Id': `device${String(n).padStart(14, '0')}` }), testDb.db, { mode: 'test' });
+    for (let n = 1; n <= 5; n++) expect(await ask(n)).toBe(true);
+    expect(await ask(6)).toBe(false);
+    expect(await ask(2)).toBe(true);
+  });
+});

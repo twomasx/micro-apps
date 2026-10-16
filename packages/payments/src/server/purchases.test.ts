@@ -78,9 +78,22 @@ async function purchase(sessionId: string, mode: PaymentsMode = 'test') {
   return { status: response.status, body: (await response.json()) as { paid?: boolean; code?: string; status?: string } };
 }
 
+let nextAddress = 1;
+
+/** A code check from a device and a network address. Each call gets a new address unless one is given. */
+function unlockRequest(device = 'devicea0000000000001', address = `198.51.100.${nextAddress++ % 250}:${nextAddress}`) {
+  return new Request('https://polymadlabs.com/focus/api/unlock/x', {
+    headers: { 'X-Device-Id': device, 'CF-Connecting-IP': address },
+  });
+}
+
+async function ask(code: string, options: { mode?: PaymentsMode; device?: string; address?: string } = {}) {
+  const response = await routes.unlock(unlockRequest(options.device, options.address), code, context({ mode: options.mode ?? 'test' }));
+  return { status: response.status, body: (await response.json()) as { valid?: boolean; status?: string } };
+}
+
 async function check(code: string, mode: PaymentsMode = 'test'): Promise<boolean> {
-  const response = await routes.unlock(code, context({ mode }));
-  return ((await response.json()) as { valid: boolean }).valid;
+  return (await ask(code, { mode })).body.valid === true;
 }
 
 function row(sessionId: string): Promise<PurchaseRow | null> {
@@ -131,8 +144,8 @@ describe('checkout', () => {
   it('kill switch off: unlocks already bought keep working', async () => {
     const { code } = await paidPurchase();
     // Nothing in the code check reads the kill switch.
-    const response = await routes.unlock(code, context({ enabled: false }));
-    expect(await response.json()).toEqual({ valid: true });
+    const response = await routes.unlock(unlockRequest(), code, context({ enabled: false }));
+    expect(await response.json()).toEqual({ valid: true, status: 'active' });
   });
 
   it('a price that differs from Stripe stops the checkout and is logged', async () => {
@@ -317,5 +330,52 @@ describe('unlock code check', () => {
     expect(await check(next)).toBe(true);
     // The success page now shows the new code.
     expect((await purchase(sessionId)).body.code).toBe(formatCode(next));
+  });
+});
+
+describe('code security', () => {
+  const device = (n: number) => `device${String(n).padStart(14, '0')}`;
+
+  it('a code works on 5 devices; the 6th is refused until the devices are reset', async () => {
+    const { code } = await paidPurchase();
+    for (let n = 1; n <= 5; n++) expect((await ask(code, { device: device(n) })).body).toEqual({ valid: true, status: 'active' });
+    expect((await ask(code, { device: device(6) })).body).toEqual({ valid: false, status: 'device_limit' });
+    // A device that already used it keeps working.
+    expect((await ask(code, { device: device(3) })).body.valid).toBe(true);
+
+    // What scripts/reset-devices.ts does.
+    await db.prepare('DELETE FROM code_devices WHERE code_hash = ?').bind(await hashCode(code)).run();
+    expect((await ask(code, { device: device(6) })).body.valid).toBe(true);
+  });
+
+  it('needs a device id', async () => {
+    const { code } = await paidPurchase();
+    const response = await routes.unlock(new Request('https://x.test/', { headers: { 'CF-Connecting-IP': '192.0.2.200' } }), code, context());
+    expect(response.status).toBe(400);
+  });
+
+  it('the 11th try in a minute from one address is refused, wrong codes included', async () => {
+    const { code } = await paidPurchase();
+    const address = '203.0.113.77';
+    for (let n = 0; n < 10; n++) expect((await ask('0000-0000-0000-0000', { address })).status).toBe(200);
+    const refused = await ask(code, { address });
+    expect(refused.status).toBe(429);
+    expect(refused.body).toMatchObject({ error: 'too_many_tries' });
+    // Another address is not affected.
+    expect((await ask(code, { address: '203.0.113.78' })).body.valid).toBe(true);
+  });
+
+  it('remembers a scrambled form of each address a code was checked from, never the address itself', async () => {
+    const { code } = await paidPurchase();
+    await ask(code, { address: '203.0.113.90' });
+    await ask(code, { address: '203.0.113.91' });
+    await ask(code, { address: '203.0.113.91' });
+    const { results } = await db
+      .prepare('SELECT address_hash FROM code_addresses WHERE code_hash = ?')
+      .bind(await hashCode(code))
+      .all<{ address_hash: string }>();
+    expect(results).toHaveLength(2);
+    expect(JSON.stringify(results)).not.toContain('203.0.113');
+    expect(results[0]?.address_hash).toMatch(/^[0-9a-f]{16}$/);
   });
 });

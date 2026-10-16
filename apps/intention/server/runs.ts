@@ -112,7 +112,7 @@ export async function startRun(request: Request, deps: RunDeps): Promise<Respons
     .bind(input.deviceId, startOfDay(clock.now(), input.timeZone))
     .first<number>('runs');
   if (longer || (today ?? 0) >= FREE_RUNS_PER_DAY) {
-    if (!(await hasLabPass(request, db, { mode: deps.mode, pass: deps.pass }))) {
+    if (!(await hasLabPass(request, db, { mode: deps.mode, pass: deps.pass }, input.deviceId))) {
       return longer
         ? error(403, 'lab_pass_required', 'Longer runs come with Lab Pass.')
         : error(429, 'daily_limit', `Free runs are ${FREE_RUNS_PER_DAY} a day. Lab Pass has no limit.`);

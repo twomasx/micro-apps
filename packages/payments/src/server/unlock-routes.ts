@@ -1,5 +1,6 @@
 import { paymentsClosed } from '../settings';
 import type { Product } from '../types';
+import { clientAddress, countTry, deviceIdOf, noteAddress, tooManyTries, admitDevice } from './guard';
 import { error, isRecord, json, readJson, SESSION_ID_PATTERN } from './http';
 import { confirmPurchase, handleStripeWebhook, startCheckout, type PaymentsContext } from './purchases';
 
@@ -56,17 +57,40 @@ export function unlockRoutes(config: UnlockAppConfig) {
       return json({ paid: true, code: await ctx.store.currentCode(row) });
     },
 
-    /** GET /api/unlock/:code. `{ valid: true }` when the code belongs to a paid purchase in this mode. */
-    async unlock(input: string, ctx: PaymentsContext): Promise<Response> {
+    /**
+     * GET /api/unlock/:code with the device id in X-Device-Id. `{ valid: true, status: 'active' }` when the code
+     * belongs to a paid purchase in this mode and this device may use it. Otherwise `valid: false`, with status
+     * `unknown` or `device_limit`. Every check counts toward the limit for the caller's network address.
+     */
+    async unlock(request: Request, input: string, ctx: PaymentsContext): Promise<Response> {
+      const { store } = ctx;
+      const deviceId = deviceIdOf(request);
+      if (!deviceId) return error(400, 'device_required', 'Send the device id in X-Device-Id.');
+      const address = clientAddress(request, undefined);
+      const rate = await countTry(store.db, address);
+      if (!rate.ok) {
+        await store.log({ action: 'code_check', result: 'rate_limited' });
+        return tooManyTries(rate);
+      }
+
       let text = input;
       try {
         text = decodeURIComponent(input);
       } catch {
         // Not valid percent-encoding. Check it as it is; it will not match.
       }
-      const row = await ctx.store.findByCode(text);
-      if (!row) await ctx.store.log({ action: 'code_check', result: 'invalid' });
-      return json({ valid: row !== null });
+      const row = await store.findByCode(text);
+      const codeHash = row?.unlock_code_hash;
+      if (!row || typeof codeHash !== 'string') {
+        await store.log({ action: 'code_check', result: 'invalid' });
+        return json({ valid: false, status: 'unknown' });
+      }
+      if ((await admitDevice(store.db, codeHash, config.app, deviceId)) === 'device_limit') {
+        await store.log({ action: 'code_check', sessionId: row.stripe_session_id, result: 'device_limit' });
+        return json({ valid: false, status: 'device_limit' });
+      }
+      await noteAddress(store.db, codeHash, await store.hashAddress(address));
+      return json({ valid: true, status: 'active' });
     },
   };
 }

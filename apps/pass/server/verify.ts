@@ -1,4 +1,16 @@
-import { error, isRecord, json, readJson, type PaymentsContext, type PurchaseRow } from '@micro/payments/server';
+import {
+  clientAddress,
+  countTry,
+  error,
+  isRecord,
+  json,
+  noteAddress,
+  readJson,
+  tooManyTries,
+  admitDevice,
+  type PaymentsContext,
+  type PurchaseRow,
+} from '@micro/payments/server';
 
 /** What the verify API says about a pass. Only active unlocks anything. */
 export type PassStatus = 'active' | 'refunded' | 'disputed' | 'unknown' | 'device_limit';
@@ -45,15 +57,40 @@ export function statusOf(row: PurchaseRow | null): PassStatus {
 }
 
 /**
+ * For an active pass: lets this device use it in this app (up to 5 devices per app) and notes the address.
+ * Returns the status to answer with.
+ */
+export async function admit(
+  ctx: PaymentsContext,
+  row: PurchaseRow | null,
+  asker: { deviceId: string; app: string },
+  address: string,
+): Promise<PassStatus> {
+  const status = statusOf(row);
+  const codeHash = row?.unlock_code_hash;
+  if (status !== 'active' || typeof codeHash !== 'string') return status;
+  if ((await admitDevice(ctx.store.db, codeHash, asker.app, asker.deviceId)) === 'device_limit') return 'device_limit';
+  await noteAddress(ctx.store.db, codeHash, await ctx.store.hashAddress(address));
+  return 'active';
+}
+
+/**
  * POST /api/verify with `{ code, deviceId, app }`. Answers `{ valid, status }`.
  * Apps never read the pass database; they all ask this, wherever they are hosted.
+ * `serviceKey` is PASS_SERVICE_KEY: app servers that send it may pass on the buyer's address.
  */
-export async function verify(request: Request, ctx: PaymentsContext): Promise<Response> {
+export async function verify(request: Request, ctx: PaymentsContext, serviceKey?: string): Promise<Response> {
+  const address = clientAddress(request, serviceKey);
+  const rate = await countTry(ctx.store.db, address);
+  if (!rate.ok) {
+    await ctx.store.log({ action: 'pass_check', result: 'rate_limited' });
+    return tooManyTries(rate);
+  }
   const question = await readQuestion(request);
   if (question instanceof Response) return question;
 
   const row = await ctx.store.findAnyByCode(question.code);
-  const status = statusOf(row);
+  const status = await admit(ctx, row, question, address);
   await ctx.store.log({
     action: 'pass_check',
     sessionId: row?.stripe_session_id ?? null,

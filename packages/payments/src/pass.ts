@@ -172,7 +172,7 @@ export interface PassStateOptions {
   takeToken?: () => string | null;
 }
 
-export type UseCodeResult = PassStatus | 'malformed' | 'offline';
+export type UseCodeResult = PassStatus | 'malformed' | 'offline' | 'rate_limited';
 
 /**
  * The pass for one app on this device: whether it is active now, kept up to date with the service.
@@ -271,8 +271,8 @@ export function createPassState(options: PassStateOptions) {
       let answer: PassAnswer;
       try {
         answer = await verifyPass(await passOrigin(), { code, deviceId: await deviceId(), app }, fetcher);
-      } catch {
-        return 'offline';
+      } catch (error) {
+        return isRateLimited(error) ? 'rate_limited' : 'offline';
       }
       if (answer.status === 'unknown') return 'unknown';
       const at = now();
@@ -295,15 +295,30 @@ export const PASS_MESSAGES: Record<Exclude<UseCodeResult, 'active'>, string> = {
   disputed: 'This pass was disputed, so it no longer unlocks anything.',
   device_limit: `This code is already in use on 5 devices. Contact us at ${CONTACT_EMAIL} if that's wrong.`,
   offline: 'We could not reach the server. Check your connection and try again.',
+  rate_limited: 'Too many tries from this network. Wait a minute and try again.',
 };
 
-export type RestoreResult = 'own' | 'pass' | 'malformed' | 'invalid' | 'offline' | 'refunded' | 'disputed' | 'device_limit';
+/** True for an error from a request that was refused for too many tries (429). */
+export function isRateLimited(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && (error as { status?: unknown }).status === 429;
+}
+
+export type RestoreResult =
+  | 'own'
+  | 'pass'
+  | 'malformed'
+  | 'invalid'
+  | 'offline'
+  | 'rate_limited'
+  | 'refunded'
+  | 'disputed'
+  | 'device_limit';
 
 export interface RestoreDeps {
   /** The app's own code check: normalizes what was typed, or null when it cannot be one of its codes. */
   normalizeOwn: (input: string) => string | null;
-  /** Asks the app's server about its own code. */
-  checkOwn: (code: string) => Promise<boolean>;
+  /** Asks the app's server about its own code. 'device_limit' when it is in use on 5 other devices. */
+  checkOwn: (code: string) => Promise<boolean | 'device_limit'>;
   /** Saves the app's own code on this device. */
   useOwn: (code: string) => Promise<void>;
   pass: Pick<PassState, 'useCode'>;
@@ -316,12 +331,13 @@ export interface RestoreDeps {
 export async function restoreCode(input: string, deps: RestoreDeps): Promise<RestoreResult> {
   const own = deps.normalizeOwn(input);
   if (own) {
-    let valid: boolean;
+    let valid: boolean | 'device_limit';
     try {
       valid = await deps.checkOwn(own);
-    } catch {
-      return 'offline';
+    } catch (error) {
+      return isRateLimited(error) ? 'rate_limited' : 'offline';
     }
+    if (valid === 'device_limit') return 'device_limit';
     if (valid) {
       await deps.useOwn(own);
       return 'own';

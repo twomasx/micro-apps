@@ -14,3 +14,16 @@ export {
 } from './store';
 export { unlockRoutes, type UnlockAppConfig, type UnlockRoutes } from './unlock-routes';
 export { CLIENT_IP_HEADER, requestHasPass, SERVICE_KEY_HEADER, type ServerPassOptions } from './pass-check';
+export {
+  addressHash,
+  clientAddress,
+  countTry,
+  deviceIdOf,
+  DEVICE_LIMIT,
+  noteAddress,
+  PER_DAY,
+  PER_MINUTE,
+  tooManyTries,
+  admitDevice,
+  type RateAnswer,
+} from './guard';

@@ -325,6 +325,27 @@ curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"
 - Every webhook gets the checkout events of every app on the account. Each app ignores sessions it did not create.
 - Local development uses the Stripe CLI and its own secret. See "Testing payments locally" in `apps/personality/CLAUDE.md` and `apps/focus/CLAUDE.md`.
 
+## Code security
+
+Unlock codes and pass codes work like keys. The rules (PAYMENTS.md section 3b), all in `packages/payments/src/server/guard.ts`:
+
+- **Device cap:** a code works on up to 5 devices per app. Each app sends its anonymous device id (`X-Device-Id`) with every check. A 6th device gets "This code is already in use on 5 devices." The table is `code_devices`.
+- **Rate limit:** every code check, right or wrong, counts toward 10 a minute and 100 a day per network address (table `rate_limits`, keys expire). Personality's and intention's servers pass the buyer's address to the pass service only with the right `PASS_SERVICE_KEY`.
+- **Sharing alerts:** each check notes a scrambled (HMAC) form of the address per code and day (table `code_addresses`). `reconcile` lists codes at the device cap or checked from 10 or more addresses in a day.
+- **Page security:** every site's `public/_headers` allows scripts only from itself and sends no referrer. `pnpm --filter @micro/scripts test` checks the files.
+
+### Admin scripts
+
+Run from the repo root. They use wrangler (logged in as Roger) and, for codes, the secrets in `~/.config/polymadlabs`. Add `--staging` for staging.
+
+```bash
+export STRIPE_SECRET_KEY=$(grep '^STRIPE_SECRET_KEY=' apps/focus/.env | cut -d= -f2-)   # the live key after go-live
+pnpm --filter @micro/scripts reconcile --from 2026-10-16 [--to 2026-10-23]   # Stripe sales against every purchases table, plus sharing alerts
+pnpm --filter @micro/scripts find-purchase --email buyer@example.com         # a buyer's purchases and current codes
+pnpm --filter @micro/scripts reissue-code --app focus --session cs_...       # or --code ...; the old code stops working
+pnpm --filter @micro/scripts reset-devices --app pass --code XXXX-XXXX-XXXX-XXXX [--for-app attention]
+```
+
 ## Stripe prices
 
 Checkout charges the Stripe price whose lookup key is `<app>:<product id>` (for example `focus:lifetime`), and refuses to start if that price differs from the app's `config/products.json`. The test-mode prices were created on Oct 16, 2026 with:

@@ -1,0 +1,6 @@
+# Page security (PAYMENTS.md section 3b): scripts only from this site, never from anywhere else,
+# and no address sent to other sites, so unlock codes and one-time pass tokens cannot leak through links.
+/*
+  Content-Security-Policy: script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff

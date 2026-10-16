@@ -45,6 +45,14 @@ export function PrivacyPage() {
         <ul className="bullets">
           <li>The Stripe payment id.</li>
           <li>A scrambled form of your unlock code (a hash). The code itself cannot be read back from it.</li>
+          <li>
+            The random device ids that used the code, with the day each was first and last seen. A code works on up to
+            5 devices, so it cannot be shared widely.
+          </li>
+          <li>
+            For each day the code is checked, a scrambled form of the network addresses it was checked from, to spot a
+            code used from many places. The addresses themselves are not kept.
+          </li>
           <li>The amount, the currency, whether it is paid, and the date.</li>
         </ul>
         <p>We keep this record for as long as Intention is online, so your unlock code keeps working.</p>

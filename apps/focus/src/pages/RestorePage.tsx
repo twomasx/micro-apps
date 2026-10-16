@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from '../components/Link';
 import { usePlayer } from '../hooks/usePlayer';
-import { checkCode } from '../lib/api';
+import { checkCodeForRestore } from '../lib/api';
 import { pass } from '../lib/pass-state';
 import { unlockWithCode } from '../lib/app-player';
 import { PASS_MESSAGES, restoreCode, type RestoreResult } from '@micro/payments/pass';
@@ -17,6 +17,7 @@ const MESSAGES: Record<Exclude<Status, 'idle' | 'unlocked'>, string> = {
   refunded: PASS_MESSAGES.refunded,
   disputed: PASS_MESSAGES.disputed,
   device_limit: PASS_MESSAGES.device_limit,
+  rate_limited: PASS_MESSAGES.rate_limited,
   offline: 'We could not reach the server. Check your connection and try again.',
 };
 
@@ -35,7 +36,7 @@ export function RestorePage() {
     // Its own unlock code first, then the all-app pass.
     void restoreCode(input, {
       normalizeOwn: normalizeCode,
-      checkOwn: checkCode,
+      checkOwn: checkCodeForRestore,
       useOwn: (code) => unlockWithCode(formatCode(code)),
       pass,
     }).then((result) => setStatus(result === 'own' || result === 'pass' ? 'unlocked' : result));

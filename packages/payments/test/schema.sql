@@ -1,5 +1,5 @@
 -- The purchases, stripe_events and payment_log tables as an app with unlock codes has them after all its
--- migrations (focus: 0001 to 0003). The tests of the shared payments code run against this.
+-- migrations (focus: 0001 to 0004). The tests of the shared payments code run against this.
 -- When an app migration changes these tables, change this file the same way.
 
 CREATE TABLE purchases (
@@ -36,3 +36,27 @@ CREATE TABLE payment_log (
   detail TEXT
 );
 CREATE INDEX payment_log_at ON payment_log (at);
+
+-- Device cap, sharing alerts and rate limits (focus 0004).
+CREATE TABLE code_devices (
+  code_hash TEXT NOT NULL,
+  app TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  first_seen TEXT NOT NULL,
+  last_seen TEXT NOT NULL,
+  PRIMARY KEY (code_hash, app, device_id)
+);
+
+CREATE TABLE code_addresses (
+  code_hash TEXT NOT NULL,
+  day TEXT NOT NULL,
+  address_hash TEXT NOT NULL,
+  PRIMARY KEY (code_hash, day, address_hash)
+);
+
+CREATE TABLE rate_limits (
+  key TEXT PRIMARY KEY,
+  count INTEGER NOT NULL,
+  expires_ms INTEGER NOT NULL
+);
+CREATE INDEX rate_limits_expires_ms ON rate_limits (expires_ms);

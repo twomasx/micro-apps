@@ -1,6 +1,6 @@
 import { hashCode } from '@micro/payments/unlock-codes';
-import { error, isRecord, json, readJson, type PaymentsContext } from '@micro/payments/server';
-import { deviceAndApp, statusOf } from './verify.ts';
+import { clientAddress, countTry, error, isRecord, json, readJson, tooManyTries, type PaymentsContext } from '@micro/payments/server';
+import { admit, deviceAndApp, statusOf } from './verify.ts';
 
 export const TOKEN_MS = 10 * 60 * 1000;
 const TOKEN_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789';
@@ -17,6 +17,8 @@ export function newToken(): string {
  * The pass pages make one when a person taps "Open <app>". Single use, gone after 10 minutes.
  */
 export async function createToken(request: Request, ctx: PaymentsContext, db: D1Database, now = Date.now()): Promise<Response> {
+  const rate = await countTry(db, clientAddress(request, undefined), now);
+  if (!rate.ok) return tooManyTries(rate);
   const body = await readJson(request);
   if (body instanceof Response) return body;
   if (!isRecord(body) || typeof body.code !== 'string') return error(400, 'invalid_body', 'Send { code }.');
@@ -40,6 +42,9 @@ export async function createToken(request: Request, ctx: PaymentsContext, db: D1
  * 410 when the token was used already, has expired, or never existed.
  */
 export async function redeemToken(request: Request, ctx: PaymentsContext, db: D1Database, now = Date.now()): Promise<Response> {
+  const address = clientAddress(request, undefined);
+  const rate = await countTry(db, address, now);
+  if (!rate.ok) return tooManyTries(rate);
   const body = await readJson(request);
   if (body instanceof Response) return body;
   const question = isRecord(body) ? deviceAndApp(body) : null;
@@ -55,8 +60,12 @@ export async function redeemToken(request: Request, ctx: PaymentsContext, db: D1
     .bind(now, await hashCode(body.token), now)
     .first<{ stripe_session_id: string }>();
   const row = used ? await ctx.store.find(used.stripe_session_id) : null;
-  const status = statusOf(row);
-  await ctx.store.log({ action: 'pass_check', sessionId: row?.stripe_session_id ?? null, result: `token_${used ? status : 'gone'}`, detail: question.app });
-  if (!row || status !== 'active') return error(410, 'token_gone', 'This link has been used or has expired. Enter your pass code instead.');
-  return json({ code: await ctx.store.currentCode(row), valid: true, status });
+  if (!row || statusOf(row) !== 'active') {
+    await ctx.store.log({ action: 'pass_check', sessionId: row?.stripe_session_id ?? null, result: 'token_gone', detail: question.app });
+    return error(410, 'token_gone', 'This link has been used or has expired. Enter your pass code instead.');
+  }
+  // The device cap counts here too. A full code still comes back, so the app can say why it does not unlock.
+  const status = await admit(ctx, row, question, address);
+  await ctx.store.log({ action: 'pass_check', sessionId: row.stripe_session_id, result: `token_${status}`, detail: question.app });
+  return json({ code: await ctx.store.currentCode(row), valid: status === 'active', status });
 }

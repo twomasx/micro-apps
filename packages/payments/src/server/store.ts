@@ -2,6 +2,7 @@ import type { PaymentsMode } from '../settings';
 import type { Product } from '../types';
 import { formatPassCode, normalizePassCode, passCodeFor } from '../pass-codes';
 import { formatCode, hashCode, normalizeCode, unlockCodeFor } from '../unlock-codes';
+import { addressHash } from './guard';
 import { randomId } from './http';
 import { writeLog, type LogEntry } from './log';
 
@@ -77,8 +78,16 @@ export function purchaseStore(options: StoreOptions) {
   }
 
   return {
+    db,
+    app,
     mode,
     find,
+
+    /** A network address, scrambled with the code secret, for the per-day list of where a code was used. */
+    async hashAddress(address: string): Promise<string> {
+      if (!codeSecret) throw new Error('This app has no code secret');
+      return addressHash(codeSecret, address);
+    },
 
     log(entry: LogEntry): Promise<void> {
       return writeLog(db, app, mode, entry);

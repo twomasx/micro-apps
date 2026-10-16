@@ -216,6 +216,19 @@ describe('restoreCode', () => {
     expect((await run(CODE, false, 'device_limit')).result).toBe('device_limit');
   });
 
+  it('says when its own code is on too many devices, or when there were too many tries', async () => {
+    const { restoreCode } = await import('./pass');
+    const pass = { useCode: vi.fn(async () => 'unknown' as const) };
+    const deps = (checkOwn: () => Promise<boolean | 'device_limit'>) => ({
+      normalizeOwn: () => 'X'.repeat(16),
+      checkOwn,
+      useOwn: async () => {},
+      pass,
+    });
+    expect(await restoreCode('x', deps(async () => 'device_limit'))).toBe('device_limit');
+    expect(await restoreCode('x', deps(async () => Promise.reject(Object.assign(new Error('429'), { status: 429 }))))).toBe('rate_limited');
+  });
+
   it('says malformed or offline', async () => {
     expect((await run('short', false, 'malformed')).result).toBe('malformed');
     expect((await run(CODE, new TypeError('offline'), 'active')).result).toBe('offline');

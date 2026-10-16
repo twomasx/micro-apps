@@ -9,6 +9,7 @@ import { appLinks } from './links.ts';
 import { passes } from './passes.ts';
 import { createToken, redeemToken, TOKEN_MS } from './tokens.ts';
 import { createTestDb, type TestDb } from './testing.ts';
+import { hashCode } from '@micro/payments/unlock-codes';
 import { verify } from './verify.ts';
 
 const SECRET = 'pass-secret-that-is-long-enough-0123456789';
@@ -36,8 +37,15 @@ function context(settings: Partial<PaymentsSettings> = {}): PaymentsContext {
   };
 }
 
+let nextAddress = 1;
+
+/** A POST from a new network address each time, unless headers say otherwise. */
 const post = (path: string, body: unknown, headers: Record<string, string> = {}) =>
-  new Request(`https://polymadlabs.com/pass/api/${path}`, { method: 'POST', headers, body: JSON.stringify(body) });
+  new Request(`https://polymadlabs.com/pass/api/${path}`, {
+    method: 'POST',
+    headers: { 'CF-Connecting-IP': `198.51.100.${nextAddress++}`, ...headers },
+    body: JSON.stringify(body),
+  });
 
 /** Buys a pass through checkout and the webhook. Returns its session and code. */
 async function buyPass(): Promise<{ sessionId: string; code: string }> {
@@ -214,5 +222,42 @@ describe('app links', () => {
     expect(extra.at(-1)).toEqual({ app: 'focus', name: 'Focus elsewhere', url: 'https://x.example/focus/' });
     expect(extra).toHaveLength(6);
     expect(appLinks('not json')).toHaveLength(5);
+  });
+});
+
+describe('pass code security', () => {
+  const device = (n: number) => `pdevice${String(n).padStart(13, '0')}`;
+  const askAs = async (code: string, app: string, deviceId: string, headers: Record<string, string> = {}, serviceKey?: string) => {
+    const response = await verify(post('verify', { code, deviceId, app }, headers), context(), serviceKey);
+    return { status: response.status, body: (await response.json()) as { valid?: boolean; status?: string } };
+  };
+
+  it('works on 5 devices in each app; the 6th in that app is refused, other apps are counted on their own', async () => {
+    const { code } = await buyPass();
+    for (let n = 1; n <= 5; n++) expect((await askAs(code, 'focus', device(n))).body.status).toBe('active');
+    expect((await askAs(code, 'focus', device(6))).body).toEqual({ valid: false, status: 'device_limit' });
+    // One phone has its own device id in every app, so other apps start from zero.
+    expect((await askAs(code, 'breathwork', device(6))).body.status).toBe('active');
+    await db.prepare('DELETE FROM code_devices WHERE code_hash = ? AND app = ?').bind(await hashCode(code), 'focus').run();
+    expect((await askAs(code, 'focus', device(6))).body.status).toBe('active');
+  });
+
+  it('the 11th check in a minute from one address is refused', async () => {
+    const { code } = await buyPass();
+    const from = { 'CF-Connecting-IP': '203.0.113.5' };
+    for (let n = 0; n < 10; n++) expect((await askAs('K7QM-XRP2-9VTD-4HNC', 'focus', device(1), from)).status).toBe(200);
+    expect((await askAs(code, 'focus', device(1), from)).status).toBe(429);
+  });
+
+  it("counts an app server's checks against the buyer's address only with the right service key", async () => {
+    const { code } = await buyPass();
+    const viaServer = (key: string) => ({ 'CF-Connecting-IP': '192.0.2.1', 'X-Client-IP': '203.0.113.200', 'X-Pass-Service-Key': key });
+    for (let n = 0; n < 10; n++) await askAs(code, 'personality', device(1), viaServer('right'), 'right');
+    // The buyer's address is used up; the app server's own address is not.
+    expect((await askAs(code, 'personality', device(1), viaServer('right'), 'right')).status).toBe(429);
+    expect((await askAs(code, 'personality', device(1), { 'CF-Connecting-IP': '192.0.2.1' }, 'right')).status).toBe(200);
+    // A wrong key cannot pick an address to blame: its checks count against its own.
+    for (let n = 0; n < 9; n++) await askAs(code, 'personality', device(1), viaServer('wrong'), 'right');
+    expect((await askAs(code, 'personality', device(1), viaServer('wrong'), 'right')).status).toBe(429);
   });
 });
