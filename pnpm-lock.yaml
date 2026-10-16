@@ -411,6 +411,28 @@ importers:
         specifier: ^4.149.0
         version: 4.149.0(@cloudflare/workers-types@5.20261009.1)
 
+  apps/landing:
+    dependencies:
+      '@fontsource/ibm-plex-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/ibm-plex-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
+    devDependencies:
+      '@micro/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.3.4
+        version: 8.3.4(esbuild@0.28.2)(terser@5.51.2)
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(jsdom@30.1.2)(vite@8.3.4(esbuild@0.28.2)(terser@5.51.2))
+
   apps/personality:
     dependencies:
       '@fontsource-variable/inter-tight':
@@ -1377,6 +1399,12 @@ packages:
 
   '@fontsource/cormorant@5.3.0':
     resolution: {integrity: sha512-r2xrO2/35L+miyYFaERPRn3TGA8G83fKAR4wGG3s4WC5pLRZ7Cw3brDjr8tRwESCHXgB3r7jZqjfK2kLPv3zrQ==}
+
+  '@fontsource/ibm-plex-mono@5.3.0':
+    resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
+
+  '@fontsource/ibm-plex-sans@5.3.0':
+    resolution: {integrity: sha512-CbE4CbbEEZJX860XyUiRpsksXIQR8Rp2XDva2VO53NJox9tVNtusrysd2x5YkUEY3ErQ66W1IiiQL8/wihhw5w==}
 
   '@fontsource/inter-tight@5.3.0':
     resolution: {integrity: sha512-uRwIrjKSUcCKIFeO2qm3yECA9phwge6Y1qQZvUmwqFgiIVWUELwwuq7pFlmlpPtO33ZtFQVOXQGNuvna1JPs6A==}
@@ -4533,6 +4561,10 @@ snapshots:
   '@fontsource-variable/outfit@5.3.0': {}
 
   '@fontsource/cormorant@5.3.0': {}
+
+  '@fontsource/ibm-plex-mono@5.3.0': {}
+
+  '@fontsource/ibm-plex-sans@5.3.0': {}
 
   '@fontsource/inter-tight@5.3.0': {}
 

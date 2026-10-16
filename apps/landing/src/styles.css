@@ -1,0 +1,620 @@
+/*
+ * Lab Index. A light, ruled study document: cool-gray ground, near-black ink, thin rules,
+ * one burnt-orange accent. IBM Plex Sans for reading, IBM Plex Mono for labels, numbers
+ * and paths. Phone layout first; min-width queries at 640px and 1024px only.
+ */
+
+:root {
+  --ground: #eef0f2;
+  --paper: #f8f9fa;
+  --ink: #111315;
+  --ink-muted: #4a5058;
+  --rule: #c5cad0;
+  --accent: #c2410c;
+  --band: #121417;
+  --band-ink: #eef0f2;
+  --band-muted: #a3aab2;
+  --band-rule: #3a3f45;
+  --band-accent: #f0884f;
+
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --gutter: 16px;
+  --pad-left: max(var(--gutter), env(safe-area-inset-left));
+  --pad-right: max(var(--gutter), env(safe-area-inset-right));
+  --measure: 1200px;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ol,
+ul,
+figure {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: var(--pad-left);
+  z-index: 10;
+  padding: 12px 16px;
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* Shared: a mono label, small caps-style. */
+.eyebrow,
+.masthead-label,
+.section-count,
+.sheet-title,
+.sheet-row dt,
+.entry-number,
+.entry-path,
+.field dt,
+.step-number {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.masthead-inner,
+.hero,
+.index,
+.protocol-inner,
+.colophon-inner {
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-left: var(--pad-left);
+  padding-right: var(--pad-right);
+}
+
+/* Header */
+
+.masthead {
+  border-bottom: 1px solid var(--ink);
+  padding-top: env(safe-area-inset-top);
+}
+
+.masthead-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'mark nav'
+    'label nav';
+  align-items: center;
+  column-gap: 16px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.wordmark {
+  grid-area: mark;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.masthead-label {
+  grid-area: label;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
+.masthead-nav {
+  grid-area: nav;
+  display: flex;
+}
+
+.masthead-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 10px;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+
+.masthead-nav a:last-child {
+  margin-right: -10px;
+}
+
+/* Hero */
+
+.hero {
+  display: grid;
+  gap: 32px;
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+.eyebrow {
+  color: var(--accent);
+}
+
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 10px;
+  background: var(--accent);
+  vertical-align: 0.05em;
+}
+
+h1 {
+  margin-top: 16px;
+  font-size: clamp(2.75rem, 14vw, 6rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.lede {
+  max-width: 34rem;
+  margin-top: 20px;
+  color: var(--ink-muted);
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+.sheet {
+  align-self: end;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.sheet-title {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.sheet-row {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 12px 16px;
+}
+
+.sheet-row + .sheet-row {
+  border-top: 1px solid var(--rule);
+}
+
+.sheet-row dt {
+  color: var(--ink-muted);
+}
+
+/* Section heads */
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+.section-head h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.section-count {
+  color: var(--ink-muted);
+}
+
+/* The index */
+
+.index {
+  padding-bottom: 64px;
+}
+
+.index,
+.protocol {
+  scroll-margin-top: 8px;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'num name'
+    'spec spec'
+    'fields fields'
+    'open open';
+  column-gap: 14px;
+  row-gap: 16px;
+  padding: 24px 0 28px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.entry-number {
+  grid-area: num;
+  padding-top: 0.3em;
+  color: var(--accent);
+  font-size: 0.9375rem;
+}
+
+.entry-name {
+  grid-area: name;
+}
+
+.entry-name h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.entry-path {
+  margin-top: 4px;
+  color: var(--ink-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* A specimen sits on its slide: a ruled frame with a margin of paper. */
+.specimen {
+  grid-area: spec;
+  align-self: start;
+  position: relative;
+  padding: 6px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.specimen::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-top: 3px solid var(--accent);
+  border-right: 3px solid var(--accent);
+}
+
+.specimen-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+}
+
+.entry-fields {
+  grid-area: fields;
+  display: grid;
+  gap: 14px;
+}
+
+.field dt {
+  color: var(--ink-muted);
+}
+
+.field dd {
+  margin-top: 4px;
+  max-width: 38rem;
+}
+
+.entry-open {
+  grid-area: open;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.entry-arrow {
+  font-family: var(--sans);
+}
+
+.entry-open:active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+@media (hover: hover) {
+  .masthead-nav a:hover {
+    text-decoration: underline;
+  }
+
+  .entry-open:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .colophon-links a:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .entry-open,
+  .entry-arrow {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  @media (hover: hover) {
+    .entry-open:hover .entry-arrow {
+      transform: translateX(3px);
+    }
+  }
+}
+
+/* Protocol */
+
+.protocol {
+  background: var(--band);
+  color: var(--band-ink);
+}
+
+.protocol-inner {
+  padding-top: 56px;
+  padding-bottom: 64px;
+}
+
+.protocol .section-head {
+  border-top-color: var(--band-ink);
+  border-bottom-color: var(--band-rule);
+}
+
+.protocol .section-count {
+  color: var(--band-muted);
+}
+
+.steps {
+  display: grid;
+  counter-reset: step;
+}
+
+.step {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--band-rule);
+}
+
+.step-number {
+  color: var(--band-accent);
+}
+
+.step h3 {
+  margin-top: 8px;
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.step p:last-child {
+  margin-top: 8px;
+  max-width: 30rem;
+  color: var(--band-muted);
+}
+
+.protocol :focus-visible {
+  outline-color: var(--band-accent);
+}
+
+/* Footer */
+
+.colophon {
+  border-top: 1px solid var(--ink);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.colophon-inner {
+  display: grid;
+  gap: 24px;
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+.motto {
+  margin-top: 4px;
+  color: var(--ink-muted);
+}
+
+.colophon-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 20px;
+}
+
+.colophon-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  text-underline-offset: 4px;
+}
+
+.colophon-note {
+  max-width: 40rem;
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+}
+
+/* Tablet */
+
+@media (min-width: 640px) {
+  :root {
+    --gutter: 32px;
+  }
+
+  .masthead-inner {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'mark label nav';
+    column-gap: 20px;
+  }
+
+  .masthead-label {
+    padding-left: 20px;
+    border-left: 1px solid var(--rule);
+  }
+
+  .hero {
+    padding-top: 64px;
+    padding-bottom: 72px;
+  }
+
+  .entry {
+    grid-template-columns: 2.5rem 13rem 1fr;
+    grid-template-areas:
+      'num spec name'
+      'num spec fields'
+      'num spec open';
+    grid-template-rows: auto 1fr auto;
+    column-gap: 24px;
+    row-gap: 14px;
+    padding: 28px 0;
+  }
+
+  .entry-open {
+    justify-self: start;
+  }
+
+  .steps {
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 24px;
+  }
+
+  .step {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .colophon-inner {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+
+  .colophon-links {
+    justify-content: flex-end;
+  }
+
+  .colophon-note {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 48px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr 22rem;
+    gap: 64px;
+    padding-top: 96px;
+    padding-bottom: 104px;
+  }
+
+  .entry {
+    grid-template-columns: 3rem 12rem 11rem 1fr auto;
+    grid-template-areas: 'num spec name fields open';
+    grid-template-rows: auto;
+    align-items: start;
+    column-gap: 28px;
+  }
+
+  .entry-fields {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 28px;
+  }
+
+  .entry-open {
+    align-self: center;
+  }
+}
