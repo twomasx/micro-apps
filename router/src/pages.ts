@@ -6,6 +6,7 @@ const HOME_APPS = [
   FIRST_APP,
   { href: '/breathwork/', label: 'Breathwork' },
   { href: '/attention/', label: 'Attention training' },
+  { href: '/intention/', label: 'Intention' },
 ];
 
 function page(title: string, body: string, status: number): Response {

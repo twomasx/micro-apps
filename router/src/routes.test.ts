@@ -67,7 +67,7 @@ describe('withoutInjection', () => {
 });
 
 describe('pages', () => {
-  it('the home page names the site and links to the personality test, breathwork and attention', async () => {
+  it('the home page names the site and links to the personality test, breathwork, attention and intention', async () => {
     const response = homePage();
     expect(response.status).toBe(200);
     const html = await response.text();
@@ -75,6 +75,7 @@ describe('pages', () => {
     expect(html).toContain('href="/personality/"');
     expect(html).toContain('<a href="/breathwork/">Breathwork</a>');
     expect(html).toContain('<a href="/attention/">Attention training</a>');
+    expect(html).toContain('<a href="/intention/">Intention</a>');
   });
 
   it('coming soon is a 200 with a link to the personality test', async () => {

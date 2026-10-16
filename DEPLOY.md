@@ -16,6 +16,10 @@ A push to GitHub does not deploy anything. Every deploy is a command run from th
 | Focus database | D1 `micro-focus` | id in `apps/focus/wrangler.jsonc` |
 | Breathwork app | Pages project `micro-breathwork` | https://micro-breathwork.pages.dev |
 | Breathwork database | D1 `micro-breathwork` | id in `apps/breathwork/wrangler.jsonc` |
+| Attention app | Pages project `micro-attention` | https://micro-attention.pages.dev |
+| Attention database | D1 `micro-attention` | id in `apps/attention/wrangler.jsonc` |
+| Intention app | Pages project `micro-intention` | https://micro-intention.pages.dev |
+| Intention database | D1 `micro-intention` | id in `apps/intention/wrangler.jsonc` |
 
 Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. The domain is on the same account. Wrangler on Roger's WSL machine is logged in to it (`pnpm exec wrangler whoami`).
 
@@ -23,9 +27,9 @@ Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. 
 
 1. `polymadlabs.com` and `www.polymadlabs.com` are custom domains of the router Worker. Cloudflare made the DNS record for each one, proxied (orange cloud). Do not add or edit records for these two names by hand.
 2. `www` redirects (308) to the same path on `polymadlabs.com`. Browser storage is kept per hostname, so the apps must be served from one hostname only.
-3. `/` is a plain placeholder page with links to `/personality/` and `/breathwork/`.
-4. `/personality/...`, `/focus/...` and `/breathwork/...` are forwarded to their Pages projects with the app prefix removed from the path. Each app is built with its base path (`/personality/`, `/focus/`, `/breathwork/`), so its links, assets and service worker all stay under that path.
-5. `/attention/` and `/intention/` say "Coming soon" with status 200 until the app is listed in `LIVE_APPS`.
+3. `/` is a plain placeholder page with links to `/personality/`, `/breathwork/`, `/attention/` and `/intention/`.
+4. `/personality/...`, `/focus/...`, `/breathwork/...`, `/attention/...` and `/intention/...` are forwarded to their Pages projects with the app prefix removed from the path. Each app is built with its base path, so its links, assets and service worker all stay under that path.
+5. An app not listed in `LIVE_APPS` says "Coming soon" with status 200. Since Oct 15, 2026 all five are listed.
 6. Everything else is a 404.
 
 The router also adds `no-transform` to the `Cache-Control` header of every HTML page. Without it Cloudflare adds its Web Analytics script to our pages, and we allow no outside analytics.
@@ -147,6 +151,44 @@ Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-at
 
 `POST /attention/api/tests` stores anonymous test summaries and `GET /attention/api/norms?length=quick|full` serves the comparison, cached for an hour. Don't take real tests on polymadlabs.com to check a deploy: every result there counts toward the comparison that users see. Check the API with a bad body instead (it answers 400), or delete check rows afterwards with `pnpm exec wrangler d1 execute DB --remote --command "DELETE FROM test_results WHERE id = '...'"`.
 
+## Deploy the intention app
+
+First deployed on Oct 15, 2026. From `apps/intention`:
+
+```bash
+pnpm build
+pnpm exec wrangler pages deploy dist --project-name micro-intention --branch main
+```
+
+Run the four checks from the repo root first. D1 database `micro-intention` (id `8191fe94-bc95-4272-909b-13dedc75002e`) has two tables: `runs` and `purchases`. Apply a new file in `apps/intention/migrations/` with `pnpm exec wrangler d1 migrations apply DB --remote` before deploying the code that needs it.
+
+`wrangler.jsonc` turns on the `enable_request_signal` compatibility flag. Without it a run whose connection drops is never told, keeps streaming into nothing and is saved as complete. Keep the flag.
+
+### Secrets
+
+Four secrets live in the `micro-intention` Pages project:
+
+| Name | Value |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | The same test mode key as the other apps. |
+| `STRIPE_WEBHOOK_SECRET` | The signing secret of the intention webhook (see Stripe below). Saved at `~/.config/polymadlabs/intention-stripe-webhook-secret`. |
+| `UNLOCK_CODE_SECRET` | 64 hex characters, its own. **Never change it**, or every code already sold stops working. Saved at `~/.config/polymadlabs/intention-unlock-code-secret`. |
+| `PUBLIC_ORIGIN` | `https://polymadlabs.com` |
+
+Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-intention`, then deploy again.
+
+### Runs are the public record
+
+Every run started on polymadlabs.com counts in the global totals, so don't check a deploy by pulling runs on the real site and leaving them. Check with a device id you can find again, then delete those rows:
+
+```bash
+curl -sN -X POST https://polymadlabs.com/intention/api/runs -H 'Content-Type: application/json' \
+  -d '{"deviceId":"deploycheck00000001","kind":"tug"}'      # streams 80 batches over 20 s
+pnpm exec wrangler d1 execute DB --remote --command "DELETE FROM runs WHERE device_id = 'deploycheck00000001'"
+```
+
+Once real people use the app, only delete rows you made yourself.
+
 ## Deploy the router
 
 From `router`:
@@ -172,6 +214,7 @@ For a minute or so after a router deploy, some requests still reach the old vers
 - Focus webhook: `https://polymadlabs.com/focus/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.
 - Breathwork webhook: `https://polymadlabs.com/breathwork/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQVAQIbd3re6uBdkogYUm05`. Signing secret at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`.
 - Attention webhook: `https://polymadlabs.com/attention/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQyQJIbd3re6uBdJJZSk73e`. Signing secret at `~/.config/polymadlabs/attention-stripe-webhook-secret`.
+- Intention webhook: `https://polymadlabs.com/intention/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UR18BIbd3re6uBd9Rlw0Mum`. Signing secret at `~/.config/polymadlabs/intention-stripe-webhook-secret`.
 - Every webhook gets the checkout events of every app on the account. Each app ignores sessions it did not create.
 - Local development uses the Stripe CLI and its own secret. See "Testing payments locally" in `apps/personality/CLAUDE.md` and `apps/focus/CLAUDE.md`.
 
@@ -244,6 +287,21 @@ Passed on Oct 15, 2026 in headless Chromium, through the preview router and then
 
 One test purchase from that check is in the production database (`cs_test_a15CDWiO...`, test mode).
 
+### Check intention
+
+Passed on Oct 15, 2026, with curl and headless Chromium, on micro-intention.pages.dev, through the preview router and then polymadlabs.com:
+
+1. `curl -s https://polymadlabs.com/intention/api/health` gives `{"ok":true}`. All seven pages (`/intention/`, `global`, `me`, `science`, `privacy`, `unlock`, `restore`) load directly (200). The home page links to `/intention/`.
+2. A run streams in real time through the router: 80 batches about 250 ms apart, the end 20 s after the start. Nothing buffers the stream.
+3. A connection dropped after 3 s is saved as `abandoned` with its 550 bits, on Pages and through the router.
+4. At 375px, 768px and 1280px everything loads from polymadlabs.com, the service worker scope is `/intention/`, no console errors, no sideways scroll. A full run in the browser ends on its result with the ring's check.
+5. `/intention/unlock` says "$4.99 once. No renewals." Pay with card 4242 4242 4242 4242 (untick Stripe's "save with Link"). You come back to "Thank you. Lab Pass is on for this device." with a code in groups of four, the same after a reload.
+6. In another browser, `/intention/restore` with that code (lower case and spaces are fine) turns Lab Pass on there too.
+7. In Stripe, the `checkout.session.completed` event shows 0 pending webhooks, and the row in D1 `micro-intention` is `paid` with a 64-character hash and no code.
+8. The five check runs were deleted afterwards. `runs` on production started empty.
+
+One test purchase from that check is in the production database (`cs_test_a1e7dNvr...`, test mode).
+
 ## Undo
 
 - **A bad app deploy:** Pages keeps every deployment. `pnpm exec wrangler pages deployment list --project-name micro-personality` shows them. Roll back in the Cloudflare dashboard (Workers & Pages, `micro-personality`, Deployments), or check out the last good commit and deploy it again.
@@ -252,8 +310,8 @@ One test purchase from that check is in the production database (`cs_test_a15CDW
 
 ## Known gaps
 
-- Nothing has been checked on a real Android phone or in iPhone Safari. For focus this matters most: playing with the screen off and the lock screen controls (see `apps/focus/DESIGN-TODO.md`). For breathwork: tones, vibration and the screen staying awake (see `apps/breathwork/DESIGN-TODO.md`). For attention: the three sounds, vibration, the screen staying awake, and the test's timing on a 90 Hz or 120 Hz screen (see `apps/attention/DESIGN-TODO.md`).
-- The home page at `/` links to the personality test, breathwork and attention. Focus is live but not linked from it yet.
+- Nothing has been checked on a real Android phone or in iPhone Safari. For focus this matters most: playing with the screen off and the lock screen controls (see `apps/focus/DESIGN-TODO.md`). For breathwork: tones, vibration and the screen staying awake (see `apps/breathwork/DESIGN-TODO.md`). For attention: the three sounds, vibration, the screen staying awake, and the test's timing on a 90 Hz or 120 Hz screen (see `apps/attention/DESIGN-TODO.md`). For intention: the full-screen canvas at 60 fps, the color fan and Android's color picker, Back closing sheets, and the calendar file (see `apps/intention/DESIGN-TODO.md`).
+- The home page at `/` links to the personality test, breathwork, attention and intention. Focus is live but not linked from it yet.
 - Every file in `apps/personality/content/` still says `status: draft`.
 - Cloudflare's Web Analytics is blocked by the router's header, but it is still switched on for the domain. Switch it off in the dashboard (Analytics & Logs, Web Analytics) so the block is not the only thing in the way.
 - Unpaid checkouts leave `pending` rows in `purchases`, in both apps. Nothing clears them yet.

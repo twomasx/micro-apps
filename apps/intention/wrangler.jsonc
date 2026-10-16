@@ -9,8 +9,7 @@
     {
       "binding": "DB",
       "database_name": "micro-intention",
-      // Placeholder. Replace with the real id (see D1_DATABASE_ID in .env.example).
-      "database_id": "00000000-0000-0000-0000-000000000000"
+      "database_id": "8191fe94-bc95-4272-909b-13dedc75002e"
     }
   ]
 }
