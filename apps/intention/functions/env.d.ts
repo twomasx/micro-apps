@@ -6,4 +6,10 @@ interface Env {
   UNLOCK_CODE_SECRET: string;
   /** Where the site is served, like https://polymadlabs.com. Checkout sends buyers back here. */
   PUBLIC_ORIGIN?: string;
+  /** The kill switch: exactly "true" opens checkout. A secret, so it can be flipped without a code change. */
+  PAYMENTS_ENABLED?: string;
+  /** "test" or "live". Set in wrangler.jsonc for each environment. */
+  PAYMENTS_MODE?: string;
+  /** "staging" or "production". Set in wrangler.jsonc. Missing means local. */
+  ENVIRONMENT?: string;
 }

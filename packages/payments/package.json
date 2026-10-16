@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./unlock-codes": "./src/unlock-codes.ts"
+    "./unlock-codes": "./src/unlock-codes.ts",
+    "./settings": "./src/settings.ts",
+    "./client": "./src/client.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

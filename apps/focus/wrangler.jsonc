@@ -3,6 +3,11 @@
   "name": "micro-focus",
   "pages_build_output_dir": "dist",
   "compatibility_date": "2026-10-01",
+  // Production. PAYMENTS_ENABLED, the kill switch, is a secret so it can be flipped without a code change.
+  "vars": {
+    "PAYMENTS_MODE": "test",
+    "ENVIRONMENT": "production"
+  },
   "d1_databases": [
     {
       "binding": "DB",

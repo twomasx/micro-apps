@@ -1,3 +1,4 @@
+import type { PaymentsMode } from '@micro/payments/settings';
 import {
   bulletLines,
   compareScores,
@@ -37,6 +38,7 @@ export async function getCompare(
   bId: string,
   db: D1Database,
   payments: PaymentsFactory,
+  mode: PaymentsMode,
 ): Promise<Response> {
   if (aId === bId) {
     return error(400, 'same_result', 'Compare two different results.');
@@ -49,14 +51,14 @@ export async function getCompare(
     return error(409, 'version_mismatch', 'These results come from different versions of the test.');
   }
 
-  let unlocked = await isCoupleUnlocked(db, a.id, b.id);
+  let unlocked = await isCoupleUnlocked(db, a.id, b.id, mode);
   const sessionId = new URL(request.url).searchParams.get('session_id');
   if (!unlocked && sessionId) {
-    await confirmSession(db, payments, sessionId, (purchase) => {
+    await confirmSession(db, payments, sessionId, mode, (purchase) => {
       const pair = [purchase.result_id, purchase.partner_result_id];
       return pair.includes(a.id) && pair.includes(b.id);
     });
-    unlocked = await isCoupleUnlocked(db, a.id, b.id);
+    unlocked = await isCoupleUnlocked(db, a.id, b.id, mode);
   }
 
   const comparison = compareScores(
@@ -65,8 +67,8 @@ export async function getCompare(
     questions,
   );
   const [aReport, bReport] = await Promise.all([
-    isReportUnlocked(db, a.id),
-    isReportUnlocked(db, b.id),
+    isReportUnlocked(db, a.id, mode),
+    isReportUnlocked(db, b.id, mode),
   ]);
   const body: CompareResponse = {
     ...comparison,

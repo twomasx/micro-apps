@@ -4,7 +4,9 @@ import { ProfileChart } from '../components/report/ProfileChart.tsx';
 import { ScaleRuler } from '../components/report/ScaleRuler.tsx';
 import { TraitBars } from '../components/report/TraitBars.tsx';
 import { useReport } from '../hooks/useReport.ts';
-import { startCheckout, type PublicResult } from '../lib/api.ts';
+import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
+import { ApiError, startCheckout, type PublicResult } from '../lib/api.ts';
 import { leaveTo } from '../lib/navigation.ts';
 import { getProduct, priceLine } from '../lib/products.ts';
 import { paragraphs, type Report, type ReportBlock } from '../lib/report.ts';
@@ -204,15 +206,19 @@ interface OfferProps {
 function Offer({ result, unconfirmed, onCheckAgain }: OfferProps) {
   const [starting, setStarting] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [closedByServer, setClosedByServer] = useState(false);
+  const status = usePaymentsStatus();
+  const closed = status?.enabled === false || closedByServer;
 
   const unlock = async () => {
     setStarting(true);
     setFailed(false);
     try {
       leaveTo(await startCheckout('report', result.id));
-    } catch {
+    } catch (error) {
       setStarting(false);
-      setFailed(true);
+      if (error instanceof ApiError && isClosedResponse(error.status)) setClosedByServer(true);
+      else setFailed(true);
     }
   };
 
@@ -245,9 +251,10 @@ function Offer({ result, unconfirmed, onCheckAgain }: OfferProps) {
           type="button"
           className="report-unlock"
           onClick={() => void unlock()}
-          disabled={starting}
+          disabled={starting || closed}
+          data-state={closed ? 'closed' : 'open'}
         >
-          Unlock the full report
+          {closed ? CLOSED_LABEL : 'Unlock the full report'}
         </button>
         <p className="report-price">{priceLine(getProduct('report'))}</p>
         <p className="report-note">

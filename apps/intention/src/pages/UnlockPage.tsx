@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from '../components/Link.tsx';
 import { useSavedUnlock } from '../hooks/useSavedUnlock.ts';
 import { useUnlocked } from '../hooks/useUnlocked.ts';
-import { fetchPurchase, startCheckout } from '../lib/api.ts';
+import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
+import { ApiError, fetchPurchase, startCheckout } from '../lib/api.ts';
 import { leaveTo } from '../lib/navigation.ts';
 import { priceLine } from '../lib/products.ts';
 import { confirmPurchase, type PurchaseState } from '../lib/unlock.ts';
@@ -35,13 +37,17 @@ export function CodeCard({ code }: { code: string }) {
 function Offer() {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [closedByServer, setClosedByServer] = useState(false);
+  const status = usePaymentsStatus();
+  const closed = status?.enabled === false || closedByServer;
 
   const buy = () => {
     setBusy(true);
     setFailed(false);
-    startCheckout().then(leaveTo, () => {
+    startCheckout().then(leaveTo, (error: unknown) => {
       setBusy(false);
-      setFailed(true);
+      if (error instanceof ApiError && isClosedResponse(error.status)) setClosedByServer(true);
+      else setFailed(true);
     });
   };
 
@@ -64,8 +70,15 @@ function Offer() {
             </span>
           ))}
       </p>
-      <button type="button" className="button-primary" onClick={buy} disabled={busy} aria-busy={busy}>
-        {busy ? 'Opening checkout' : 'Buy Lab Pass'}
+      <button
+        type="button"
+        className="button-primary"
+        onClick={buy}
+        disabled={busy || closed}
+        aria-busy={busy}
+        data-state={closed ? 'closed' : 'open'}
+      >
+        {closed ? CLOSED_LABEL : busy ? 'Opening checkout' : 'Buy Lab Pass'}
       </button>
       <p role="status" className="status-line">
         {failed ? 'The checkout could not open. Check your connection and try again.' : ''}

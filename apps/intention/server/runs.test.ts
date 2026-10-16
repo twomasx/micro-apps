@@ -63,7 +63,7 @@ function handClock() {
 function deps(clock: Clock, extra: Partial<RunDeps> = {}) {
   const pending: Promise<unknown>[] = [];
   return {
-    deps: { db, clock, waitUntil: (p: Promise<unknown>) => void pending.push(p), ...extra } satisfies RunDeps,
+    deps: { db, mode: 'test', clock, waitUntil: (p: Promise<unknown>) => void pending.push(p), ...extra } satisfies RunDeps,
     settled: () => Promise.all(pending),
   };
 }

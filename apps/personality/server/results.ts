@@ -1,3 +1,4 @@
+import type { PaymentsMode } from '@micro/payments/settings';
 import { getQuestions } from '../src/lib/questions.ts';
 import { score, ScoringError, type Answers, type AxisScore, type Flag } from '../src/lib/scoring.ts';
 import { typeSummary } from './content.ts';
@@ -26,28 +27,28 @@ function notFound(): Response {
 }
 
 /** True when a paid purchase covers the full report for this result. */
-export async function isReportUnlocked(db: D1Database, resultId: string): Promise<boolean> {
+export async function isReportUnlocked(db: D1Database, resultId: string, mode: PaymentsMode): Promise<boolean> {
   const row = await db
     .prepare(
       `SELECT 1 FROM purchases
-       WHERE result_id = ? AND product IN ('report', 'both') AND status = 'paid'
+       WHERE result_id = ? AND product IN ('report', 'both') AND status = 'paid' AND mode = ?
        LIMIT 1`,
     )
-    .bind(resultId)
+    .bind(resultId, mode)
     .first();
   return row !== null;
 }
 
 /** True when a paid purchase covers the couple report for this pair, bought from either side. */
-export async function isCoupleUnlocked(db: D1Database, a: string, b: string): Promise<boolean> {
+export async function isCoupleUnlocked(db: D1Database, a: string, b: string, mode: PaymentsMode): Promise<boolean> {
   const row = await db
     .prepare(
       `SELECT 1 FROM purchases
-       WHERE product IN ('couple', 'both') AND status = 'paid'
+       WHERE product IN ('couple', 'both') AND status = 'paid' AND mode = ?3
          AND ((result_id = ?1 AND partner_result_id = ?2) OR (result_id = ?2 AND partner_result_id = ?1))
        LIMIT 1`,
     )
-    .bind(a, b)
+    .bind(a, b, mode)
     .first();
   return row !== null;
 }
@@ -133,7 +134,7 @@ export async function findResult(db: D1Database, id: string): Promise<ResultRow 
 }
 
 /** GET /api/results/:id. Never returns the raw answers. */
-export async function getResult(id: string, db: D1Database): Promise<Response> {
+export async function getResult(id: string, db: D1Database, mode: PaymentsMode): Promise<Response> {
   const row = await findResult(db, id);
   if (!row) return notFound();
 
@@ -145,7 +146,7 @@ export async function getResult(id: string, db: D1Database): Promise<Response> {
     flags: JSON.parse(row.flags) as Flag[],
     createdAt: row.created_at,
     summary: typeSummary(row.type),
-    unlocked: await isReportUnlocked(db, row.id),
+    unlocked: await isReportUnlocked(db, row.id, mode),
   });
 }
 

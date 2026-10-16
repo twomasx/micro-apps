@@ -1,4 +1,11 @@
-import { createStripePayments, type PaymentsProvider, type Product } from '@micro/payments';
+import {
+  createStripePayments,
+  paymentsClosed,
+  type PaymentsMode,
+  type PaymentsProvider,
+  type PaymentsSettings,
+  type Product,
+} from '@micro/payments';
 import { formatCode, hashCode, normalizeCode, unlockCodeFor } from '@micro/payments/unlock-codes';
 import { appConfig } from '../app.config.ts';
 import catalog from '../config/products.json';
@@ -18,9 +25,10 @@ export interface CheckoutUrls {
 /** Makes the provider for one request. Tests pass a fake; the routes pass Stripe. */
 export type PaymentsFactory = (urls: CheckoutUrls) => PaymentsProvider;
 
-export function stripePayments(env: Env): PaymentsFactory {
+export function stripePayments(env: Env, mode: PaymentsMode): PaymentsFactory {
   return (urls) =>
     createStripePayments({
+      mode,
       secretKey: env.STRIPE_SECRET_KEY,
       webhookSecret: env.STRIPE_WEBHOOK_SECRET,
       products: PRODUCTS,
@@ -35,8 +43,12 @@ interface PurchaseRow {
   status: string;
 }
 
-function findPurchase(db: D1Database, sessionId: string): Promise<PurchaseRow | null> {
-  return db.prepare('SELECT status FROM purchases WHERE stripe_session_id = ?').bind(sessionId).first<PurchaseRow>();
+/** Only purchases made in this deployment's mode count. A test purchase never unlocks anything in live mode. */
+function findPurchase(db: D1Database, sessionId: string, mode: PaymentsMode): Promise<PurchaseRow | null> {
+  return db
+    .prepare('SELECT status FROM purchases WHERE stripe_session_id = ? AND mode = ?')
+    .bind(sessionId, mode)
+    .first<PurchaseRow>();
 }
 
 /** Records a paid checkout with the hash of its unlock code. Does nothing the second time. */
@@ -56,8 +68,9 @@ async function confirm(
   provider: () => PaymentsProvider,
   sessionId: string,
   codeSecret: string,
+  mode: PaymentsMode,
 ): Promise<string | null> {
-  const purchase = await findPurchase(db, sessionId);
+  const purchase = await findPurchase(db, sessionId, mode);
   // Every app on this Stripe account gets every checkout event. Sessions we did not create are not ours.
   if (!purchase || purchase.status !== 'pending') return purchase?.status ?? null;
   const { paid } = await provider().verifyPurchase(sessionId);
@@ -71,8 +84,11 @@ export async function createCheckout(
   request: Request,
   db: D1Database,
   payments: PaymentsFactory,
+  settings: PaymentsSettings,
   publicOrigin?: string,
 ): Promise<Response> {
+  // The kill switch. Existing unlocks keep working; only new checkouts stop.
+  if (!settings.enabled) return paymentsClosed();
   const text = await request.text();
   if (text.length > MAX_BODY_CHARS) return error(413, 'too_large', 'The request body is too large.');
   let body: unknown;
@@ -94,10 +110,10 @@ export async function createCheckout(
   // The row starts as pending. Only the webhook or a session confirmed with Stripe turns it into paid.
   await db
     .prepare(
-      `INSERT INTO purchases (id, stripe_session_id, unlock_code_hash, amount_cents, currency, status, created_at)
-       VALUES (?, ?, NULL, ?, ?, 'pending', ?)`,
+      `INSERT INTO purchases (id, stripe_session_id, unlock_code_hash, amount_cents, currency, status, mode, created_at)
+       VALUES (?, ?, NULL, ?, ?, 'pending', ?, ?)`,
     )
-    .bind(randomId(), session.sessionId, product.amount, product.currency, new Date().toISOString())
+    .bind(randomId(), session.sessionId, product.amount, product.currency, settings.mode, new Date().toISOString())
     .run();
 
   return json({ url: session.url }, 201);
@@ -109,6 +125,7 @@ export async function handleStripeWebhook(
   db: D1Database,
   payments: PaymentsFactory,
   codeSecret: string,
+  mode: PaymentsMode,
 ): Promise<Response> {
   const provider = payments(NO_URLS);
   let event;
@@ -118,7 +135,7 @@ export async function handleStripeWebhook(
     return error(400, 'invalid_signature', 'The webhook signature is not valid.');
   }
   // A checkout can complete before the money arrives, so confirm asks Stripe if it is paid.
-  if (event.type === 'purchase.completed') await confirm(db, () => provider, event.sessionId, codeSecret);
+  if (event.type === 'purchase.completed') await confirm(db, () => provider, event.sessionId, codeSecret, mode);
   return json({ received: true });
 }
 
@@ -131,16 +148,17 @@ export async function getPurchase(
   db: D1Database,
   payments: PaymentsFactory,
   codeSecret: string,
+  mode: PaymentsMode,
 ): Promise<Response> {
   if (!SESSION_ID_PATTERN.test(sessionId)) return error(404, 'not_found', 'No purchase with this id.');
-  const status = await confirm(db, () => payments(NO_URLS), sessionId, codeSecret);
+  const status = await confirm(db, () => payments(NO_URLS), sessionId, codeSecret, mode);
   if (status === null) return error(404, 'not_found', 'No purchase with this id.');
   if (status !== 'paid') return json({ paid: false });
   return json({ paid: true, code: formatCode(await unlockCodeFor(codeSecret, sessionId)) });
 }
 
 /** GET /api/unlock/:code. `{ valid: true }` when the code belongs to a paid purchase. */
-export async function checkUnlockCode(input: string, db: D1Database): Promise<Response> {
+export async function checkUnlockCode(input: string, db: D1Database, mode: PaymentsMode): Promise<Response> {
   let text = input;
   try {
     text = decodeURIComponent(input);
@@ -150,8 +168,8 @@ export async function checkUnlockCode(input: string, db: D1Database): Promise<Re
   const code = normalizeCode(text);
   if (!code) return json({ valid: false });
   const row = await db
-    .prepare(`SELECT 1 AS found FROM purchases WHERE unlock_code_hash = ? AND status = 'paid'`)
-    .bind(await hashCode(code))
+    .prepare(`SELECT 1 AS found FROM purchases WHERE unlock_code_hash = ? AND status = 'paid' AND mode = ?`)
+    .bind(await hashCode(code), mode)
     .first();
   return json({ valid: row !== null });
 }

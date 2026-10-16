@@ -1,4 +1,4 @@
-import type { PaymentsProvider } from '@micro/payments';
+import type { PaymentsProvider, PaymentsSettings } from '@micro/payments';
 import { formatCode, hashCode, normalizeCode, unlockCodeFor } from '@micro/payments/unlock-codes';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import catalog from '../config/products.json';
@@ -14,9 +14,11 @@ import { createTestDb, type TestDb } from './testing.ts';
 
 const ORIGIN = 'https://example.test';
 const SECRET = 'test-secret-that-is-long-enough-0123456789';
+const SETTINGS: PaymentsSettings = { enabled: true, mode: 'test', environment: 'local' };
 
 interface PurchaseRow {
   stripe_session_id: string;
+  mode: string;
   unlock_code_hash: string | null;
   amount_cents: number;
   currency: string;
@@ -72,12 +74,12 @@ beforeEach(() => {
   fake = new FakePayments();
 });
 
-function checkout(body: unknown): Promise<Response> {
+function checkout(body: unknown, settings = SETTINGS): Promise<Response> {
   const request = new Request('http://127.0.0.1:8803/api/checkout', {
     method: 'POST',
     body: typeof body === 'string' ? body : JSON.stringify(body),
   });
-  return createCheckout(request, db, fake.factory, ORIGIN);
+  return createCheckout(request, db, fake.factory, settings, ORIGIN);
 }
 
 async function startCheckout(): Promise<string> {
@@ -93,16 +95,16 @@ function webhook(sessionId: string | null, signature = 'good'): Promise<Response
     headers: { 'stripe-signature': signature },
     body: JSON.stringify(sessionId ? { sessionId } : {}),
   });
-  return handleStripeWebhook(request, db, fake.factory, SECRET);
+  return handleStripeWebhook(request, db, fake.factory, SECRET, 'test');
 }
 
 async function purchase(sessionId: string) {
-  const response = await getPurchase(sessionId, db, fake.factory, SECRET);
+  const response = await getPurchase(sessionId, db, fake.factory, SECRET, 'test');
   return { status: response.status, body: (await response.json()) as { paid?: boolean; code?: string } };
 }
 
-async function check(code: string): Promise<boolean> {
-  const response = await checkUnlockCode(code, db);
+async function check(code: string, mode: 'test' | 'live' = 'test'): Promise<boolean> {
+  const response = await checkUnlockCode(code, db, mode);
   return ((await response.json()) as { valid: boolean }).valid;
 }
 
@@ -137,7 +139,14 @@ describe('checkout', () => {
       amount_cents: product?.amount,
       currency: product?.currency,
       status: 'pending',
+      mode: 'test',
     });
+  });
+
+  it('is closed while the kill switch is off', async () => {
+    const response = await checkout({ product: 'labpass' }, { ...SETTINGS, enabled: false });
+    expect(response.status).toBe(503);
+    expect(fake.urls).toHaveLength(0);
   });
 
   it('refuses other products and bad bodies', async () => {
@@ -221,6 +230,34 @@ describe('unlock code check', () => {
     expect(await check(code)).toBe(true);
     expect(await check(formatCode(code))).toBe(true);
     expect(await check(encodeURIComponent(` ${formatCode(code).toLowerCase()} `))).toBe(true);
+  });
+
+  it('keeps working while the kill switch is off', async () => {
+    const sessionId = await startCheckout();
+    fake.paidSessions.add(sessionId);
+    await webhook(sessionId);
+    // The kill switch only closes checkout. Nothing in the check reads it.
+    expect(await check(await unlockCodeFor(SECRET, sessionId))).toBe(true);
+  });
+
+  it('refuses a purchase made in the other mode, both ways', async () => {
+    const sessionId = await startCheckout();
+    fake.paidSessions.add(sessionId);
+    await webhook(sessionId);
+    const code = await unlockCodeFor(SECRET, sessionId);
+    expect(await check(code, 'live')).toBe(false);
+
+    const liveSession = await startCheckout();
+    await db.prepare(`UPDATE purchases SET mode = 'live' WHERE stripe_session_id = ?`).bind(liveSession).run();
+    fake.paidSessions.add(liveSession);
+    // A test deployment does not even confirm a live purchase.
+    expect((await purchase(liveSession)).status).toBe(404);
+    await db
+      .prepare(`UPDATE purchases SET status = 'paid', unlock_code_hash = ? WHERE stripe_session_id = ?`)
+      .bind(await hashCode(await unlockCodeFor(SECRET, liveSession)), liveSession)
+      .run();
+    expect(await check(await unlockCodeFor(SECRET, liveSession))).toBe(false);
+    expect(await check(await unlockCodeFor(SECRET, liveSession), 'live')).toBe(true);
   });
 
   it('refuses unknown, unpaid and malformed codes', async () => {

@@ -1,7 +1,10 @@
 import Stripe from 'stripe';
+import { assertKeyMatchesMode, type PaymentsMode } from './settings';
 import type { PaymentsProvider, Product } from './types';
 
 export interface StripePaymentsOptions {
+  /** PAYMENTS_MODE. The key must belong to it. */
+  mode: PaymentsMode;
   secretKey: string;
   webhookSecret: string;
   products: readonly Product[];
@@ -12,10 +15,7 @@ export interface StripePaymentsOptions {
 
 /** Stripe Checkout behind PaymentsProvider. Runs on Cloudflare Workers (fetch + SubtleCrypto). */
 export function createStripePayments(options: StripePaymentsOptions): PaymentsProvider {
-  // Test mode only for now.
-  if (!options.secretKey.startsWith('sk_test_')) {
-    throw new Error('Stripe secret key must be a test mode key (sk_test_...)');
-  }
+  assertKeyMatchesMode(options.secretKey, options.mode);
 
   const stripe = new Stripe(options.secretKey, {
     httpClient: Stripe.createFetchHttpClient(),

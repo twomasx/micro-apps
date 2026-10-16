@@ -1,3 +1,4 @@
+import type { PaymentsMode } from '@micro/payments/settings';
 import type { MeAnswer, MeRun } from '../src/lib/me-types.ts';
 import { stoufferFromSum, aimSign, type Aim } from '../src/lib/scoring.ts';
 import { bitString, unpackBits } from './bits.ts';
@@ -50,10 +51,10 @@ async function finishedRuns(device: string, db: D1Database, now: number): Promis
 }
 
 /** GET /api/me. Your runs, newest first. With Lab Pass: all of them, your lifetime total and your chart. */
-export async function getMe(request: Request, db: D1Database, now = Date.now()): Promise<Response> {
+export async function getMe(request: Request, db: D1Database, mode: PaymentsMode, now = Date.now()): Promise<Response> {
   const device = deviceFrom(request);
   if (!device) return error(400, 'invalid_device', 'Send the device id in the X-Device-Id header.');
-  const [rows, full] = await Promise.all([finishedRuns(device, db, now), hasLabPass(request, db)]);
+  const [rows, full] = await Promise.all([finishedRuns(device, db, now), hasLabPass(request, db, mode)]);
   const newestFirst = rows.map((row) => toRun(row, now)).reverse();
 
   let lifetime: MeAnswer['lifetime'] = null;
@@ -102,10 +103,15 @@ const CSV_COLUMNS = [
 ] as const;
 
 /** GET /api/me/csv. Every run with every bit, for Lab Pass. */
-export async function getMeCsv(request: Request, db: D1Database, now = Date.now()): Promise<Response> {
+export async function getMeCsv(
+  request: Request,
+  db: D1Database,
+  mode: PaymentsMode,
+  now = Date.now(),
+): Promise<Response> {
   const device = deviceFrom(request);
   if (!device) return error(400, 'invalid_device', 'Send the device id in the X-Device-Id header.');
-  if (!(await hasLabPass(request, db))) return error(403, 'lab_pass_required', 'The CSV download comes with Lab Pass.');
+  if (!(await hasLabPass(request, db, mode))) return error(403, 'lab_pass_required', 'The CSV download comes with Lab Pass.');
   const { results } = await db
     .prepare(
       `SELECT id, kind, aim, source, length_bits, n, deviation, z, status, started_ms, created_at, hour_event, bits

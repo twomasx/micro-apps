@@ -1,4 +1,4 @@
-import type { PaymentsProvider } from '@micro/payments';
+import type { PaymentsProvider, PaymentsSettings } from '@micro/payments';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import catalog from '../config/products.json';
 import p1 from '../src/data/items.p1.json';
@@ -16,6 +16,7 @@ import { createResult, getResult } from './results.ts';
 import { createTestDb, type TestDb } from './testing.ts';
 
 const ORIGIN = 'https://example.test';
+const SETTINGS: PaymentsSettings = { enabled: true, mode: 'test', environment: 'local' };
 const RIGHT_POLES = new Set(p1.axes.map((axis) => axis.right.letter));
 
 interface ErrorBody {
@@ -29,6 +30,7 @@ interface PurchaseRow {
   amount_cents: number;
   currency: string;
   status: string;
+  mode: string;
 }
 
 // The database lasts for the whole file, so session ids must never repeat.
@@ -95,12 +97,12 @@ async function newResultId(toward = 4): Promise<string> {
   return ((await response.json()) as { id: string }).id;
 }
 
-function checkout(body: unknown): Promise<Response> {
+function checkout(body: unknown, settings = SETTINGS): Promise<Response> {
   const request = new Request('http://127.0.0.1:8801/api/checkout', {
     method: 'POST',
     body: JSON.stringify(body),
   });
-  return createCheckout(request, db, fake.factory, ORIGIN);
+  return createCheckout(request, db, fake.factory, settings, ORIGIN);
 }
 
 /** Starts a checkout for the full report and returns its session id. */
@@ -117,13 +119,13 @@ function webhook(sessionId: string | null, signature = 'good'): Promise<Response
     headers: { 'stripe-signature': signature },
     body: JSON.stringify(sessionId ? { sessionId } : {}),
   });
-  return handleStripeWebhook(request, db, fake.factory);
+  return handleStripeWebhook(request, db, fake.factory, 'test');
 }
 
 function report(resultId: string, sessionId?: string): Promise<Response> {
   const query = sessionId ? `?session_id=${sessionId}` : '';
   const request = new Request(`http://localhost/api/results/${resultId}/report${query}`);
-  return getReport(request, resultId, db, fake.factory);
+  return getReport(request, resultId, db, fake.factory, 'test');
 }
 
 async function purchases(resultId: string): Promise<PurchaseRow[]> {
@@ -135,7 +137,7 @@ async function purchases(resultId: string): Promise<PurchaseRow[]> {
 }
 
 async function isUnlocked(resultId: string): Promise<boolean> {
-  const response = await getResult(resultId, db);
+  const response = await getResult(resultId, db, 'test');
   return ((await response.json()) as { unlocked: boolean }).unlocked;
 }
 
@@ -216,6 +218,29 @@ describe('POST /api/checkout', () => {
     const response = await checkout({ product: 'report', resultId: id });
     expect(response.status).toBe(409);
     expect(((await response.json()) as ErrorBody).error).toBe('already_unlocked');
+  });
+});
+
+describe('kill switch and mode', () => {
+  it('closes checkout while the kill switch is off', async () => {
+    const resultId = await newResultId();
+    const response = await checkout({ product: 'report', resultId }, { ...SETTINGS, enabled: false });
+    expect(response.status).toBe(503);
+    expect(await purchases(resultId)).toEqual([]);
+  });
+
+  it('records the mode, and a purchase unlocks nothing in the other mode', async () => {
+    const resultId = await newResultId();
+    const sessionId = await startReportCheckout(resultId);
+    expect((await purchases(resultId))[0]?.mode).toBe('test');
+    fake.paidSessions.add(sessionId);
+    await webhook(sessionId);
+
+    expect(await isUnlocked(resultId)).toBe(true);
+    const live = await getResult(resultId, db, 'live');
+    expect(((await live.json()) as { unlocked: boolean }).unlocked).toBe(false);
+    const request = new Request(`http://localhost/api/results/${resultId}/report`);
+    expect((await getReport(request, resultId, db, fake.factory, 'live')).status).toBe(402);
   });
 });
 
@@ -386,7 +411,7 @@ describe('GET /api/results/:id/report', () => {
 function compare(a: string, b: string, sessionId?: string): Promise<Response> {
   const query = sessionId ? `?session_id=${sessionId}` : '';
   const request = new Request(`http://localhost/api/compare/${a}/${b}${query}`);
-  return getCompare(request, a, b, db, fake.factory);
+  return getCompare(request, a, b, db, fake.factory, 'test');
 }
 
 /** Starts a checkout for a pair and returns its session id. */
@@ -517,7 +542,7 @@ describe('GET /api/compare/:a/:b', () => {
 describe('GET /api/results/:id', () => {
   it('now returns the free summary for the type', async () => {
     const id = await newResultId();
-    const body = (await (await getResult(id, db)).json()) as { summary: string | null };
+    const body = (await (await getResult(id, db, 'test')).json()) as { summary: string | null };
     expect(body.summary).toContain('You prefer quiet, ideas and possibilities');
   });
 });

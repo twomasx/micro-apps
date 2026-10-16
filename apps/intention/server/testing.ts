@@ -1,8 +1,9 @@
 import { getPlatformProxy } from 'wrangler';
 import init from '../migrations/0001_init.sql?raw';
+import paymentsMode from '../migrations/0002_payments_mode.sql?raw';
 
 // Add each new migration here, in order.
-const MIGRATIONS = [init];
+const MIGRATIONS = [init, paymentsMode];
 
 export interface TestDb {
   db: D1Database;

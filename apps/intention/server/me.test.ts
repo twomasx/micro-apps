@@ -62,7 +62,7 @@ async function paidPass() {
 
 const request = (headers: Record<string, string>) => new Request('http://localhost/api/me', { headers });
 const me = async (headers: Record<string, string> = { [DEVICE_HEADER]: DEVICE }) =>
-  (await (await getMe(request(headers), db, NOW)).json()) as MeAnswer;
+  (await (await getMe(request(headers), db, 'test', NOW)).json()) as MeAnswer;
 
 describe('your runs', () => {
   it('free: your last 5, newest first, and how many there are in all', async () => {
@@ -110,22 +110,22 @@ describe('your runs', () => {
   });
 
   it('needs a device id', async () => {
-    expect((await getMe(request({}), db, NOW)).status).toBe(400);
-    expect((await getMe(request({ [DEVICE_HEADER]: 'bad id' }), db, NOW)).status).toBe(400);
+    expect((await getMe(request({}), db, 'test', NOW)).status).toBe(400);
+    expect((await getMe(request({ [DEVICE_HEADER]: 'bad id' }), db, 'test', NOW)).status).toBe(400);
   });
 });
 
 describe('the CSV', () => {
   it('comes with Lab Pass only', async () => {
     await insert(DEVICE, 4);
-    expect((await getMeCsv(request({ [DEVICE_HEADER]: DEVICE }), db, NOW)).status).toBe(403);
+    expect((await getMeCsv(request({ [DEVICE_HEADER]: DEVICE }), db, 'test', NOW)).status).toBe(403);
   });
 
   it('has every run and every bit', async () => {
     await paidPass();
     await insert(DEVICE, 4, { n: 8 });
     await insert(OTHER, 0);
-    const response = await getMeCsv(request({ [DEVICE_HEADER]: DEVICE, [UNLOCK_HEADER]: code }), db, NOW);
+    const response = await getMeCsv(request({ [DEVICE_HEADER]: DEVICE, [UNLOCK_HEADER]: code }), db, 'test', NOW);
     expect(response.headers.get('Content-Type')).toContain('text/csv');
     const lines = (await response.text()).trim().split('\r\n');
     expect(lines[0]).toBe('run_id,started_at,kind,aim,source,planned_bits,bits_received,deviation,z,status,intention_hour,bits');

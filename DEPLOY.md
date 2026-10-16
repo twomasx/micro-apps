@@ -222,9 +222,26 @@ pnpm exec wrangler deploy --env=""        # production: polymadlabs.com and www
 
 For a minute or so after a router deploy, some requests still reach the old version, so an app that was just turned on can answer 404 now and then. Wait until checks pass several times in a row before calling it broken.
 
+## Payments kill switch
+
+Every app reads `PAYMENTS_ENABLED`, a Pages secret. Only the exact value `true` opens checkout. Anything else, or no value, keeps it closed: buy buttons say "Unlocks open soon" and `POST <app>/api/checkout` answers 503. Unlocks already bought keep working.
+
+Since Oct 16, 2026 it is `false` in production for all five apps, because production still runs on Stripe test keys. See PAYMENTS.md.
+
+Flip it for one app (here focus), then deploy that app again so the new value takes effect:
+
+```bash
+cd apps/focus
+printf 'false' | pnpm exec wrangler pages secret put PAYMENTS_ENABLED --project-name micro-focus   # or 'true'
+pnpm build && pnpm exec wrangler pages deploy dist --project-name micro-focus --branch main
+curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"test","environment":"production"}
+```
+
+`PAYMENTS_MODE` (`test` or `live`) and `ENVIRONMENT` are plain variables in each app's `wrangler.jsonc`. The Stripe key must match the mode (`sk_test_` or `sk_live_`), and every purchase row records the mode it was made in. An app only accepts purchases made in its own mode.
+
 ## Stripe
 
-- Test mode. The code refuses a key that does not start with `sk_test_`. Going live needs a change in `packages/payments/src/stripe.ts` as well as live keys.
+- Test mode. The code refuses a key that does not match `PAYMENTS_MODE` (see the kill switch above). Going live is the procedure in PAYMENTS.md section 6, not a code change.
 - Webhook: `https://polymadlabs.com/personality/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UPxeIIbd3re6uBdIm3vv1hN`. Its signing secret was saved on Roger's machine at `~/.config/polymadlabs/stripe-webhook-secret`, outside the repo.
 - If the webhook is ever recreated, it gets a new signing secret: put it in `STRIPE_WEBHOOK_SECRET` and deploy again.
 - Focus webhook: `https://polymadlabs.com/focus/api/stripe/webhook`, event `checkout.session.completed`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.

@@ -1,4 +1,11 @@
-import { createStripePayments, type PaymentsProvider, type Product } from '@micro/payments';
+import {
+  createStripePayments,
+  paymentsClosed,
+  type PaymentsMode,
+  type PaymentsProvider,
+  type PaymentsSettings,
+  type Product,
+} from '@micro/payments';
 import { appConfig } from '../app.config.ts';
 import catalog from '../config/products.json';
 import { getQuestions } from '../src/lib/questions.ts';
@@ -21,9 +28,10 @@ export interface CheckoutUrls {
 /** Makes the provider for one request. Tests pass a fake; the routes pass Stripe. */
 export type PaymentsFactory = (urls: CheckoutUrls) => PaymentsProvider;
 
-export function stripePayments(env: Env): PaymentsFactory {
+export function stripePayments(env: Env, mode: PaymentsMode): PaymentsFactory {
   return (urls) =>
     createStripePayments({
+      mode,
       secretKey: env.STRIPE_SECRET_KEY,
       webhookSecret: env.STRIPE_WEBHOOK_SECRET,
       products: PRODUCTS,
@@ -45,11 +53,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/** Records a paid checkout. Does nothing the second time, or for a session we never created. */
-async function markPaid(db: D1Database, sessionId: string): Promise<void> {
+/**
+ * Records a paid checkout. Does nothing the second time, for a session we never created,
+ * or for a purchase made in the other mode.
+ */
+async function markPaid(db: D1Database, sessionId: string, mode: PaymentsMode): Promise<void> {
   await db
-    .prepare(`UPDATE purchases SET status = 'paid' WHERE stripe_session_id = ? AND status = 'pending'`)
-    .bind(sessionId)
+    .prepare(`UPDATE purchases SET status = 'paid' WHERE stripe_session_id = ? AND status = 'pending' AND mode = ?`)
+    .bind(sessionId, mode)
     .run();
 }
 
@@ -58,8 +69,11 @@ export async function createCheckout(
   request: Request,
   db: D1Database,
   payments: PaymentsFactory,
+  settings: PaymentsSettings,
   publicOrigin?: string,
 ): Promise<Response> {
+  // The kill switch. Existing unlocks keep working; only new checkouts stop.
+  if (!settings.enabled) return paymentsClosed();
   const text = await request.text();
   if (text.length > MAX_BODY_CHARS) {
     return error(413, 'too_large', 'The request body is too large.');
@@ -96,8 +110,8 @@ export async function createCheckout(
     partnerId = partner.id;
   }
   // Never sell something that is already unlocked.
-  const hasReport = product.id !== 'couple' && (await isReportUnlocked(db, result.id));
-  const hasCouple = partnerId !== null && (await isCoupleUnlocked(db, result.id, partnerId));
+  const hasReport = product.id !== 'couple' && (await isReportUnlocked(db, result.id, settings.mode));
+  const hasCouple = partnerId !== null && (await isCoupleUnlocked(db, result.id, partnerId, settings.mode));
   if (product.id === 'report' ? hasReport : product.id === 'couple' ? hasCouple : hasReport && hasCouple) {
     return error(409, 'already_unlocked', 'This is already unlocked.');
   }
@@ -117,8 +131,8 @@ export async function createCheckout(
   await db
     .prepare(
       `INSERT INTO purchases
-         (id, stripe_session_id, product, result_id, partner_result_id, amount_cents, currency, status, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+         (id, stripe_session_id, product, result_id, partner_result_id, amount_cents, currency, status, mode, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`,
     )
     .bind(
       randomId(),
@@ -128,6 +142,7 @@ export async function createCheckout(
       partnerId,
       product.amount,
       product.currency,
+      settings.mode,
       new Date().toISOString(),
     )
     .run();
@@ -140,6 +155,7 @@ export async function handleStripeWebhook(
   request: Request,
   db: D1Database,
   payments: PaymentsFactory,
+  mode: PaymentsMode,
 ): Promise<Response> {
   const provider = payments(NO_URLS);
   let event;
@@ -152,7 +168,7 @@ export async function handleStripeWebhook(
   if (event.type === 'purchase.completed') {
     // A checkout can complete before the money arrives, so ask Stripe if it is paid.
     const { paid } = await provider.verifyPurchase(event.sessionId);
-    if (paid) await markPaid(db, event.sessionId);
+    if (paid) await markPaid(db, event.sessionId, mode);
   }
   return json({ received: true });
 }
@@ -165,19 +181,20 @@ export async function confirmSession(
   db: D1Database,
   payments: PaymentsFactory,
   sessionId: string,
+  mode: PaymentsMode,
   belongs: (purchase: PurchaseRow) => boolean,
 ): Promise<void> {
   if (!SESSION_ID_PATTERN.test(sessionId)) return;
   const purchase = await db
     .prepare(
-      'SELECT product, result_id, partner_result_id, status FROM purchases WHERE stripe_session_id = ?',
+      'SELECT product, result_id, partner_result_id, status FROM purchases WHERE stripe_session_id = ? AND mode = ?',
     )
-    .bind(sessionId)
+    .bind(sessionId, mode)
     .first<PurchaseRow>();
   if (!purchase || purchase.status !== 'pending' || !belongs(purchase)) return;
 
   const { paid } = await payments(NO_URLS).verifyPurchase(sessionId);
-  if (paid) await markPaid(db, sessionId);
+  if (paid) await markPaid(db, sessionId, mode);
 }
 
 /** GET /api/results/:id/report. 402 until the report is unlocked. */
@@ -186,16 +203,17 @@ export async function getReport(
   id: string,
   db: D1Database,
   payments: PaymentsFactory,
+  mode: PaymentsMode,
 ): Promise<Response> {
   const row = await findResult(db, id);
   if (!row) return error(404, 'not_found', 'No result with this id.');
 
-  if (!(await isReportUnlocked(db, row.id))) {
+  if (!(await isReportUnlocked(db, row.id, mode))) {
     const sessionId = new URL(request.url).searchParams.get('session_id');
     if (sessionId) {
-      await confirmSession(db, payments, sessionId, (purchase) => purchase.result_id === row.id);
+      await confirmSession(db, payments, sessionId, mode, (purchase) => purchase.result_id === row.id);
     }
-    if (!(await isReportUnlocked(db, row.id))) {
+    if (!(await isReportUnlocked(db, row.id, mode))) {
       return error(402, 'payment_required', 'This report is not unlocked.');
     }
   }

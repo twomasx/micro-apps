@@ -5,7 +5,9 @@ import { PairScale } from '../components/compare/PairScale.tsx';
 import { Prose } from '../components/Prose.tsx';
 import { useCompare } from '../hooks/useCompare.ts';
 import { useLoaded } from '../hooks/useLoaded.ts';
-import { startCheckout } from '../lib/api.ts';
+import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
+import { ApiError, startCheckout } from '../lib/api.ts';
 import { swapSides, type CompareResponse } from '../lib/compare.ts';
 import { appHref, leaveTo } from '../lib/navigation.ts';
 import { getProduct, priceLine, type ProductId } from '../lib/products.ts';
@@ -38,6 +40,9 @@ function CompareView({ compare, own, unconfirmed, onCheckAgain }: CompareViewPro
   const [starting, setStarting] = useState(false);
   const [failed, setFailed] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [closedByServer, setClosedByServer] = useState(false);
+  const status = usePaymentsStatus();
+  const closed = status?.enabled === false || closedByServer;
   const { a, b } = compare;
   const names = own ? { a: 'You', b: 'Them' } : { a: 'First', b: 'Second' };
 
@@ -46,9 +51,10 @@ function CompareView({ compare, own, unconfirmed, onCheckAgain }: CompareViewPro
     setFailed(false);
     try {
       leaveTo(await startCheckout(product, a.id, b.id));
-    } catch {
+    } catch (error) {
       setStarting(false);
-      setFailed(true);
+      if (error instanceof ApiError && isClosedResponse(error.status)) setClosedByServer(true);
+      else setFailed(true);
     }
   };
 
@@ -153,9 +159,10 @@ function CompareView({ compare, own, unconfirmed, onCheckAgain }: CompareViewPro
               type="button"
               className="compare-unlock"
               onClick={() => void unlock('couple')}
-              disabled={starting}
+              disabled={starting || closed}
+              data-state={closed ? 'closed' : 'open'}
             >
-              Unlock the couple report
+              {closed ? CLOSED_LABEL : 'Unlock the couple report'}
             </button>
             <p className="compare-price">{priceLine(getProduct('couple'))}</p>
           </div>
@@ -166,9 +173,10 @@ function CompareView({ compare, own, unconfirmed, onCheckAgain }: CompareViewPro
                 type="button"
                 className="compare-unlock-both"
                 onClick={() => void unlock('both')}
-                disabled={starting}
+                disabled={starting || closed}
+                data-state={closed ? 'closed' : 'open'}
               >
-                Unlock it with your full report
+                {closed ? CLOSED_LABEL : 'Unlock it with your full report'}
               </button>
               <p className="compare-price">{priceLine(getProduct('both'))}</p>
               <p className="compare-note">

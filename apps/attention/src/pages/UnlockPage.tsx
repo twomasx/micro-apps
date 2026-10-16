@@ -3,7 +3,9 @@ import { EnsoCanvas } from '../components/EnsoCanvas';
 import { Link } from '../components/Link';
 import { useSavedUnlock } from '../hooks/useSavedUnlock';
 import { useUnlocked } from '../hooks/useUnlocked';
-import { fetchPurchase, startCheckout } from '../lib/api';
+import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { usePaymentsStatus } from '../hooks/usePaymentsStatus';
+import { ApiError, fetchPurchase, startCheckout } from '../lib/api';
 import { leaveTo } from '../lib/navigation';
 import { getProduct, priceLine } from '../lib/products';
 import { confirmPurchase, type PurchaseState } from '../lib/unlock';
@@ -36,14 +38,18 @@ export function CodeCard({ code }: { code: string }) {
 function Offer() {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [closedByServer, setClosedByServer] = useState(false);
+  const status = usePaymentsStatus();
+  const closed = status?.enabled === false || closedByServer;
   const product = getProduct('lifetime');
 
   const buy = () => {
     setBusy(true);
     setFailed(false);
-    startCheckout().then(leaveTo, () => {
+    startCheckout().then(leaveTo, (error: unknown) => {
       setBusy(false);
-      setFailed(true);
+      if (error instanceof ApiError && isClosedResponse(error.status)) setClosedByServer(true);
+      else setFailed(true);
     });
   };
 
@@ -69,8 +75,15 @@ function Offer() {
             ))}
         </p>
       </div>
-      <button type="button" className="button button-primary" onClick={buy} disabled={busy} aria-busy={busy}>
-        {busy ? 'Opening checkout' : 'Buy the lifetime unlock'}
+      <button
+        type="button"
+        className="button button-primary"
+        onClick={buy}
+        disabled={busy || closed}
+        aria-busy={busy}
+        data-state={closed ? 'closed' : 'open'}
+      >
+        {closed ? CLOSED_LABEL : busy ? 'Opening checkout' : 'Buy the lifetime unlock'}
       </button>
       <p role="status" className="page-status">
         {failed ? 'The checkout could not open. Check your connection and try again.' : ''}

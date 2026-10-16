@@ -169,7 +169,7 @@ describe('POST /api/results', () => {
 describe('GET /api/results/:id', () => {
   it('returns the stored result without answers or the delete token', async () => {
     const created = await create();
-    const response = await getResult(created.id, db);
+    const response = await getResult(created.id, db, 'test');
     expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe('no-store');
 
@@ -188,12 +188,12 @@ describe('GET /api/results/:id', () => {
   });
 
   it('returns 404 for an id that does not exist', async () => {
-    await expectError(await getResult(randomId(), db), 404, 'not_found');
+    await expectError(await getResult(randomId(), db, 'test'), 404, 'not_found');
   });
 
   it('returns 404 for an id in the wrong format', async () => {
     for (const id of ['', 'abc', '1', "x' OR '1'='1", 'A'.repeat(16)]) {
-      await expectError(await getResult(id, db), 404, 'not_found');
+      await expectError(await getResult(id, db, 'test'), 404, 'not_found');
     }
   });
 
@@ -201,7 +201,7 @@ describe('GET /api/results/:id', () => {
     for (const product of ['report', 'both']) {
       const created = await create();
       await addPurchase(created.id, product, 'paid');
-      const body = await (await getResult(created.id, db)).json<{ unlocked: boolean }>();
+      const body = await (await getResult(created.id, db, 'test')).json<{ unlocked: boolean }>();
       expect(body.unlocked).toBe(true);
     }
   });
@@ -209,11 +209,11 @@ describe('GET /api/results/:id', () => {
   it('is not unlocked by an unpaid purchase or by the couple report alone', async () => {
     const unpaid = await create();
     await addPurchase(unpaid.id, 'report', 'pending');
-    expect((await (await getResult(unpaid.id, db)).json<{ unlocked: boolean }>()).unlocked).toBe(false);
+    expect((await (await getResult(unpaid.id, db, 'test')).json<{ unlocked: boolean }>()).unlocked).toBe(false);
 
     const couple = await create();
     await addPurchase(couple.id, 'couple', 'paid');
-    expect((await (await getResult(couple.id, db)).json<{ unlocked: boolean }>()).unlocked).toBe(false);
+    expect((await (await getResult(couple.id, db, 'test')).json<{ unlocked: boolean }>()).unlocked).toBe(false);
   });
 });
 
@@ -222,13 +222,13 @@ describe('DELETE /api/results/:id', () => {
     const created = await create();
     const response = await deleteResult(del(created.id, created.deleteToken), created.id, db);
     expect(response.status).toBe(204);
-    await expectError(await getResult(created.id, db), 404, 'not_found');
+    await expectError(await getResult(created.id, db, 'test'), 404, 'not_found');
   });
 
   it('refuses without a token', async () => {
     const created = await create();
     await expectError(await deleteResult(del(created.id), created.id, db), 401, 'missing_token');
-    expect((await getResult(created.id, db)).status).toBe(200);
+    expect((await getResult(created.id, db, 'test')).status).toBe(200);
   });
 
   it('refuses with the wrong token', async () => {
@@ -239,7 +239,7 @@ describe('DELETE /api/results/:id', () => {
       403,
       'wrong_token',
     );
-    expect((await getResult(created.id, db)).status).toBe(200);
+    expect((await getResult(created.id, db, 'test')).status).toBe(200);
   });
 
   it('returns 404 for an id that does not exist', async () => {

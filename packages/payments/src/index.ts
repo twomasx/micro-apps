@@ -6,3 +6,4 @@ export type {
   WebhookResult,
 } from './types';
 export { createStripePayments, type StripePaymentsOptions } from './stripe';
+export * from './settings';
