@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { withoutInjection } from './index.ts';
-import { comingSoonPage, homePage, notFoundPage } from './pages.ts';
-import { parseLiveApps, route } from './routes.ts';
+import { comingSoonPage, notFoundPage } from './pages.ts';
+import { landingPath, parseLiveApps, route } from './routes.ts';
 
 const LIVE = parseLiveApps('personality');
 
@@ -14,8 +14,10 @@ describe('parseLiveApps', () => {
 });
 
 describe('route', () => {
-  it('serves the home page at /', () => {
-    expect(route('/', LIVE)).toEqual({ kind: 'home' });
+  it('serves the landing page at / and its files under /_landing/', () => {
+    for (const path of ['/', '/_landing/', '/_landing/assets/index-abc.js', '/_landing/og.png']) {
+      expect(route(path, LIVE)).toEqual({ kind: 'landing' });
+    }
   });
 
   it('forwards everything under a live app', () => {
@@ -36,17 +38,30 @@ describe('route', () => {
   });
 
   it('returns not found for everything else', () => {
-    for (const path of ['/nope', '/focus/anything', '/personalityx/', '/index.html', '/api/health']) {
+    for (const path of ['/nope', '/focus/anything', '/personalityx/', '/index.html', '/api/health', '/_landing', '/_landingx/', '/assets/index.js', '/og.png']) {
       expect(route(path, LIVE)).toEqual({ kind: 'notFound' });
     }
   });
 });
 
+describe('landingPath', () => {
+  it('asks Pages for the page and its files from its root', () => {
+    expect(landingPath('/', true)).toBe('/');
+    expect(landingPath('/_landing/assets/index-abc.js', true)).toBe('/assets/index-abc.js');
+    expect(landingPath('/_landing/og.png', true)).toBe('/og.png');
+  });
+
+  it('asks the local Vite server for everything under /_landing/', () => {
+    expect(landingPath('/', false)).toBe('/_landing/');
+    expect(landingPath('/_landing/src/main.ts', false)).toBe('/_landing/src/main.ts');
+  });
+});
+
 describe('withoutInjection', () => {
   it('marks HTML so Cloudflare adds no analytics script, and keeps the page', async () => {
-    const page = withoutInjection(homePage());
+    const page = withoutInjection(notFoundPage());
     expect(page.headers.get('cache-control')).toBe('no-transform');
-    expect(page.status).toBe(200);
+    expect(page.status).toBe(404);
     expect(await page.text()).toContain('PolymadLabs');
   });
 
@@ -67,17 +82,6 @@ describe('withoutInjection', () => {
 });
 
 describe('pages', () => {
-  it('the home page names the site and links to the personality test, breathwork, attention and intention', async () => {
-    const response = homePage();
-    expect(response.status).toBe(200);
-    const html = await response.text();
-    expect(html).toContain('<h1>PolymadLabs</h1>');
-    expect(html).toContain('href="/personality/"');
-    expect(html).toContain('<a href="/breathwork/">Breathwork</a>');
-    expect(html).toContain('<a href="/attention/">Attention training</a>');
-    expect(html).toContain('<a href="/intention/">Intention</a>');
-  });
-
   it('coming soon is a 200 with a link to the personality test', async () => {
     const response = comingSoonPage('focus');
     expect(response.status).toBe(200);

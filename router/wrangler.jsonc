@@ -21,7 +21,8 @@
     "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
     "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
     "ATTENTION_ORIGIN": "https://micro-attention.pages.dev",
-    "INTENTION_ORIGIN": "https://micro-intention.pages.dev"
+    "INTENTION_ORIGIN": "https://micro-intention.pages.dev",
+    "LANDING_ORIGIN": "https://micro-landing.pages.dev"
   },
   "env": {
     // Local: forward to each app's Vite server, which already serves under /<app>/.
@@ -34,7 +35,8 @@
         "FOCUS_ORIGIN": "http://localhost:3002",
         "BREATHWORK_ORIGIN": "http://localhost:3003",
         "ATTENTION_ORIGIN": "http://localhost:3004",
-        "INTENTION_ORIGIN": "http://localhost:3005"
+        "INTENTION_ORIGIN": "http://localhost:3005",
+        "LANDING_ORIGIN": "http://localhost:3006"
       }
     },
     // A copy of production on a workers.dev address, with no domain attached:
@@ -49,7 +51,8 @@
         "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
         "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
         "ATTENTION_ORIGIN": "https://micro-attention.pages.dev",
-        "INTENTION_ORIGIN": "https://micro-intention.pages.dev"
+        "INTENTION_ORIGIN": "https://micro-intention.pages.dev",
+        "LANDING_ORIGIN": "https://micro-landing.pages.dev"
       }
     }
   }

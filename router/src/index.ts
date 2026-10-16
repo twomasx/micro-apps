@@ -1,5 +1,5 @@
-import { comingSoonPage, homePage, notFoundPage } from './pages.ts';
-import { parseLiveApps, route, type App } from './routes.ts';
+import { comingSoonPage, notFoundPage } from './pages.ts';
+import { landingPath, parseLiveApps, route, type App } from './routes.ts';
 
 type Env = {
   STRIP_PREFIX: string;
@@ -7,11 +7,12 @@ type Env = {
   LIVE_APPS: string;
   /** The one address people should use, like "polymadlabs.com". Other hostnames redirect to it. */
   CANONICAL_HOST?: string;
+  /** The landing page app, served at `/`. */
+  LANDING_ORIGIN: string;
 } & Record<`${Uppercase<App>}_ORIGIN`, string>;
 
-/** Forwards a request to an app and fixes redirects so they stay under the app's path. */
-async function forward(request: Request, url: URL, origin: string, prefix: string, strip: boolean) {
-  const path = strip ? url.pathname.slice(prefix.length) : url.pathname;
+/** Forwards a request to `path` on an app and fixes redirects so they stay under the app's path. */
+async function forward(request: Request, url: URL, origin: string, path: string, prefix: string, strip: boolean) {
   const response = await fetch(new Request(new URL(path + url.search, origin), request));
 
   // The app thinks it lives at "/", so its own redirects need the prefix put back.
@@ -44,10 +45,11 @@ async function handle(request: Request, env: Env): Promise<Response> {
     return Response.redirect(`https://${env.CANONICAL_HOST}${url.pathname}${url.search}`, 308);
   }
 
+  const strip = env.STRIP_PREFIX === 'true';
   const target = route(url.pathname, parseLiveApps(env.LIVE_APPS));
   switch (target.kind) {
-    case 'home':
-      return homePage();
+    case 'landing':
+      return forward(request, url, env.LANDING_ORIGIN, landingPath(url.pathname, strip), '', strip);
     case 'addSlash':
       return Response.redirect(`${url.origin}/${target.app}/${url.search}`, 308);
     case 'comingSoon':
@@ -56,7 +58,8 @@ async function handle(request: Request, env: Env): Promise<Response> {
       return notFoundPage();
     case 'app': {
       const origin = env[`${target.app.toUpperCase() as Uppercase<App>}_ORIGIN`];
-      return forward(request, url, origin, target.prefix, env.STRIP_PREFIX === 'true');
+      const path = strip ? url.pathname.slice(target.prefix.length) : url.pathname;
+      return forward(request, url, origin, path, target.prefix, strip);
     }
   }
 }

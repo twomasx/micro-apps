@@ -20,6 +20,7 @@ A push to GitHub does not deploy anything. Every deploy is a command run from th
 | Attention database | D1 `micro-attention` | id in `apps/attention/wrangler.jsonc` |
 | Intention app | Pages project `micro-intention` | https://micro-intention.pages.dev |
 | Intention database | D1 `micro-intention` | id in `apps/intention/wrangler.jsonc` |
+| Landing page | Pages project `micro-landing` | https://micro-landing.pages.dev (not deployed yet) |
 
 Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. The domain is on the same account. Wrangler on Roger's WSL machine is logged in to it (`pnpm exec wrangler whoami`).
 
@@ -27,7 +28,7 @@ Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. 
 
 1. `polymadlabs.com` and `www.polymadlabs.com` are custom domains of the router Worker. Cloudflare made the DNS record for each one, proxied (orange cloud). Do not add or edit records for these two names by hand.
 2. `www` redirects (308) to the same path on `polymadlabs.com`. Browser storage is kept per hostname, so the apps must be served from one hostname only.
-3. `/` is a plain placeholder page with links to `/personality/`, `/breathwork/`, `/attention/` and `/intention/`.
+3. `/` is the landing page, forwarded to the `micro-landing` Pages project (`LANDING_ORIGIN`). Its files (scripts, styles, fonts, images) live under `/_landing/`, which the router forwards to the same project with `/_landing` removed.
 4. `/personality/...`, `/focus/...`, `/breathwork/...`, `/attention/...` and `/intention/...` are forwarded to their Pages projects with the app prefix removed from the path. Each app is built with its base path, so its links, assets and service worker all stay under that path.
 5. An app not listed in `LIVE_APPS` says "Coming soon" with status 200. Since Oct 15, 2026 all five are listed.
 6. Everything else is a 404.
@@ -188,6 +189,19 @@ pnpm exec wrangler d1 execute DB --remote --command "DELETE FROM runs WHERE devi
 ```
 
 Once real people use the app, only delete rows you made yourself.
+
+## Deploy the landing page
+
+Not deployed yet. From `apps/landing`, once Roger approves the page:
+
+```bash
+pnpm build
+pnpm exec wrangler pages deploy dist --project-name micro-landing --branch main
+```
+
+The first deploy creates the Pages project; answer the prompt with `main` as the production branch. There are no functions, secrets or database. Deploy the landing page **before** a router that has `LANDING_ORIGIN`, or `/` breaks until it exists.
+
+`dist/404.html` makes Pages answer unknown paths like `/_landing/nope` with a 404 instead of the page.
 
 ## Deploy the router
 
