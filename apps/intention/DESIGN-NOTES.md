@@ -143,6 +143,18 @@ A round three-line button at the top right, shown whenever no run is in progress
 - **Losing Lab Pass** (a refund, or a code that stops checking out) quietly returns to the free view: a saved custom pair shows as Ember and Glacier, and runs are 20 seconds.
 - **Tested end to end in Stripe test mode:** 5 free runs, the sixth refused with the offer, checkout with the 4242 test card, the code shown on return, 60-second runs, the custom picker, the full history and the CSV, and restoring the code on a second device.
 
+## Done checks (step 7, Oct 15, 2026)
+
+Run on the production build (`pnpm build` + `vite preview`, service worker on) with the local functions.
+
+- `pnpm typecheck`, `pnpm test` (204 intention tests, every workspace passing), `pnpm lint` and `pnpm build` pass.
+- Every page (the tug, everyone's runs, your runs, the science, privacy, Lab Pass, restore, not found) at 375, 768 and 1280 px: no console errors, no sideways scroll, the service worker registered with scope `/intention/`.
+- Touch targets: every button and link outside running text is at least 44 px. (The fan swatches measure 14 px while folded, when they are invisible and inert; open they are 48 px.)
+- A full 20-second run: 20.4 s from tap to result (20 s of bits plus the 250 ms playback delay and the network), 60 fps, the ring drew its check.
+- Largest paint 0.6 s on the main screen and on everyone's runs, with 4G throttling (9 Mbps, 170 ms) and a 4x slower CPU. Budget 2.5 s.
+- JavaScript: 91.8 KB gzipped for the page. Budget 150 KB. The service worker's own files (6.2 KB) load separately.
+- Stripe test mode end to end: checkout with the 4242 card, the code on return, restore on a second device, 60-second runs, your own colors, full history and the CSV.
+
 ### Icon
 
 A dark square with a circle split by a curved seam: Ember on the left, Glacier on the right, a thin white line between. The circle sits inside the middle 80%, so the 512 px file is also the maskable icon.
