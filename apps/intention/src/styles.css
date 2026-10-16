@@ -9,10 +9,13 @@
   --button: #ffffff;
   --button-ink: #141416;
   --night: #141416;
-  /* Dark shading at the top and bottom edges, so white text reads on any color. */
+  /*
+   * Dark shading at the top and bottom edges, so white text reads on any color. The page sets
+   * --shade-top and --shade-bottom per pair, just enough for WCAG AA (src/lib/readability.ts).
+   */
   --shade: 20 20 24;
-  --shade-top: 0.38;
-  --shade-bottom: 0.6;
+  --shade-top: 0.3;
+  --shade-bottom: 0.45;
   --display: 'Unbounded', system-ui, sans-serif;
   --text: 'Inter Tight', system-ui, sans-serif;
   --gutter: 22px;
@@ -95,19 +98,6 @@ button {
   display: block;
 }
 
-.tug-shade {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgb(var(--shade) / var(--shade-top)) 0%,
-    rgb(var(--shade) / 0) 24%,
-    rgb(var(--shade) / 0) 50%,
-    rgb(var(--shade) / var(--shade-bottom)) 100%
-  );
-}
-
 .tug-ui {
   position: absolute;
   inset: 0;
@@ -125,6 +115,8 @@ button {
 }
 
 .tug-top {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -183,12 +175,70 @@ button {
   stroke-dashoffset: 0;
 }
 
+/*
+ * The edge shading hangs off the text blocks, so every line of text sits on the full amount at any screen
+ * size. It reaches past the screen edges (the page clips it) and eases in over 96 px.
+ */
+.tug-top::before,
+.tug-bottom::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: -100vw;
+  right: -100vw;
+  pointer-events: none;
+}
+
+.tug-top::before {
+  top: -200px;
+  bottom: -96px;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--shade) / var(--shade-top)) calc(100% - 96px),
+    rgb(var(--shade) / calc(var(--shade-top) * 0.6)) calc(100% - 66px),
+    rgb(var(--shade) / calc(var(--shade-top) * 0.25)) calc(100% - 36px),
+    rgb(var(--shade) / 0) 100%
+  );
+}
+
+.tug-bottom::before {
+  top: -96px;
+  bottom: -200px;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--shade) / 0) 0,
+    rgb(var(--shade) / calc(var(--shade-bottom) * 0.25)) 36px,
+    rgb(var(--shade) / calc(var(--shade-bottom) * 0.6)) 66px,
+    rgb(var(--shade) / var(--shade-bottom)) 96px
+  );
+}
+
 .tug-bottom {
+  position: relative;
+  isolation: isolate;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   width: 100%;
+}
+
+.tug-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tug-top,
+.tug-text,
+.tug-go {
+  transition: opacity 300ms var(--ease-out);
+}
+
+/* Everything behind the open fan fades. */
+.tug[data-fan='open'] :is(.tug-top, .tug-text, .tug-go) {
+  opacity: 0.12;
 }
 
 .tug-pill {
@@ -272,7 +322,7 @@ button {
   font-weight: 600;
   text-shadow: none;
   transition:
-    background-color 200ms,
+    opacity 300ms var(--ease-out),
     transform 150ms var(--ease-out);
 }
 
@@ -292,21 +342,243 @@ button {
   transform: scale(0.98);
 }
 
-/* Round half-and-half dot of the current pair. Opens the color fan (step 3). */
+/* ---------- the color fan ---------- */
+
+.fan-anchor {
+  position: relative;
+  flex: none;
+  width: 56px;
+  height: 56px;
+}
+
+/* Round half-and-half dot of the current pair. Opens the fan. */
 .tug-colors {
   width: 56px;
   height: 56px;
-  flex: none;
   border-radius: 50%;
   background: linear-gradient(90deg, var(--left) 50%, var(--right) 50%);
   box-shadow:
     0 0 0 2px rgb(255 255 255 / 0.85),
     0 6px 18px rgb(0 0 0 / 0.22);
-  transition: transform 150ms var(--ease-out);
+  transition: transform 320ms var(--ease-out);
 }
 
 .tug-colors:active {
   transform: scale(0.94);
+}
+
+.tug-colors[aria-expanded='true'] {
+  transform: rotate(180deg) scale(0.9);
+}
+
+.fan-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: auto;
+  cursor: default;
+  background: radial-gradient(140% 80% at 88% 100%, rgb(10 10 14 / 0.62), rgb(10 10 14 / 0.18) 75%);
+  animation: fade-in 260ms var(--ease-out) both;
+}
+
+/* A point at the dot's center. Swatches are placed from it. */
+.fan {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+
+.swatch {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--swatch, 48px);
+  height: var(--swatch, 48px);
+  margin: calc(var(--swatch, 48px) / -2) 0 0 calc(var(--swatch, 48px) / -2);
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--sw-left) 50%, var(--sw-right) 50%);
+  box-shadow:
+    0 0 0 2px rgb(255 255 255 / 0.9),
+    0 8px 20px rgb(0 0 0 / 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(0, 0) scale(0.3);
+  /* A slight bounce on the way out, a quick fold on the way back. */
+  transition:
+    transform 260ms var(--ease-out) var(--delay),
+    opacity 180ms var(--ease-out) var(--delay);
+}
+
+.fan-anchor[data-open='true'] .swatch {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(var(--x), var(--y)) scale(1);
+  transition:
+    transform 440ms cubic-bezier(0.2, 0.9, 0.3, 1.25) var(--delay),
+    opacity 200ms var(--ease-out) var(--delay);
+}
+
+.swatch[data-selected='true'] {
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 0 0 7px rgb(255 255 255 / 0.35),
+    0 8px 20px rgb(0 0 0 / 0.3);
+}
+
+.swatch-custom {
+  display: grid;
+  place-items: center;
+  background: rgb(255 255 255 / 0.16);
+  color: var(--ink);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* The current pair's name, just above the dot, inside the arc. */
+.fan-name {
+  position: absolute;
+  right: -28px;
+  bottom: 42px;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 600;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.4);
+  opacity: 0;
+  transition: opacity 240ms var(--ease-out);
+  pointer-events: none;
+}
+
+.fan-anchor[data-open='true'] .fan-name {
+  opacity: 1;
+}
+
+/* ---------- sheets and the color picker ---------- */
+
+.sheet {
+  width: 100%;
+  max-width: 100%;
+  margin: auto 0 0;
+  padding: 0 0 env(safe-area-inset-bottom);
+  border: 0;
+  border-radius: 22px 22px 0 0;
+  background: rgb(22 22 26 / 0.97);
+  color: var(--ink);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Light, so the colors you pick show behind the sheet. */
+.sheet::backdrop {
+  background: rgb(0 0 0 / 0.2);
+}
+
+.sheet[open] {
+  animation: sheet-in 320ms var(--ease-out);
+}
+
+.sheet-body {
+  padding: 18px 22px 24px;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sheet-title {
+  font-size: 18px;
+  font-weight: 600;
+  outline: none;
+}
+
+.text-button {
+  min-height: 44px;
+  padding: 0 8px;
+  margin-right: -8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.picker-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.picker-color {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.picker-color b {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.picker-color input {
+  width: 100%;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+}
+
+.picker-color input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.picker-color input::-webkit-color-swatch {
+  border: 0;
+  border-radius: 14px;
+}
+
+.picker-color input::-moz-color-swatch {
+  border: 0;
+  border-radius: 14px;
+}
+
+.picker-note {
+  margin-top: 16px;
+  font-size: 15px;
+  color: var(--ink-muted);
+}
+
+.picker-apply {
+  margin-top: 18px;
+  width: 100%;
+  min-height: 52px;
+  border-radius: 999px;
+  background: var(--button);
+  color: var(--button-ink);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
 }
 
 @keyframes rise {
@@ -333,6 +605,13 @@ button {
 
   .tug-score-value {
     font-size: 72px;
+  }
+
+  .sheet {
+    max-width: 420px;
+    margin: auto;
+    border-radius: 22px;
+    padding-bottom: 0;
   }
 }
 

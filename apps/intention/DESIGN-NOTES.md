@@ -27,7 +27,7 @@ Simulation, 10,000 runs of 4,000 bits through the server's bit maker and the rea
 
 ### Text and controls
 
-- **Night style only:** white text, white Begin button with dark text, dark shading at the top (38%) and bottom (60%) edges. Step 3 makes the shading automatic per pair for WCAG AA.
+- **Night style only:** white text, white Begin button with dark text, and dark shading at the top and bottom edges, worked out per pair (see "Colors" below).
 - **Fonts:** Unbounded 300 for the headline and score, Inter Tight 400, 500 and 600 for the rest. Self-hosted Latin subsets from Fontsource.
 - **The headline before the first run says "Pull your color across".** Your color does not exist until the server picks it. When the run starts, the headline names it ("Pull Glacier across") for 1.6 s, then fades out. After that the only thing at the top is the progress ring.
 - **The progress ring fills with the bits shown,** not with a timer, so it ends exactly when the last bit appears. A finished run draws a check mark inside it. A stopped run keeps its partial ring and gets no check.
@@ -37,7 +37,61 @@ Simulation, 10,000 runs of 4,000 bits through the server's bit maker and the rea
 - **Wording.** Before: "You get one of the two colors at random. For 20 seconds, try to make it spread across the screen." During: "Hold Glacier in mind and will it across." It asks you to try without saying it works. After: the one-run verdict at its real odds.
 - **One short vibration (15 ms) at the end of every run, the same for any score.** A stronger buzz for a high score would reward a result that is most likely chance. No vibration on iPhone, where the API is missing.
 - **The screen stays on during a run** (Screen Wake Lock, released at the end).
-- **The color dot cycles through the preset pairs** as a stand-in until the fan arrives in step 3.
+
+## Colors
+
+### Readable on any pair
+
+- **The text stays white and the button stays white.** That is the Night style. What changes per pair is how dark the top and bottom edge shading is (`src/lib/readability.ts`).
+- **The shading is worked out against the brightest each color can get on screen:** the winner's lightening, its glow and the pale band along the seam, all stacked. So the text holds wherever the seam is and whoever is winning.
+- **Targets:** WCAG AA. 4.5:1 for the line of text, the "how far from chance" caption (white at 84%) and the Stop button text. 3:1 for the headline (large text) and the progress ring (a control). The white Begin button gets the same 4.5:1 against its background, so it stands out at more than the 3:1 a control needs.
+- **The shading hangs off the text blocks,** not off fixed screen percentages. Every line of text sits on the full amount at any screen size, and the shading eases out over 96 px above it. Each pair gets the least shading that passes, never less than 0.30 at the top and 0.45 at the bottom, so all pairs keep the same Night look.
+- **Tested on every preset and on 425 custom pairs,** including white with white, and black, yellow, cyan and green in every combination.
+
+| Pair | Top | Bottom | Weakest text contrast |
+| --- | --- | --- | --- |
+| Ember and Glacier | 0.37 | 0.60 | 4.87:1 |
+| Rose and Navy | 0.30 | 0.52 | 4.81:1 |
+| Saffron and Indigo | 0.37 | 0.60 | 4.88:1 |
+| Peach and Lilac | 0.35 | 0.59 | 4.86:1 |
+| Chartreuse and Magenta | 0.41 | 0.62 | 4.90:1 |
+| Day and Night | 0.46 | 0.66 | 4.93:1 |
+| Tangerine and Plum | 0.30 | 0.57 | 4.85:1 |
+
+The default pair's automatic values (0.37 and 0.60) land almost exactly on the sketch's hand-tuned Night style (0.38 and 0.58).
+
+### Colorblind check of the presets
+
+Each pair is simulated for protanopia and deuteranopia with the Machado, Oliveira and Fernandes (2009) matrices at full severity, then compared in Oklab. About 0.02 is a just-noticeable difference. The test requires 0.10, a clear difference at a glance. Every preset passes; the closest is Ember and Glacier under deuteranopia, at more than twice the line.
+
+| Pair | Typical | Protanopia | Deuteranopia |
+| --- | --- | --- | --- |
+| Ember and Glacier | 0.289 | 0.272 | 0.212 |
+| Rose and Navy | 0.381 | 0.239 | 0.361 |
+| Saffron and Indigo | 0.499 | 0.452 | 0.509 |
+| Peach and Lilac | 0.236 | 0.219 | 0.249 |
+| Chartreuse and Magenta | 0.420 | 0.414 | 0.304 |
+| Day and Night | 0.728 | 0.727 | 0.730 |
+| Tangerine and Plum | 0.425 | 0.387 | 0.442 |
+
+Color is never the only cue: the pill names your color and the arrow shows its direction.
+
+### The color fan
+
+- **Swatches fan out from the dot in a quarter arc,** each a half-and-half circle of its pair, with a slight bounce (an overshooting curve) and a 26 ms stagger. They fold back in reverse order, faster and without bounce. Everything behind fades to 12% and a dark wash rises from the corner. The dot turns half a turn while the fan is open.
+- **The arc starts at 195°, not straight left.** At 180° the first swatch sat on the Begin button's row.
+- **The radius fits the screen.** It is measured when the fan opens, from the room left of the dot. On a 360 px Android phone the fan still has full 48 px swatches, 9 px from the edge. Only below about 340 px do swatches shrink, never under 44 px.
+- **The current pair's name shows just above the dot,** inside the arc, where nothing else sits.
+- **Picking a pair applies it, holds 220 ms so you see it selected, then folds.** The choice is saved on the device (`intention:colors`).
+- **Closing:** tapping outside, Escape (focus goes back to the dot) and the Android Back button. The rest of the screen is inert while the fan is open, so keyboard focus stays in it.
+- **No fan during a run.** The dot is hidden; colors cannot change while bits count.
+
+### Your own colors
+
+- **The "+" swatch opens a sheet with two color wells,** left and right. The field behind updates as you pick, and the sheet's dimming is light so you can see it. "Use these" keeps the pair; Close or Back puts the old one back.
+- **Custom colors get plain names** ("Red", "Deep blue", "Pale pink"), from the nearest of twelve familiar hues in Oklch, so the pill can still say "Your color: Teal". If both names come out the same, they become "Light blue" and "Dark blue"; two identical colors become "Left color" and "Right color".
+- **Notes, never blocks.** If the two colors are hard to tell apart for anyone, or for red-green color blindness, the sheet says so in one line. The screen stays readable either way.
+- **Lab Pass:** the spec puts your own colors in Lab Pass. The lock and price on "+" come with payments in step 6.
 
 ### Icon
 
