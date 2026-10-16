@@ -6,7 +6,8 @@
   // Production. PAYMENTS_ENABLED, the kill switch, is a secret so it can be flipped without a code change.
   "vars": {
     "PAYMENTS_MODE": "test",
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "production",
+    "PASS_API_ORIGIN": "https://polymadlabs.com"
   },
   // request.signal aborts when the browser disconnects, so a run stopped early is saved as abandoned.
   "compatibility_flags": ["enable_request_signal"],
@@ -23,7 +24,8 @@
     "preview": {
       "vars": {
         "PAYMENTS_MODE": "test",
-        "ENVIRONMENT": "staging"
+        "ENVIRONMENT": "staging",
+        "PASS_API_ORIGIN": "https://staging.polymadlabs.com"
       },
       "d1_databases": [
         {

@@ -1,0 +1,36 @@
+/* A tiny reset and the mobile rules only. Roger designs this app (see DESIGN-TODO.md). */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+input,
+button {
+  font: inherit;
+  font-size: 16px;
+}
+
+button,
+input {
+  min-height: 48px;
+}
+
+a {
+  display: inline-block;
+  min-height: 44px;
+  padding-block: 10px;
+}

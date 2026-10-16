@@ -1,4 +1,5 @@
 import type { CompareResponse } from './compare.ts';
+import { passHeaders } from './pass-state.ts';
 import type { ProductId } from './products.ts';
 import type { Report } from './report.ts';
 import type { Answers, AxisScore, Flag } from './scoring.ts';
@@ -39,7 +40,11 @@ function apiUrl(path: string): string {
 }
 
 async function request(path: string, init?: RequestInit): Promise<Response> {
-  const response = await fetch(apiUrl(path), init);
+  // With an all-app pass, the server unlocks every report. Without one, the request is unchanged.
+  const extra = await passHeaders();
+  const withPass =
+    Object.keys(extra).length === 0 ? init : { ...init, headers: { ...(init?.headers as Record<string, string>), ...extra } };
+  const response = await fetch(apiUrl(path), withPass);
   if (response.ok) return response;
 
   let code = 'unknown';

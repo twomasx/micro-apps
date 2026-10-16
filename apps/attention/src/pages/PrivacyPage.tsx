@@ -64,6 +64,16 @@ export function PrivacyPage() {
         <p>We keep this record for as long as Attention is online, so your unlock code keeps working.</p>
       </section>
 
+      <section className="page-section" aria-labelledby="pass-title">
+        <h2 id="pass-title">If you use a PolymadLabs pass</h2>
+        <p>
+          Attention keeps your pass code and a random device id in this browser's storage. To check the pass, it sends both
+          to the PolymadLabs pass service, at most about once a day. The pass service keeps the device ids that used
+          each code, with the day each was first seen, so one code cannot be shared widely. The 
+          <a href="https://polymadlabs.com/pass/privacy">pass privacy note</a> has the details.
+        </p>
+      </section>
+
       <section className="page-section" aria-labelledby="payments-title">
         <h2 id="payments-title">Payments</h2>
         <p>

@@ -36,6 +36,10 @@ Payment happens on Stripe's page. Stripe collects your email and card details an
 
 We store a record of the purchase: which product, which result it unlocks, the amount, and Stripe's reference for the payment.
 
+## If you use a PolymadLabs pass
+
+With a PolymadLabs pass, every full report and couple report is unlocked. The test keeps your pass code and a random device id in this browser's storage. When you open a report, our server sends both to the PolymadLabs pass service to check the pass. The pass service keeps the device ids that used each code, with the day each was first seen, so one code cannot be shared widely. The pass privacy note at polymadlabs.com/pass/privacy has the details.
+
 ## How long we keep it
 
 We keep a result until you delete it. Purchase records are kept after a result is deleted, because we need them for accounting.

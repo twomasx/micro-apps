@@ -26,6 +26,13 @@ describe('route', () => {
     }
   });
 
+  it('forwards the pass service like an app', () => {
+    const live = parseLiveApps('personality,pass');
+    expect(route('/pass/', live)).toEqual({ kind: 'app', app: 'pass', prefix: '/pass' });
+    expect(route('/pass/api/verify', live)).toEqual({ kind: 'app', app: 'pass', prefix: '/pass' });
+    expect(route('/pass', live)).toEqual({ kind: 'addSlash', app: 'pass' });
+  });
+
   it('adds the slash to a bare app path', () => {
     expect(route('/personality', LIVE)).toEqual({ kind: 'addSlash', app: 'personality' });
     expect(route('/focus', LIVE)).toEqual({ kind: 'addSlash', app: 'focus' });

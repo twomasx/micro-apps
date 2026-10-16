@@ -38,6 +38,7 @@ export async function getCompare(
   bId: string,
   db: D1Database,
   ctx: PaymentsContext,
+  hasPass: () => Promise<boolean> = async () => false,
 ): Promise<Response> {
   const { mode } = ctx.settings;
   if (aId === bId) {
@@ -60,6 +61,9 @@ export async function getCompare(
     });
     unlocked = await isCoupleUnlocked(db, a.id, b.id, mode);
   }
+  // An all-app pass unlocks every couple report and every full report.
+  const pass = unlocked ? false : await hasPass();
+  unlocked ||= pass;
 
   const comparison = compareScores(
     JSON.parse(a.scores) as AxisScore[],
@@ -67,8 +71,8 @@ export async function getCompare(
     questions,
   );
   const [aReport, bReport] = await Promise.all([
-    isReportUnlocked(db, a.id, mode),
-    isReportUnlocked(db, b.id, mode),
+    isReportUnlocked(db, a.id, mode).then((own) => own || pass),
+    isReportUnlocked(db, b.id, mode).then((own) => own || pass),
   ]);
   const body: CompareResponse = {
     ...comparison,

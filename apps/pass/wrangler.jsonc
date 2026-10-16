@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "micro-pass",
+  "pages_build_output_dir": "dist",
+  "compatibility_date": "2026-10-01",
+  // Production: polymadlabs.com/pass/. PAYMENTS_ENABLED, the kill switch, is a secret.
+  // ALLOWED_ORIGINS: every site whose pages may call the pass API. Add an app's own domain here when it moves.
+  "vars": {
+    "PAYMENTS_MODE": "test",
+    "ENVIRONMENT": "production",
+    "ALLOWED_ORIGINS": "https://polymadlabs.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "micro-pass",
+      "database_id": "bfec4e83-2446-4954-bf92-90df0d9d69e4",
+      // Local dev and tests use their own SQLite file under this id, never the real database.
+      "preview_database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  // Staging: the `staging` branch (staging.micro-pass.pages.dev), served at https://staging.polymadlabs.com/pass/.
+  // It also allows the staging router's workers.dev address, a second origin with its own storage,
+  // to test that a pass reaches an app on another domain with no shared storage.
+  "env": {
+    "preview": {
+      "vars": {
+        "PAYMENTS_MODE": "test",
+        "ENVIRONMENT": "staging",
+        "ALLOWED_ORIGINS": "https://staging.polymadlabs.com,https://micro-router-preview.micro-router.workers.dev",
+        "EXTRA_APP_LINKS": "[{\"app\":\"personality\",\"name\":\"Personality test on another address (test)\",\"url\":\"https://micro-router-preview.micro-router.workers.dev/personality/\"},{\"app\":\"focus\",\"name\":\"Focus on another address (test)\",\"url\":\"https://micro-router-preview.micro-router.workers.dev/focus/\"},{\"app\":\"breathwork\",\"name\":\"Breathwork on another address (test)\",\"url\":\"https://micro-router-preview.micro-router.workers.dev/breathwork/\"},{\"app\":\"attention\",\"name\":\"Attention on another address (test)\",\"url\":\"https://micro-router-preview.micro-router.workers.dev/attention/\"},{\"app\":\"intention\",\"name\":\"Intention on another address (test)\",\"url\":\"https://micro-router-preview.micro-router.workers.dev/intention/\"}]"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "micro-pass-staging",
+          "database_id": "59753a15-6b83-49a7-80ed-05ad402b15da"
+        }
+      ]
+    }
+  }
+}

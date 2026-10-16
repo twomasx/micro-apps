@@ -15,13 +15,14 @@
   // Origins of apps that are not in LIVE_APPS are placeholders.
   "vars": {
     "STRIP_PREFIX": "true",
-    "LIVE_APPS": "personality,focus,breathwork,attention,intention",
+    "LIVE_APPS": "personality,focus,breathwork,attention,intention,pass",
     "CANONICAL_HOST": "polymadlabs.com",
     "PERSONALITY_ORIGIN": "https://micro-personality.pages.dev",
     "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
     "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
     "ATTENTION_ORIGIN": "https://micro-attention.pages.dev",
     "INTENTION_ORIGIN": "https://micro-intention.pages.dev",
+    "PASS_ORIGIN": "https://micro-pass.pages.dev",
     "LANDING_ORIGIN": "https://micro-landing-b6u.pages.dev"
   },
   "env": {
@@ -30,12 +31,13 @@
       "routes": [],
       "vars": {
         "STRIP_PREFIX": "false",
-        "LIVE_APPS": "personality,focus,breathwork,attention,intention",
+        "LIVE_APPS": "personality,focus,breathwork,attention,intention,pass",
         "PERSONALITY_ORIGIN": "http://localhost:3001",
         "FOCUS_ORIGIN": "http://localhost:3002",
         "BREATHWORK_ORIGIN": "http://localhost:3003",
         "ATTENTION_ORIGIN": "http://localhost:3004",
         "INTENTION_ORIGIN": "http://localhost:3005",
+        "PASS_ORIGIN": "http://localhost:3007",
         "LANDING_ORIGIN": "http://localhost:3006"
       }
     },
@@ -47,7 +49,7 @@
       "workers_dev": true,
       "vars": {
         "STRIP_PREFIX": "true",
-        "LIVE_APPS": "personality,focus,breathwork,attention,intention",
+        "LIVE_APPS": "personality,focus,breathwork,attention,intention,pass",
         "CANONICAL_HOST": "staging.polymadlabs.com",
         "NOINDEX": "true",
         "PERSONALITY_ORIGIN": "https://staging.micro-personality.pages.dev",
@@ -55,6 +57,7 @@
         "BREATHWORK_ORIGIN": "https://staging.micro-breathwork.pages.dev",
         "ATTENTION_ORIGIN": "https://staging.micro-attention.pages.dev",
         "INTENTION_ORIGIN": "https://staging.micro-intention.pages.dev",
+        "PASS_ORIGIN": "https://staging.micro-pass.pages.dev",
         "LANDING_ORIGIN": "https://staging.micro-landing-b6u.pages.dev"
       }
     }

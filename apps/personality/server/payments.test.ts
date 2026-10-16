@@ -13,7 +13,7 @@ import { createResult, getResult } from './results.ts';
 import { createTestDb, type TestDb } from './testing.ts';
 
 const ORIGIN = 'https://example.test';
-const SETTINGS: PaymentsSettings = { enabled: true, mode: 'test', environment: 'local' };
+const SETTINGS: PaymentsSettings = { enabled: true, mode: 'test', environment: 'local', passOrigin: '' };
 const RIGHT_POLES = new Set(p1.axes.map((axis) => axis.right.letter));
 
 interface ErrorBody {
@@ -222,6 +222,29 @@ describe('kill switch and mode', () => {
     expect(((await live.json()) as { unlocked: boolean }).unlocked).toBe(false);
     const request = new Request(`http://localhost/api/results/${resultId}/report`);
     expect((await getReport(request, resultId, db, context({ mode: 'live' }))).status).toBe(402);
+  });
+});
+
+describe('the all-app pass', () => {
+  const yes = async () => true;
+
+  it('an active pass unlocks every full report, and the server asks before sending text', async () => {
+    const id = await newResultId();
+    expect((await report(id)).status).toBe(402);
+    const request = new Request(`http://localhost/api/results/${id}/report`);
+    expect((await getReport(request, id, db, context(), yes)).status).toBe(200);
+    const answer = (await (await getResult(id, db, 'test', yes)).json()) as { unlocked: boolean };
+    expect(answer.unlocked).toBe(true);
+    expect(await isUnlocked(id)).toBe(false);
+  });
+
+  it('an active pass unlocks the couple report and both full reports', async () => {
+    const [a, b] = [await newResultId(4), await newResultId(2)];
+    const request = new Request(`http://localhost/api/compare/${a}/${b}`);
+    const body = (await (await getCompare(request, a, b, db, context(), yes)).json()) as CompareResponse;
+    expect(body.unlocked).toBe(true);
+    expect(body.couple).not.toBeNull();
+    expect(body.a.reportUnlocked && body.b.reportUnlocked).toBe(true);
   });
 });
 

@@ -10,4 +10,8 @@ interface Env {
   PAYMENTS_MODE?: string;
   /** "staging" or "production". Set in wrangler.jsonc. Missing means local. */
   ENVIRONMENT?: string;
+  /** The pass service for this environment, like https://polymadlabs.com. Set in wrangler.jsonc. */
+  PASS_API_ORIGIN?: string;
+  /** Shared with the pass service. Lets this server check passes with the buyer's address for rate limits. */
+  PASS_SERVICE_KEY?: string;
 }

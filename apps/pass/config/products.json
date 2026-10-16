@@ -1,0 +1,10 @@
+{
+  "products": [
+    {
+      "id": "pass",
+      "name": "PolymadLabs pass: every app",
+      "amount": 1999,
+      "currency": "usd"
+    }
+  ]
+}

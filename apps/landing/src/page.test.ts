@@ -76,6 +76,10 @@ describe('page', () => {
     }
   });
 
+  it('has one line about the all-app pass, linking to it, with no price', () => {
+    expect(html).toContain('<p class="protocol-pass">One pass unlocks every app, including the ones we add later. <a href="/pass/">See the PolymadLabs pass</a></p>');
+  });
+
   it('has one h1, then h2 sections, then h3 entries', () => {
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
     const levels = [...html.matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]));

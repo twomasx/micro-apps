@@ -1,5 +1,5 @@
 import { appConfig } from '../app.config.ts';
-import { experiments, protocol, studySheet, type Experiment } from './content.ts';
+import { experiments, passLine, protocol, studySheet, type Experiment } from './content.ts';
 import { specimens } from './specimens/index.ts';
 
 /**
@@ -63,6 +63,8 @@ const parts: Record<string, () => string> = {
           `<li class="step"><p class="step-number">Step ${i + 1}</p><h3>${escape(step.title)}</h3><p>${escape(step.text)}</p></li>`,
       )
       .join('\n'),
+  pass: () =>
+    `<p class="protocol-pass">${escape(passLine.text)} <a href="${passLine.path}">${escape(passLine.link)}</a></p>`,
   'footer-links': () => experiments.map((e) => `<li><a href="${e.path}">${escape(e.name)}</a></li>`).join('\n'),
 };
 

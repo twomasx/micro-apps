@@ -1,4 +1,5 @@
-export const APPS = ['personality', 'focus', 'breathwork', 'attention', 'intention'] as const;
+// `pass` is the all-app pass service. It lives at polymadlabs.com/pass/ for good.
+export const APPS = ['personality', 'focus', 'breathwork', 'attention', 'intention', 'pass'] as const;
 export type App = (typeof APPS)[number];
 
 /** The landing page's own files (scripts, styles, fonts, images) all live under this path. */

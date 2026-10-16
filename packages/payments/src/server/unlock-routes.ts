@@ -12,6 +12,8 @@ export interface UnlockAppConfig {
   productId: string;
   /** config/products.json */
   products: readonly Product[];
+  /** The page Stripe sends buyers back to, under `base`. "unlock" unless said otherwise. */
+  returnPage?: string;
 }
 
 /**
@@ -34,7 +36,7 @@ export function unlockRoutes(config: UnlockAppConfig) {
       if (!isRecord(body) || body.product !== product.id) {
         return error(400, 'unknown_product', `Send { product: "${product.id}" }.`);
       }
-      const page = `${publicOrigin ?? new URL(request.url).origin}${config.base}unlock`;
+      const page = `${publicOrigin ?? new URL(request.url).origin}${config.base}${config.returnPage ?? 'unlock'}`;
       return startCheckout(ctx, product, { successUrl: `${page}?session_id={CHECKOUT_SESSION_ID}`, cancelUrl: page });
     },
 

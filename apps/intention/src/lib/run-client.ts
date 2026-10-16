@@ -1,3 +1,4 @@
+import { passHeaders } from './pass-state.ts';
 import type { BitsEvent, EndEvent, Kind, RunResult, RunSeconds, StartEvent, StartRequest } from './protocol.ts';
 import { ApiError, apiUrl, getJson } from './api.ts';
 import { SseParser } from './sse.ts';
@@ -36,6 +37,7 @@ export async function streamRun(options: RunOptions, handlers: RunHandlers, sign
       'Content-Type': 'application/json',
       Accept: 'text/event-stream',
       ...(options.unlockCode ? { 'X-Unlock-Code': options.unlockCode } : {}),
+      ...passHeaders(options.deviceId),
     },
     body: JSON.stringify(body),
     cache: 'no-store',

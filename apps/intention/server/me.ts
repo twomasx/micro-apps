@@ -1,9 +1,8 @@
-import type { PaymentsMode } from '@micro/payments/settings';
 import type { MeAnswer, MeRun } from '../src/lib/me-types.ts';
 import { stoufferFromSum, aimSign, type Aim } from '../src/lib/scoring.ts';
 import { bitString, unpackBits } from './bits.ts';
 import { error, json } from './http.ts';
-import { deviceFrom, hasLabPass } from './labpass.ts';
+import { deviceFrom, hasLabPass, type LabPassAccess } from './labpass.ts';
 import { effectiveStatus } from './runs.ts';
 import { thin } from './totals.ts';
 
@@ -51,10 +50,10 @@ async function finishedRuns(device: string, db: D1Database, now: number): Promis
 }
 
 /** GET /api/me. Your runs, newest first. With Lab Pass: all of them, your lifetime total and your chart. */
-export async function getMe(request: Request, db: D1Database, mode: PaymentsMode, now = Date.now()): Promise<Response> {
+export async function getMe(request: Request, db: D1Database, access: LabPassAccess, now = Date.now()): Promise<Response> {
   const device = deviceFrom(request);
   if (!device) return error(400, 'invalid_device', 'Send the device id in the X-Device-Id header.');
-  const [rows, full] = await Promise.all([finishedRuns(device, db, now), hasLabPass(request, db, mode)]);
+  const [rows, full] = await Promise.all([finishedRuns(device, db, now), hasLabPass(request, db, access)]);
   const newestFirst = rows.map((row) => toRun(row, now)).reverse();
 
   let lifetime: MeAnswer['lifetime'] = null;
@@ -106,12 +105,12 @@ const CSV_COLUMNS = [
 export async function getMeCsv(
   request: Request,
   db: D1Database,
-  mode: PaymentsMode,
+  access: LabPassAccess,
   now = Date.now(),
 ): Promise<Response> {
   const device = deviceFrom(request);
   if (!device) return error(400, 'invalid_device', 'Send the device id in the X-Device-Id header.');
-  if (!(await hasLabPass(request, db, mode))) return error(403, 'lab_pass_required', 'The CSV download comes with Lab Pass.');
+  if (!(await hasLabPass(request, db, access))) return error(403, 'lab_pass_required', 'The CSV download comes with Lab Pass.');
   const { results } = await db
     .prepare(
       `SELECT id, kind, aim, source, length_bits, n, deviation, z, status, started_ms, created_at, hour_event, bits

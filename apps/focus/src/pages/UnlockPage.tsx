@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from '../components/Link';
+import { PassOffer } from '../components/PassOffer';
 import { usePlayer } from '../hooks/usePlayer';
 import { useSavedUnlock } from '../hooks/useSavedUnlock';
 import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
@@ -76,6 +77,7 @@ function Offer() {
         {failed ? 'The checkout could not open. Check your connection and try again.' : ''}
       </p>
       <p>You pay on Stripe's checkout page. There is no account to make.</p>
+      <PassOffer />
       <p>
         Bought it already?{' '}
         <Link to="restore" className="inline-link">

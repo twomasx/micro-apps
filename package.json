@@ -13,6 +13,7 @@
     "dev:attention": "pnpm --filter @micro/attention dev",
     "dev:intention": "pnpm --filter @micro/intention dev",
     "dev:landing": "pnpm --filter @micro/landing dev",
+    "dev:pass": "pnpm --filter @micro/pass dev",
     "dev:router": "pnpm --filter @micro/router dev",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r --if-present test",

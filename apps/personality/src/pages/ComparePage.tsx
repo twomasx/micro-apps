@@ -6,6 +6,7 @@ import { Prose } from '../components/Prose.tsx';
 import { useCompare } from '../hooks/useCompare.ts';
 import { useLoaded } from '../hooks/useLoaded.ts';
 import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { PassOffer } from '../components/PassOffer.tsx';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
 import { ApiError, startCheckout } from '../lib/api.ts';
 import { swapSides, type CompareResponse } from '../lib/compare.ts';
@@ -194,6 +195,7 @@ function CompareView({ compare, own, unconfirmed, onCheckAgain }: CompareViewPro
               Checkout could not be started. Try again.
             </p>
           )}
+          <PassOffer back={`c/${a.id}/${b.id}`} />
         </section>
       )}
 

@@ -3,16 +3,20 @@
  */
 import type { PaymentsStatus } from './settings';
 
-let status: Promise<PaymentsStatus | null> | null = null;
+const statuses = new Map<string, Promise<PaymentsStatus | null>>();
 
 /**
  * GET api/payments, asked once per page load. Null when the server cannot be reached:
  * the buy button then stays as it is and checkout itself answers 503 if payments are closed.
  */
-export function loadPaymentsStatus(baseUrl: string): Promise<PaymentsStatus | null> {
-  status ??= fetch(`${baseUrl}api/payments`, { cache: 'no-store' })
-    .then((response) => (response.ok ? (response.json() as Promise<PaymentsStatus>) : null))
-    .catch(() => null);
+export function loadPaymentsStatus(baseUrl: string, fetcher: typeof fetch = fetch): Promise<PaymentsStatus | null> {
+  let status = statuses.get(baseUrl);
+  if (!status) {
+    status = fetcher(`${baseUrl}api/payments`, { cache: 'no-store' })
+      .then((response) => (response.ok ? (response.json() as Promise<PaymentsStatus>) : null))
+      .catch(() => null);
+    statuses.set(baseUrl, status);
+  }
   return status;
 }
 

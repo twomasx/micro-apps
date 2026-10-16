@@ -1,5 +1,6 @@
 import type { MeAnswer } from './me-types.ts';
 import type { GlobalAnswer, HourAnswer } from './totals-types.ts';
+import { passHeaders } from './pass-state.ts';
 
 /** Calls to this app's functions. All five apps share one domain, so paths start from the base. */
 export function apiUrl(path: string): string {
@@ -37,7 +38,7 @@ export function fetchHour(): Promise<HourAnswer> {
 
 /** Headers that say which device is asking, and its Lab Pass code if it has one. */
 function meHeaders(deviceId: string, unlockCode: string | null): HeadersInit {
-  return { 'X-Device-Id': deviceId, ...(unlockCode ? { 'X-Unlock-Code': unlockCode } : {}) };
+  return { ...passHeaders(deviceId), 'X-Device-Id': deviceId, ...(unlockCode ? { 'X-Unlock-Code': unlockCode } : {}) };
 }
 
 export function fetchMe(deviceId: string, unlockCode: string | null): Promise<MeAnswer> {
@@ -45,7 +46,7 @@ export function fetchMe(deviceId: string, unlockCode: string | null): Promise<Me
 }
 
 /** Every run with every bit, as a CSV file. Lab Pass only. */
-export async function fetchMeCsv(deviceId: string, unlockCode: string): Promise<Blob> {
+export async function fetchMeCsv(deviceId: string, unlockCode: string | null): Promise<Blob> {
   const response = await fetch(apiUrl('me/csv'), { cache: 'no-store', headers: meHeaders(deviceId, unlockCode) });
   if (!response.ok) throw new ApiError(response.status, null);
   return response.blob();

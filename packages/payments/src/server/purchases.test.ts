@@ -31,7 +31,7 @@ beforeEach(() => {
 });
 
 function context(settings: Partial<PaymentsSettings> = {}): PaymentsContext {
-  const full: PaymentsSettings = { enabled: true, mode: 'test', environment: 'local', ...settings };
+  const full: PaymentsSettings = { enabled: true, mode: 'test', environment: 'local', passOrigin: '', ...settings };
   return {
     store: purchaseStore({ db, app: 'focus', mode: full.mode, codeSecret: SECRET }),
     settings: full,

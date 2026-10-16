@@ -7,6 +7,7 @@ import { ComparePage } from './pages/ComparePage.tsx';
 import { InfoPage, infoTitle } from './pages/InfoPage.tsx';
 import { IntroPage } from './pages/IntroPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
+import { PassPage } from './pages/PassPage.tsx';
 import { ReportPage } from './pages/ReportPage.tsx';
 import { ResultPage } from './pages/ResultPage.tsx';
 import { TestPage } from './pages/TestPage.tsx';
@@ -28,6 +29,8 @@ function pageTitle(route: Route): string {
     case 'science':
     case 'privacy':
       return `${infoTitle(route.name)} | ${SITE_TITLE}`;
+    case 'pass':
+      return `PolymadLabs pass | ${SITE_TITLE}`;
     case 'notFound':
       return `Page not found | ${SITE_TITLE}`;
   }
@@ -55,6 +58,8 @@ function Page({ route }: { route: Route }) {
     case 'science':
     case 'privacy':
       return <InfoPage page={route.name} />;
+    case 'pass':
+      return <PassPage back={route.back} />;
     case 'notFound':
       return <NotFoundPage />;
   }

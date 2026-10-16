@@ -10,6 +10,7 @@ Five small web apps, built one per day (Oct 12 to 16, 2026), all served from pol
 | attention | /attention/ | 3004 | 8804 | Thu |
 | intention | /intention/ | 3005 | 8805 | Fri |
 | landing | / (files under /_landing/) | 3006 | none | |
+| pass (all-app pass service) | /pass/ | 3007 | 8807 | |
 | router | (all of polymadlabs.com) | 3000 | none | |
 
 Run an app: `pnpm dev:<app>` (site and functions together). Router: `pnpm dev:router`. Checks: `pnpm typecheck`, `pnpm test`, `pnpm lint`, `pnpm build`. All four cover the whole repo. `pnpm test` runs the `test` script of every workspace that has one (Vitest).

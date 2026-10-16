@@ -21,6 +21,8 @@ A push to GitHub does not deploy anything. Every deploy is a command run from th
 | Intention app | Pages project `micro-intention` | https://micro-intention.pages.dev |
 | Intention database | D1 `micro-intention` | id in `apps/intention/wrangler.jsonc` |
 | Landing page | Pages project `micro-landing` | https://micro-landing-b6u.pages.dev (the name micro-landing was taken on pages.dev, so Cloudflare added -b6u) |
+| All-app pass service | Pages project `micro-pass` | https://micro-pass.pages.dev, served at polymadlabs.com/pass/ |
+| Pass databases | D1 `micro-pass` and `micro-pass-staging` | ids in `apps/pass/wrangler.jsonc` |
 
 Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. The domain is on the same account. Wrangler on Roger's WSL machine is logged in to it (`pnpm exec wrangler whoami`).
 
@@ -29,7 +31,7 @@ Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. 
 1. `polymadlabs.com` and `www.polymadlabs.com` are custom domains of the router Worker. Cloudflare made the DNS record for each one, proxied (orange cloud). Do not add or edit records for these two names by hand.
 2. `www` redirects (308) to the same path on `polymadlabs.com`. Browser storage is kept per hostname, so the apps must be served from one hostname only.
 3. `/` is the landing page, forwarded to the `micro-landing` Pages project (`LANDING_ORIGIN`). Its files (scripts, styles, fonts, images) live under `/_landing/`, which the router forwards to the same project with `/_landing` removed.
-4. `/personality/...`, `/focus/...`, `/breathwork/...`, `/attention/...` and `/intention/...` are forwarded to their Pages projects with the app prefix removed from the path. Each app is built with its base path, so its links, assets and service worker all stay under that path.
+4. `/personality/...`, `/focus/...`, `/breathwork/...`, `/attention/...`, `/intention/...` and `/pass/...` are forwarded to their Pages projects with the app prefix removed from the path. Each app is built with its base path, so its links, assets and service worker all stay under that path.
 5. An app not listed in `LIVE_APPS` says "Coming soon" with status 200. Since Oct 15, 2026 all five are listed.
 6. Everything else is a 404.
 
@@ -190,6 +192,37 @@ pnpm exec wrangler d1 execute DB --remote --command "DELETE FROM runs WHERE devi
 
 Once real people use the app, only delete rows you made yourself.
 
+## Deploy the pass service
+
+First deployed on Oct 16, 2026. The account is on Workers Paid since then (the free plan allows only 10 D1 databases). From `apps/pass`:
+
+```bash
+pnpm build
+pnpm exec wrangler d1 migrations apply DB --remote [--env preview]
+pnpm exec wrangler pages deploy dist --project-name micro-pass --branch main      # or --branch staging
+```
+
+The project was created with `wrangler pages project create micro-pass --production-branch main --force`.
+
+### Secrets
+
+| Name | Value |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | The test key, in both environments, until go-live. |
+| `STRIPE_WEBHOOK_SECRET` | Staging only for now: the pass webhook below. Saved at `~/.config/polymadlabs/staging/pass-stripe-webhook-secret`. |
+| `PASS_CODE_SECRET` | 64 hex characters. Pass codes are made from it. **Never change it.** Production: `~/.config/polymadlabs/pass-code-secret`; staging: `pass-staging-code-secret`. |
+| `PASS_SERVICE_KEY` | 64 hex characters, also set on personality and intention, so their servers can ask about passes with the buyer's address for rate limits. Production: `~/.config/polymadlabs/pass-service-key`; staging: `pass-staging-service-key`. |
+| `PUBLIC_ORIGIN` | `https://polymadlabs.com` (production), `https://staging.polymadlabs.com` (staging). |
+| `PAYMENTS_ENABLED` | `false` in production, `true` on staging. |
+
+`ALLOWED_ORIGINS` (who may call the pass API from a browser) and, on staging, `EXTRA_APP_LINKS` are plain variables in `apps/pass/wrangler.jsonc`. When an app moves to its own domain, add that domain to `ALLOWED_ORIGINS` for its environment.
+
+Every app has `PASS_API_ORIGIN` in its `wrangler.jsonc`: `https://polymadlabs.com` in production, `https://staging.polymadlabs.com` on staging. Staging apps ask the staging pass service.
+
+### Testing a pass on another domain
+
+The staging router also answers at https://micro-router-preview.micro-router.workers.dev. It is a different origin, with its own browser storage, and it is in staging's `ALLOWED_ORIGINS`. The pass thanks page on staging has buttons for each app "on another address (test)". The apps' bare `staging.micro-<app>.pages.dev` addresses do not work for this: each app is built for its `/<app>/` path.
+
 ## Deploy the landing page
 
 First deployed on Oct 15, 2026. From `apps/landing`:
@@ -287,6 +320,7 @@ curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"
 - Breathwork: `https://staging.polymadlabs.com/breathwork/api/stripe/webhook`, endpoint id `we_1UQVAQIbd3re6uBdkogYUm05`. Signing secret at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`.
 - Attention: `https://staging.polymadlabs.com/attention/api/stripe/webhook`, endpoint id `we_1UQyQJIbd3re6uBdJJZSk73e`. Signing secret at `~/.config/polymadlabs/attention-stripe-webhook-secret`.
 - Intention: `https://staging.polymadlabs.com/intention/api/stripe/webhook`, endpoint id `we_1UR18BIbd3re6uBd9Rlw0Mum`. Signing secret at `~/.config/polymadlabs/intention-stripe-webhook-secret`.
+- Pass: `https://staging.polymadlabs.com/pass/api/stripe/webhook`, endpoint id `we_1URKZHIbd3re6uBdaXqgvLZx`, made by `stripe-sync --webhooks`. Signing secret at `~/.config/polymadlabs/staging/pass-stripe-webhook-secret`.
 - If a webhook is ever recreated, it gets a new signing secret: put it in `STRIPE_WEBHOOK_SECRET` (`--env preview` for staging) and deploy again.
 - Every webhook gets the checkout events of every app on the account. Each app ignores sessions it did not create.
 - Local development uses the Stripe CLI and its own secret. See "Testing payments locally" in `apps/personality/CLAUDE.md` and `apps/focus/CLAUDE.md`.

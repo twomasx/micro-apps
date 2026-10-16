@@ -1,4 +1,5 @@
 import { checkCode } from './api';
+import { pass } from './pass-state';
 import { loadUnlock, saveUnlock } from './store';
 import { refreshUnlock } from './unlock';
 
@@ -15,11 +16,20 @@ function devUnlocked(): boolean {
   return import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('unlocked');
 }
 
-function set(value: boolean) {
-  const next = value || devUnlocked();
+/** This app's own lifetime unlock, as opposed to the all-app pass. */
+let own = false;
+
+/** Unlocked with this app's own purchase or with an active all-app pass. */
+function publish() {
+  const next = own || pass.isActive() || devUnlocked();
   if (next === unlocked) return;
   unlocked = next;
   for (const listener of listeners) listener();
+}
+
+function set(value: boolean) {
+  own = value;
+  publish();
 }
 
 export function isUnlocked(): boolean {
@@ -37,6 +47,8 @@ let started = false;
 export function startUnlockCheck(): void {
   if (started) return;
   started = true;
+  pass.subscribe(publish);
+  void pass.start();
   void refreshUnlock({
     load: loadUnlock,
     save: saveUnlock,

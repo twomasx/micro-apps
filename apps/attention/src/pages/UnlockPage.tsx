@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { EnsoCanvas } from '../components/EnsoCanvas';
 import { Link } from '../components/Link';
+import { PassOffer } from '../components/PassOffer';
 import { useSavedUnlock } from '../hooks/useSavedUnlock';
 import { useUnlocked } from '../hooks/useUnlocked';
 import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
@@ -89,6 +90,7 @@ function Offer() {
         {failed ? 'The checkout could not open. Check your connection and try again.' : ''}
       </p>
       <p className="section-help">You pay on Stripe's checkout page. There is no account to make.</p>
+      <PassOffer />
       <p className="section-help">
         Bought it already? <Link to="restore">Restore your purchase</Link>
       </p>

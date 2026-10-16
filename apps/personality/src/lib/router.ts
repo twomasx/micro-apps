@@ -6,7 +6,12 @@ export type Route =
   | { name: 'compare'; a: string; b: string; sessionId: string | null }
   | { name: 'science' }
   | { name: 'privacy' }
+  /** Enter an all-app pass code. `back` is the report or comparison to return to. */
+  | { name: 'pass'; back: string | null }
   | { name: 'notFound' };
+
+/** Only a report or a comparison page of this app can be the place to go back to. */
+const BACK_PATTERN = /^(r\/[a-z0-9]+\/report|c\/[a-z0-9]+\/[a-z0-9]+)$/;
 
 /** Maps a URL to a screen. `base` is the app's base path, like '/personality/'. */
 export function parseRoute(pathname: string, search: string, base: string): Route {
@@ -22,6 +27,10 @@ export function parseRoute(pathname: string, search: string, base: string): Rout
   if (first === 'test' && parts.length === 1) return { name: 'test' };
   if (first === 'science' && parts.length === 1) return { name: 'science' };
   if (first === 'privacy' && parts.length === 1) return { name: 'privacy' };
+  if (first === 'pass' && parts.length === 1) {
+    const back = new URLSearchParams(search).get('back');
+    return { name: 'pass', back: back && BACK_PATTERN.test(back) ? back : null };
+  }
   if (first === 'c' && second !== undefined && third !== undefined && parts.length === 3) {
     const sessionId = new URLSearchParams(search).get('session_id');
     return { name: 'compare', a: second, b: third, sessionId };

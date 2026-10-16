@@ -46,6 +46,16 @@ export function PrivacyPage() {
       </section>
 
       <section className="page-section">
+        <h2>If you use a PolymadLabs pass</h2>
+        <p>
+          Breathwork keeps your pass code and a random device id in this browser's storage. To check the pass, it sends both
+          to the PolymadLabs pass service, at most about once a day. The pass service keeps the device ids that used
+          each code, with the day each was first seen, so one code cannot be shared widely. The 
+          <a href="https://polymadlabs.com/pass/privacy">pass privacy note</a> has the details.
+        </p>
+      </section>
+
+      <section className="page-section">
         <h2>Payments</h2>
         <p>
           Payments happen on Stripe's checkout page. Stripe asks for your email to send the receipt, and for your card

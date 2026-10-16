@@ -433,6 +433,58 @@ importers:
         specifier: ^5.0.3
         version: 5.0.3(@types/node@24.19.2)(jsdom@30.1.2)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(terser@5.51.2)(tsx@4.23.15))
 
+  apps/pass:
+    dependencies:
+      '@micro/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
+      '@micro/platform':
+        specifier: workspace:*
+        version: link:../../packages/platform
+      react:
+        specifier: ^19.3.0
+        version: 19.3.0
+      react-dom:
+        specifier: ^19.3.0
+        version: 19.3.0(react@19.3.0)
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^5.20261006.1
+        version: 5.20261009.1
+      '@micro/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      '@vitejs/plugin-react':
+        specifier: ^6.1.2
+        version: 6.1.2(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(terser@5.51.2)(tsx@4.23.15))
+      concurrently:
+        specifier: ^10.0.6
+        version: 10.0.6
+      fake-indexeddb:
+        specifier: ^6.2.5
+        version: 6.2.5
+      jsdom:
+        specifier: ^30.1.2
+        version: 30.1.2
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.3.4
+        version: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(terser@5.51.2)(tsx@4.23.15)
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@24.19.2)(jsdom@30.1.2)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(terser@5.51.2)(tsx@4.23.15))
+      wrangler:
+        specifier: ^4.149.0
+        version: 4.149.0(@cloudflare/workers-types@5.20261009.1)(@types/node@24.19.2)
+
   apps/personality:
     dependencies:
       '@fontsource-variable/inter-tight':

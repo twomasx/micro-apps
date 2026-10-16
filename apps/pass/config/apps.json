@@ -1,0 +1,9 @@
+{
+  "apps": [
+    { "app": "personality", "name": "Personality test", "path": "/personality/", "covers": "Every full report and couple report" },
+    { "app": "focus", "name": "Focus", "path": "/focus/", "covers": "The lifetime unlock" },
+    { "app": "breathwork", "name": "Breathwork", "path": "/breathwork/", "covers": "The lifetime unlock" },
+    { "app": "attention", "name": "Attention", "path": "/attention/", "covers": "The lifetime unlock" },
+    { "app": "intention", "name": "Intention", "path": "/intention/", "covers": "Lab Pass" }
+  ]
+}

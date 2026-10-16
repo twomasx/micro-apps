@@ -43,3 +43,5 @@ Decisions built the simplest way for now that need your call. What has been deci
 
 - [ ] **"Unlocks open soon":** while payments are closed (the kill switch), the buy button is disabled, says "Unlocks open soon" and has `data-state="closed"` (open is `data-state="open"`). Style the closed state.
 - [ ] **TEST MODE label:** staging only (`.test-mode-label`, `data-mode="test"`, in `src/components/TestModeLabel.tsx`, shown when the hostname starts with `staging.`). For now it is fixed to the top edge in the middle, in plain system colors, and taps go through it. Production never shows it.
+- [ ] **Pass offer line** (`.pass-offer`, under the buy button): "Or get every app for $19.99 once." and a link to the pass page.
+- [ ] **Restore box takes pass codes too.** The intro line now ends "A PolymadLabs pass code works here too." Messages for a refunded or disputed pass, and for a code in use on 5 devices, come from `@micro/payments/pass`.

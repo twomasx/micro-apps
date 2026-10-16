@@ -5,6 +5,7 @@ import { ScaleRuler } from '../components/report/ScaleRuler.tsx';
 import { TraitBars } from '../components/report/TraitBars.tsx';
 import { useReport } from '../hooks/useReport.ts';
 import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { PassOffer } from '../components/PassOffer.tsx';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
 import { ApiError, startCheckout, type PublicResult } from '../lib/api.ts';
 import { leaveTo } from '../lib/navigation.ts';
@@ -266,6 +267,7 @@ function Offer({ result, unconfirmed, onCheckAgain }: OfferProps) {
             Checkout could not be started. Try again.
           </p>
         )}
+        <PassOffer back={`r/${result.id}/report`} />
       </section>
 
       <BackLink id={result.id} />

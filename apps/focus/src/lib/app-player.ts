@@ -6,6 +6,7 @@ import { createPlayerController, type PlayerController } from './player-controll
 import { mediaTitle } from './player-view';
 import { loadSettings, loadUnlock, recordSession, saveSettings, saveUnlock } from './store';
 import { elapsedMs, type SessionTimer } from './timer';
+import { pass } from './pass-state';
 import { refreshUnlock } from './unlock';
 
 /**
@@ -17,6 +18,9 @@ const AUDIO_ROUTE: OutputRoute = 'direct';
 let player: PlayerController | null = null;
 /** The timer of the last session written to history, so one session is written once. */
 let recordedTimer: SessionTimer | null = null;
+
+/** Focus's own lifetime unlock, as opposed to the all-app pass. */
+let ownUnlocked = false;
 
 /** In dev only, ?unlocked shows the app as it is after the lifetime unlock. Real unlocks come from the server. */
 function devUnlocked(): boolean {
@@ -55,13 +59,21 @@ export function getPlayer(): PlayerController {
     onPause: () => controller.dispatch({ type: 'pause' }),
   });
   void loadSettings().then((settings) => controller.dispatch({ type: 'hydrate', settings }));
+  // Unlocked with Focus's own purchase or with an active all-app pass.
+  const publish = () =>
+    controller.dispatch({ type: 'setUnlocked', unlocked: ownUnlocked || pass.isActive() || devUnlocked() });
+  pass.subscribe(publish);
+  void pass.start();
   void refreshUnlock({
     load: loadUnlock,
     save: saveUnlock,
     check: checkCode,
     online: () => navigator.onLine,
     now: Date.now,
-    apply: (unlocked) => controller.dispatch({ type: 'setUnlocked', unlocked: unlocked || devUnlocked() }),
+    apply: (unlocked) => {
+      ownUnlocked = unlocked;
+      publish();
+    },
   });
 
   player = controller;
@@ -85,5 +97,6 @@ function recordIfFinished(state: PlayerState) {
 /** After a purchase or a restored code: remember the code on this device and unlock the player. */
 export async function unlockWithCode(code: string): Promise<void> {
   await saveUnlock({ code, valid: true, checkedAt: Date.now() });
+  ownUnlocked = true;
   getPlayer().dispatch({ type: 'setUnlocked', unlocked: true });
 }

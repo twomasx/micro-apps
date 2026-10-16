@@ -1,5 +1,5 @@
-import { purchaseStore } from '@micro/payments/server';
-import type { PaymentsMode } from '@micro/payments/settings';
+import { purchaseStore, requestHasPass, type ServerPassOptions } from '@micro/payments/server';
+import { readSettings, type PaymentsMode } from '@micro/payments/settings';
 import { appConfig } from '../app.config.ts';
 
 /** Requests carry these headers. The device id is random and means nothing outside this app. */
@@ -13,9 +13,25 @@ export function deviceFrom(request: Request): string | null {
   return id && DEVICE_ID_PATTERN.test(id) ? id : null;
 }
 
-/** True when the request carries the unlock code of a paid Lab Pass bought in this deployment's mode. */
-export async function hasLabPass(request: Request, db: D1Database, mode: PaymentsMode): Promise<boolean> {
-  return isPaidCode(request.headers.get(UNLOCK_HEADER), db, mode);
+/** What deciding Lab Pass needs: this deployment's mode, and the pass service to ask about all-app passes. */
+export interface LabPassAccess {
+  mode: PaymentsMode;
+  /** Absent in tests and local dev without a pass service. */
+  pass?: ServerPassOptions;
+}
+
+export function labPassAccess(env: Env): LabPassAccess {
+  const { mode, passOrigin } = readSettings(env);
+  return { mode, pass: { passOrigin, serviceKey: env.PASS_SERVICE_KEY, app: appConfig.name } };
+}
+
+/**
+ * True when the request carries the unlock code of a paid Lab Pass bought in this deployment's mode,
+ * or an active all-app pass (checked with the pass service).
+ */
+export async function hasLabPass(request: Request, db: D1Database, access: LabPassAccess): Promise<boolean> {
+  if (await isPaidCode(request.headers.get(UNLOCK_HEADER), db, access.mode)) return true;
+  return access.pass ? requestHasPass(request, access.pass) : false;
 }
 
 /** A refunded or disputed Lab Pass no longer counts. */

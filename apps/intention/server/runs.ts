@@ -1,3 +1,4 @@
+import type { ServerPassOptions } from '@micro/payments/server';
 import type { PaymentsMode } from '@micro/payments/settings';
 import {
   BATCH_MS,
@@ -44,6 +45,8 @@ export interface RunDeps {
   db: D1Database;
   /** PAYMENTS_MODE. Only a Lab Pass bought in this mode counts. */
   mode: PaymentsMode;
+  /** The pass service, so an all-app pass counts as Lab Pass. */
+  pass?: ServerPassOptions;
   /** Keeps the final database write alive after the browser has gone. */
   waitUntil: (promise: Promise<unknown>) => void;
   clock?: Clock;
@@ -109,7 +112,7 @@ export async function startRun(request: Request, deps: RunDeps): Promise<Respons
     .bind(input.deviceId, startOfDay(clock.now(), input.timeZone))
     .first<number>('runs');
   if (longer || (today ?? 0) >= FREE_RUNS_PER_DAY) {
-    if (!(await hasLabPass(request, db, deps.mode))) {
+    if (!(await hasLabPass(request, db, { mode: deps.mode, pass: deps.pass }))) {
       return longer
         ? error(403, 'lab_pass_required', 'Longer runs come with Lab Pass.')
         : error(429, 'daily_limit', `Free runs are ${FREE_RUNS_PER_DAY} a day. Lab Pass has no limit.`);

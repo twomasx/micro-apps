@@ -8,6 +8,7 @@ import { getDeviceId } from '../lib/device.ts';
 import { runDetails, runWhen } from '../lib/me-copy.ts';
 import type { MeAnswer } from '../lib/me-types.ts';
 import { priceLine } from '../lib/products.ts';
+import { pass } from '../lib/pass-state.ts';
 import { loadUnlockCode } from '../lib/unlock-store.ts';
 
 interface Loaded {
@@ -42,7 +43,7 @@ export function MePage() {
 function MeContent({ me, deviceId, code }: Loaded) {
   const [csv, setCsv] = useState<'idle' | 'working' | 'failed'>('idle');
   const download = useCallback(async () => {
-    if (!code) return;
+    if (!code && !pass.isActive()) return;
     setCsv('working');
     try {
       const blob = await fetchMeCsv(deviceId, code);

@@ -14,6 +14,8 @@ export interface PaymentsSettings {
   enabled: boolean;
   mode: PaymentsMode;
   environment: DeployEnvironment;
+  /** Where the all-app pass service runs, like https://polymadlabs.com. Empty means this same site. */
+  passOrigin: string;
 }
 
 export interface PaymentsEnv {
@@ -23,6 +25,8 @@ export interface PaymentsEnv {
   PAYMENTS_MODE?: string;
   /** "staging", "production" or "local". */
   ENVIRONMENT?: string;
+  /** The pass service's origin for this environment. Staging apps ask the staging pass service. */
+  PASS_API_ORIGIN?: string;
 }
 
 /** What the client learns from GET api/payments. */
@@ -30,6 +34,7 @@ export interface PaymentsStatus {
   enabled: boolean;
   mode: PaymentsMode;
   environment: DeployEnvironment;
+  passOrigin: string;
 }
 
 export function parseMode(value: string | undefined): PaymentsMode {
@@ -47,6 +52,7 @@ export function readSettings(env: PaymentsEnv): PaymentsSettings {
     enabled: env.PAYMENTS_ENABLED === 'true',
     mode: parseMode(env.PAYMENTS_MODE),
     environment: environment === 'staging' || environment === 'production' ? environment : 'local',
+    passOrigin: (env.PASS_API_ORIGIN ?? '').replace(/\/$/, ''),
   };
 }
 
@@ -60,7 +66,12 @@ export function assertKeyMatchesMode(secretKey: string, mode: PaymentsMode): voi
 
 /** The body of GET api/payments. */
 export function paymentsStatus(settings: PaymentsSettings): PaymentsStatus {
-  return { enabled: settings.enabled, mode: settings.mode, environment: settings.environment };
+  return {
+    enabled: settings.enabled,
+    mode: settings.mode,
+    environment: settings.environment,
+    passOrigin: settings.passOrigin,
+  };
 }
 
 /** What checkout answers while the kill switch is off. */

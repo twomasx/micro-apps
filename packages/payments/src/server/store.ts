@@ -1,5 +1,6 @@
 import type { PaymentsMode } from '../settings';
 import type { Product } from '../types';
+import { formatPassCode, normalizePassCode, passCodeFor } from '../pass-codes';
 import { formatCode, hashCode, normalizeCode, unlockCodeFor } from '../unlock-codes';
 import { randomId } from './http';
 import { writeLog, type LogEntry } from './log';
@@ -20,6 +21,18 @@ export interface PurchaseRow {
   [column: string]: unknown;
 }
 
+/** How an app's codes are made, read and shown. */
+export interface CodeScheme {
+  make(secret: string, sessionId: string, generation: number): Promise<string>;
+  normalize(input: string): string | null;
+  format(code: string): string;
+}
+
+/** App unlock codes: 7K3M-Q9TD-2XWB-HC4R. */
+export const UNLOCK_CODES: CodeScheme = { make: unlockCodeFor, normalize: normalizeCode, format: formatCode };
+/** All-app pass codes: K7QM-2XRP-9VTD-4HNC, no 0, O, 1, I, L or U. */
+export const PASS_CODES: CodeScheme = { make: passCodeFor, normalize: normalizePassCode, format: formatPassCode };
+
 export interface StoreOptions {
   db: D1Database;
   /** The app's name, written to the log. */
@@ -28,6 +41,8 @@ export interface StoreOptions {
   mode: PaymentsMode;
   /** UNLOCK_CODE_SECRET, in apps whose buyers get an unlock code. Personality has none. */
   codeSecret?: string;
+  /** Unlock codes unless said otherwise. The pass service uses PASS_CODES. */
+  codes?: CodeScheme;
 }
 
 const COLUMN = /^[a-z_]+$/;
@@ -37,7 +52,7 @@ const COLUMN = /^[a-z_]+$/;
  * Every app's migrations create the same columns; see packages/payments/test/schema.sql.
  */
 export function purchaseStore(options: StoreOptions) {
-  const { db, app, mode, codeSecret } = options;
+  const { db, app, mode, codeSecret, codes = UNLOCK_CODES } = options;
 
   async function find(sessionId: string): Promise<PurchaseRow | null> {
     return db
@@ -46,9 +61,19 @@ export function purchaseStore(options: StoreOptions) {
       .first<PurchaseRow>();
   }
 
+  /** The purchase this code belongs to, in any status (refunded and disputed too), or null. */
+  async function findAnyByCode(input: string): Promise<PurchaseRow | null> {
+    const code = codes.normalize(input);
+    if (!code) return null;
+    return db
+      .prepare('SELECT * FROM purchases WHERE unlock_code_hash = ? AND mode = ?')
+      .bind(await hashCode(code), mode)
+      .first<PurchaseRow>();
+  }
+
   async function codeHash(sessionId: string, generation: number): Promise<string> {
     if (!codeSecret) throw new Error('This app has no unlock codes');
-    return hashCode(await unlockCodeFor(codeSecret, sessionId, generation));
+    return hashCode(await codes.make(codeSecret, sessionId, generation));
   }
 
   return {
@@ -130,17 +155,21 @@ export function purchaseStore(options: StoreOptions) {
     /** The current unlock code of a paid purchase, formatted for people. */
     async currentCode(row: PurchaseRow): Promise<string> {
       if (!codeSecret) throw new Error('This app has no unlock codes');
-      return formatCode(await unlockCodeFor(codeSecret, row.stripe_session_id, row.code_generation ?? 0));
+      return codes.format(await codes.make(codeSecret, row.stripe_session_id, row.code_generation ?? 0));
     },
 
     /** The paid purchase this code belongs to, or null. Looked up by hash; the code itself is never stored. */
     async findByCode(input: string): Promise<PurchaseRow | null> {
-      const code = normalizeCode(input);
-      if (!code) return null;
-      return db
-        .prepare(`SELECT * FROM purchases WHERE unlock_code_hash = ? AND mode = ? AND status = 'paid'`)
-        .bind(await hashCode(code), mode)
-        .first<PurchaseRow>();
+      const row = await findAnyByCode(input);
+      return row?.status === 'paid' ? row : null;
+    },
+
+    findAnyByCode,
+
+    /** The hash a code is stored and looked up by, or null when the code is malformed. */
+    async hashOf(input: string): Promise<string | null> {
+      const code = codes.normalize(input);
+      return code ? hashCode(code) : null;
     },
   };
 }

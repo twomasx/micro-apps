@@ -3,5 +3,7 @@
   "compilerOptions": {
     "types": ["@cloudflare/workers-types"]
   },
-  "include": ["src", "test"]
+  "include": ["src", "test"],
+  // Browser-only modules are checked by tsconfig.browser.json.
+  "exclude": ["src/client.ts", "src/client.test.ts", "src/pass.ts", "src/pass.test.ts"]
 }

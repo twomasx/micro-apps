@@ -2,6 +2,7 @@ import { createStripePayments, type Product } from '@micro/payments';
 import {
   confirmPurchase,
   purchaseStore,
+  requestHasPass,
   SESSION_ID_PATTERN,
   startCheckout,
   type PaymentsContext,
@@ -18,6 +19,12 @@ import { findResult, isCoupleUnlocked, isReportUnlocked } from './results.ts';
 
 const PRODUCTS: readonly Product[] = catalog.products;
 const MAX_BODY_CHARS = 1_000;
+
+/** Asks the pass service whether this request carries an active all-app pass. */
+export function passCheck(request: Request, env: Env): () => Promise<boolean> {
+  const { passOrigin } = readSettings(env);
+  return () => requestHasPass(request, { passOrigin, serviceKey: env.PASS_SERVICE_KEY, app: appConfig.name });
+}
 
 /** Everything the payment routes need for one request, from the Pages environment. Personality has no unlock codes. */
 export function paymentsContext(env: Env): PaymentsContext {
@@ -125,6 +132,7 @@ export async function getReport(
   id: string,
   db: D1Database,
   ctx: PaymentsContext,
+  hasPass: () => Promise<boolean> = async () => false,
 ): Promise<Response> {
   const { mode } = ctx.settings;
   const row = await findResult(db, id);
@@ -135,7 +143,8 @@ export async function getReport(
     if (sessionId) {
       await confirmSession(ctx, sessionId, (purchase) => purchase.result_id === row.id);
     }
-    if (!(await isReportUnlocked(db, row.id, mode))) {
+    // An all-app pass unlocks every report. The pass service is asked; the device never decides.
+    if (!(await isReportUnlocked(db, row.id, mode)) && !(await hasPass())) {
       return error(402, 'payment_required', 'This report is not unlocked.');
     }
   }

@@ -134,7 +134,12 @@ export async function findResult(db: D1Database, id: string): Promise<ResultRow 
 }
 
 /** GET /api/results/:id. Never returns the raw answers. */
-export async function getResult(id: string, db: D1Database, mode: PaymentsMode): Promise<Response> {
+export async function getResult(
+  id: string,
+  db: D1Database,
+  mode: PaymentsMode,
+  hasPass: () => Promise<boolean> = async () => false,
+): Promise<Response> {
   const row = await findResult(db, id);
   if (!row) return notFound();
 
@@ -146,7 +151,7 @@ export async function getResult(id: string, db: D1Database, mode: PaymentsMode):
     flags: JSON.parse(row.flags) as Flag[],
     createdAt: row.created_at,
     summary: typeSummary(row.type),
-    unlocked: await isReportUnlocked(db, row.id, mode),
+    unlocked: (await isReportUnlocked(db, row.id, mode)) || (await hasPass()),
   });
 }
 
