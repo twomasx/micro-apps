@@ -11,6 +11,8 @@ describe('parseRoute', () => {
 
   it('finds the other screens', () => {
     expect(route('/focus/science')).toEqual({ name: 'science' });
+    expect(route('/focus/science/')).toEqual({ name: 'science' });
+    expect(route('/focus/unlock/', '?session_id=cs_test_2')).toEqual({ name: 'unlock', sessionId: 'cs_test_2' });
     expect(route('/focus/privacy/')).toEqual({ name: 'privacy' });
     expect(route('/focus/restore')).toEqual({ name: 'restore' });
     expect(route('/focus/bench')).toEqual({ name: 'bench' });

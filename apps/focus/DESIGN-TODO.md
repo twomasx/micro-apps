@@ -21,6 +21,10 @@ For this app Claude made the design (see the spec). These are the choices still 
 
 - [ ] **The icon** (two stars on a ring, `public/icon-512.png`). Keep or change.
 
+## Share image
+
+- [ ] **The link preview picture** (`og.png`, made at build time from `shareImageSvg()` in `src/seo.ts`): the night sky, the two stars on their orbit with a 10:00 Prime clock, "Binaural beats for focus" in Cormorant and two plain lines in Manrope. Keep or change.
+
 ## Still to check on real devices
 
 - [ ] **Android Chrome:** the left-only and right-only tones on `/focus/bench` in dev (no sound in the other ear), 2 minutes with the screen off, and the play and pause controls on the lock screen.

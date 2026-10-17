@@ -8,6 +8,7 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { RestorePage } from './pages/RestorePage';
 import { SciencePage } from './pages/SciencePage';
 import { UnlockPage } from './pages/UnlockPage';
+import { PAGES } from './seo';
 
 const SITE_TITLE = 'Focus';
 
@@ -55,7 +56,11 @@ export function App() {
   const route = useRoute();
 
   useEffect(() => {
-    document.title = route.name === 'player' ? SITE_TITLE : `${PAGE_TITLES[route.name]} | ${SITE_TITLE}`;
+    // Pages that search engines see keep the title from src/seo.ts, the same as in the HTML the server sent.
+    const seo = route.name === 'player' || route.name === 'science' || route.name === 'privacy' ? PAGES[route.name] : null;
+    // The audio test page is not built for production, where its address is an unknown page.
+    const name = route.name === 'bench' && !BenchPage ? 'notFound' : route.name;
+    document.title = seo ? seo.title : `${PAGE_TITLES[name as Exclude<Route['name'], 'player'>]} | ${SITE_TITLE}`;
   }, [route]);
 
   return (

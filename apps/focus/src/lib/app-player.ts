@@ -63,7 +63,8 @@ export function getPlayer(): PlayerController {
   const publish = () =>
     controller.dispatch({ type: 'setUnlocked', unlocked: ownUnlocked || pass.isActive() || devUnlocked() });
   pass.subscribe(publish);
-  void pass.start();
+  // main.tsx may have started the pass already (a ?passToken= on any page); publish its answer either way.
+  void pass.start().then(publish);
   void refreshUnlock({
     load: loadUnlock,
     save: saveUnlock,
