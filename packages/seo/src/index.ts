@@ -120,6 +120,50 @@ export function organization(origin: string, name: string, logo: string): object
   return { '@context': 'https://schema.org', '@type': 'Organization', name, url: `${origin}/`, logo };
 }
 
+export interface ArticleInput {
+  headline: string;
+  description: string;
+  url: string;
+  image: string;
+  /** ISO dates, like '2026-10-16'. */
+  datePublished: string;
+  dateModified: string;
+  /** The publisher: name and home page. */
+  publisher: { name: string; url: string; logo: string };
+}
+
+/** A content page (SEO.md step 2). The author is the organization: there is no named writer. */
+export function article(input: ArticleInput): object {
+  const publisher = {
+    '@type': 'Organization',
+    name: input.publisher.name,
+    url: input.publisher.url,
+    logo: { '@type': 'ImageObject', url: input.publisher.logo },
+  };
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: input.headline,
+    description: input.description,
+    url: input.url,
+    mainEntityOfPage: input.url,
+    image: input.image,
+    datePublished: input.datePublished,
+    dateModified: input.dateModified,
+    author: publisher,
+    publisher,
+  };
+}
+
+/** Where a page sits: [{ name: 'Breathwork', url }, { name: 'Box breathing', url }]. */
+export function breadcrumbList(items: readonly { name: string; url: string }[]): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({ '@type': 'ListItem', position: index + 1, name: item.name, item: item.url })),
+  };
+}
+
 /** A sitemap for one app or the landing page. */
 export function sitemapXml(urls: readonly { loc: string; lastmod: string }[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>

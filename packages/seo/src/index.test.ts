@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { headTags, jsonLdScript, seoProblems, sitemapXml, webApplication, type PageSeo, type Site } from './index.ts';
+import {
+  article,
+  breadcrumbList,
+  headTags,
+  jsonLdScript,
+  seoProblems,
+  sitemapXml,
+  webApplication,
+  type PageSeo,
+  type Site,
+} from './index.ts';
 
 const SITE: Site = { origin: 'https://polymadlabs.com', base: '/breathwork/', siteName: 'PolymadLabs' };
 const PAGE: PageSeo = {
@@ -79,5 +89,33 @@ describe('sitemapXml', () => {
     expect(sitemapXml([{ loc: 'https://polymadlabs.com/breathwork/', lastmod: '2026-10-16' }])).toContain(
       '<url><loc>https://polymadlabs.com/breathwork/</loc><lastmod>2026-10-16</lastmod></url>',
     );
+  });
+});
+
+describe('content page data', () => {
+  it('an article names the organization as author and publisher, with both dates', () => {
+    const data = article({
+      headline: 'Box Breathing Timer',
+      description: 'd',
+      url: 'https://polymadlabs.com/breathwork/box-breathing/',
+      image: 'https://polymadlabs.com/breathwork/box-breathing/og.png',
+      datePublished: '2026-10-16',
+      dateModified: '2026-10-16',
+      publisher: { name: 'PolymadLabs', url: 'https://polymadlabs.com/', logo: 'https://polymadlabs.com/_landing/logo-512.png' },
+    }) as Record<string, unknown>;
+    expect(data['@type']).toBe('Article');
+    expect(data.author).toEqual(data.publisher);
+    expect(data).toMatchObject({ datePublished: '2026-10-16', dateModified: '2026-10-16' });
+  });
+
+  it('a breadcrumb list numbers its items from 1', () => {
+    const data = breadcrumbList([
+      { name: 'Breathwork', url: 'https://polymadlabs.com/breathwork/' },
+      { name: 'Box breathing', url: 'https://polymadlabs.com/breathwork/box-breathing/' },
+    ]) as { itemListElement: { position: number; name: string }[] };
+    expect(data.itemListElement.map((item) => [item.position, item.name])).toEqual([
+      [1, 'Breathwork'],
+      [2, 'Box breathing'],
+    ]);
   });
 });
