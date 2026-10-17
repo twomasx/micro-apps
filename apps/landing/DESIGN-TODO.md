@@ -20,3 +20,9 @@ In this order: Android Chrome, iPhone Safari, tablet, desktop.
 
 - [ ] **One line about the pass** under the protocol steps (`.protocol-pass`): "One pass unlocks every app, including the ones we add later." with a link to `/pass/`. No price, as with the rest of the page. Where should it sit and how should it look?
 - [ ] With a pass on this browser, the app links open each app with a one-time token (`src/pass-links.ts`). Nothing visible changes.
+
+## Terms and refunds (drafts)
+
+- [ ] **Approve the wording** in `src/legal.ts`: the terms of use (`/terms`) and the refund policy (`/refunds`, 14 days, full refund, no reason needed). Three lines say "[Roger: ...]": the notice period if an app closes, the line about refunds after 14 days, and the law, business name and address.
+- [ ] Once approved: remove "Draft ... Not yet approved." from both pages, drop the `noindex` tag, deploy the landing page and then the production router (it routes `/terms` and `/refunds`). Until then they are only on staging.
+- [ ] Footer links "Terms of use" and "Refund policy" sit in their own list under the app links.

@@ -5,6 +5,9 @@ export type App = (typeof APPS)[number];
 /** The landing page's own files (scripts, styles, fonts, images) all live under this path. */
 export const LANDING_FILES = '/_landing/';
 
+/** Pages of the landing app other than `/`: the terms of use and the refund policy. */
+export const LANDING_PAGES = ['/terms', '/refunds'] as const;
+
 export type Route =
   /** The landing page at `/`, or one of its files under /_landing/. */
   | { kind: 'landing' }
@@ -25,6 +28,7 @@ export function parseLiveApps(setting: string | undefined): App[] {
 /** Decides what a path gets. Only the path matters, not the query. */
 export function route(pathname: string, liveApps: readonly App[]): Route {
   if (pathname === '/' || pathname.startsWith(LANDING_FILES)) return { kind: 'landing' };
+  if ((LANDING_PAGES as readonly string[]).includes(pathname)) return { kind: 'landing' };
 
   const app = APPS.find((name) => pathname === `/${name}` || pathname.startsWith(`/${name}/`));
   if (!app) return { kind: 'notFound' };
@@ -39,6 +43,8 @@ export function route(pathname: string, liveApps: readonly App[]): Route {
  * `/assets/...`; local dev (Vite, served under /_landing/) wants `/_landing/` and `/_landing/assets/...`.
  */
 export function landingPath(pathname: string, stripPrefix: boolean): string {
-  if (stripPrefix) return pathname === '/' ? '/' : pathname.slice(LANDING_FILES.length - 1);
+  const page = (LANDING_PAGES as readonly string[]).includes(pathname);
+  if (stripPrefix) return pathname === '/' || page ? pathname : pathname.slice(LANDING_FILES.length - 1);
+  if (page) return `${LANDING_FILES}${pathname.slice(1)}.html`;
   return pathname === '/' ? LANDING_FILES : pathname;
 }

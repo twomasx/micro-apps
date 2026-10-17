@@ -618,3 +618,30 @@ h1 {
     align-self: center;
   }
 }
+
+/* Terms and refund pages: one readable column under the masthead. */
+.legal {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 32px var(--pad-right) 64px var(--pad-left);
+}
+
+.legal h1 {
+  margin: 0 0 8px;
+}
+
+.legal-updated {
+  margin: 0 0 24px;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+
+.legal-section h2 {
+  margin: 32px 0 8px;
+  font-size: 1.125rem;
+}
+
+.legal p {
+  line-height: 1.6;
+}

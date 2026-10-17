@@ -15,7 +15,7 @@ describe('parseLiveApps', () => {
 
 describe('route', () => {
   it('serves the landing page at / and its files under /_landing/', () => {
-    for (const path of ['/', '/_landing/', '/_landing/assets/index-abc.js', '/_landing/og.png']) {
+    for (const path of ['/', '/_landing/', '/_landing/assets/index-abc.js', '/_landing/og.png', '/terms', '/refunds']) {
       expect(route(path, LIVE)).toEqual({ kind: 'landing' });
     }
   });
@@ -45,7 +45,7 @@ describe('route', () => {
   });
 
   it('returns not found for everything else', () => {
-    for (const path of ['/nope', '/focus/anything', '/personalityx/', '/index.html', '/api/health', '/_landing', '/_landingx/', '/assets/index.js', '/og.png']) {
+    for (const path of ['/nope', '/focus/anything', '/personalityx/', '/index.html', '/api/health', '/_landing', '/_landingx/', '/assets/index.js', '/og.png', '/terms/', '/terms.html']) {
       expect(route(path, LIVE)).toEqual({ kind: 'notFound' });
     }
   });
@@ -56,6 +56,12 @@ describe('landingPath', () => {
     expect(landingPath('/', true)).toBe('/');
     expect(landingPath('/_landing/assets/index-abc.js', true)).toBe('/assets/index-abc.js');
     expect(landingPath('/_landing/og.png', true)).toBe('/og.png');
+  });
+
+  it('asks for the terms and refund pages by name', () => {
+    expect(landingPath('/terms', true)).toBe('/terms');
+    expect(landingPath('/refunds', true)).toBe('/refunds');
+    expect(landingPath('/terms', false)).toBe('/_landing/terms.html');
   });
 
   it('asks the local Vite server for everything under /_landing/', () => {

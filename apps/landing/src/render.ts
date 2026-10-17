@@ -1,5 +1,6 @@
 import { appConfig } from '../app.config.ts';
 import { experiments, passLine, protocol, studySheet, type Experiment } from './content.ts';
+import { refunds, terms, type LegalPage } from './legal.ts';
 import { specimens } from './specimens/index.ts';
 
 /**
@@ -51,6 +52,17 @@ function meta(): string {
   ].join('\n    ');
 }
 
+/** A terms or refund page, from src/legal.ts. */
+function legal(page: LegalPage): string {
+  const sections = page.sections
+    .map(
+      (section) =>
+        `<section class="legal-section">\n<h2>${escape(section.heading)}</h2>\n${section.paragraphs.map((p) => `<p>${escape(p)}</p>`).join('\n')}\n</section>`,
+    )
+    .join('\n');
+  return `<h1>${escape(page.title)}</h1>\n<p class="legal-updated">${escape(page.updated)}</p>\n<p class="legal-intro">${escape(page.intro)}</p>\n${sections}`;
+}
+
 const parts: Record<string, () => string> = {
   meta,
   sheet: () =>
@@ -65,6 +77,9 @@ const parts: Record<string, () => string> = {
       .join('\n'),
   pass: () =>
     `<p class="protocol-pass">${escape(passLine.text)} <a href="${passLine.path}">${escape(passLine.link)}</a></p>`,
+  terms: () => legal(terms),
+  refunds: () => legal(refunds),
+  'legal-links': () => '<li><a href="/terms">Terms of use</a></li>\n<li><a href="/refunds">Refund policy</a></li>',
   'footer-links': () => experiments.map((e) => `<li><a href="${e.path}">${escape(e.name)}</a></li>`).join('\n'),
 };
 
