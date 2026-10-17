@@ -30,7 +30,7 @@ export async function startCheckout(): Promise<string> {
   return url;
 }
 
-export type PurchaseAnswer = { paid: true; code: string } | { paid: false };
+export type PurchaseAnswer = { paid: true; code: string } | { paid: false; status?: string };
 
 /** For the page Stripe sends the buyer back to. */
 export function fetchPurchase(sessionId: string): Promise<PurchaseAnswer> {

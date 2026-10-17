@@ -10,6 +10,7 @@ type State =
   | { kind: 'checking' }
   | { kind: 'paid'; code: string }
   | { kind: 'pending' }
+  | { kind: 'revoked' }
   | { kind: 'notFound' }
   | { kind: 'offline' };
 
@@ -24,6 +25,7 @@ async function confirm(sessionId: string, cancelled: () => boolean): Promise<Sta
     try {
       const answer = await fetchPurchase(sessionId);
       if (answer.paid) return { kind: 'paid', code: answer.code };
+      if (answer.status === 'refunded' || answer.status === 'disputed') return { kind: 'revoked' };
     } catch (error) {
       return error instanceof ApiError && error.status === 404 ? { kind: 'notFound' } : { kind: 'offline' };
     }
@@ -90,6 +92,14 @@ export function ThanksPage({ sessionId }: { sessionId: string | null }) {
         <>
           <p role="status">We could not reach the server to check your payment. Check your connection and try again.</p>
           {retry}
+        </>
+      );
+      break;
+    case 'revoked':
+      body = (
+        <>
+          <p role="status">This payment was refunded or disputed, so the pass does not unlock anything.</p>
+          <p>{CONTACT_LINE}</p>
         </>
       );
       break;

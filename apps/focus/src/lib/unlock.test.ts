@@ -89,3 +89,19 @@ describe('confirmPurchase', () => {
     expect(await run([() => Promise.reject(new TypeError('Failed to fetch'))]).result).toEqual({ kind: 'offline' });
   });
 });
+
+describe('confirmPurchase after a refund or dispute', () => {
+  it('says the payment no longer unlocks, without asking again', async () => {
+    let calls = 0;
+    const state = await confirmPurchase('cs_test_x', {
+      fetchPurchase: async () => {
+        calls++;
+        return { paid: false, status: 'disputed' };
+      },
+      wait: async () => {},
+      cancelled: () => false,
+    });
+    expect(state).toEqual({ kind: 'revoked' });
+    expect(calls).toBe(1);
+  });
+});

@@ -57,11 +57,13 @@ export type PurchaseState =
   | { kind: 'paid'; code: string }
   /** Stripe has not confirmed the payment yet. It can take a little while. */
   | { kind: 'pending' }
+  /** Stripe took the payment, then it was refunded or disputed, so it unlocks nothing. */
+  | { kind: 'revoked' }
   | { kind: 'notFound' }
   | { kind: 'offline' };
 
 export interface ConfirmDeps {
-  fetchPurchase: (sessionId: string) => Promise<{ paid: true; code: string } | { paid: false }>;
+  fetchPurchase: (sessionId: string) => Promise<{ paid: true; code: string } | { paid: false; status?: string }>;
   wait: (ms: number) => Promise<void>;
   /** True when the page has gone away and the polling should stop. */
   cancelled: () => boolean;
@@ -78,6 +80,7 @@ export async function confirmPurchase(sessionId: string, deps: ConfirmDeps): Pro
     try {
       const answer = await deps.fetchPurchase(sessionId);
       if (answer.paid) return { kind: 'paid', code: answer.code };
+      if (answer.status === 'refunded' || answer.status === 'disputed') return { kind: 'revoked' };
     } catch (error) {
       const status = (error as { status?: unknown }).status;
       return status === 404 ? { kind: 'notFound' } : { kind: 'offline' };

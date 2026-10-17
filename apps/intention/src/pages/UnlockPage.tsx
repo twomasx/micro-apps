@@ -4,6 +4,7 @@ import { PassOffer } from '../components/PassOffer.tsx';
 import { useSavedUnlock } from '../hooks/useSavedUnlock.ts';
 import { useUnlocked } from '../hooks/useUnlocked.ts';
 import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { CONTACT_EMAIL } from '@micro/payments/contact';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
 import { ApiError, fetchPurchase, startCheckout } from '../lib/api.ts';
 import { leaveTo } from '../lib/navigation.ts';
@@ -163,6 +164,15 @@ function Returned({ sessionId }: { sessionId: string }) {
           </p>
           <p>Check your connection and try again.</p>
           {retry}
+        </>
+      );
+    case 'revoked':
+      return (
+        <>
+          <p role="status" className="lead">
+            This payment was refunded or disputed, so it does not turn on Lab Pass.
+          </p>
+          <p>Questions? Write to {CONTACT_EMAIL}.</p>
         </>
       );
     case 'notFound':

@@ -5,6 +5,7 @@ import { PassOffer } from '../components/PassOffer';
 import { useSavedUnlock } from '../hooks/useSavedUnlock';
 import { useUnlocked } from '../hooks/useUnlocked';
 import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { CONTACT_EMAIL } from '@micro/payments/contact';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus';
 import { ApiError, fetchPurchase, startCheckout } from '../lib/api';
 import { leaveTo } from '../lib/navigation';
@@ -168,6 +169,15 @@ function Returned({ sessionId }: { sessionId: string }) {
           </p>
           <p>Check your connection and try again.</p>
           {retry}
+        </>
+      );
+    case 'revoked':
+      return (
+        <>
+          <p role="status" className="page-strong">
+            This payment was refunded or disputed, so it does not unlock Attention.
+          </p>
+          <p>Questions? Write to {CONTACT_EMAIL}.</p>
         </>
       );
     case 'notFound':
