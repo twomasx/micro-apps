@@ -95,7 +95,7 @@ describe('result page', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Share this result' }));
 
     expect((await screen.findByRole('status')).textContent).toBe('Link copied.');
-    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/personality/r/${ID}`);
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/personality/r/${ID}/`);
   });
 
   it('someone else\'s result offers the test, not compare or delete', async () => {
@@ -168,6 +168,6 @@ describe('intro', () => {
     await saveAsOwn();
     open('/personality/');
     const link = await screen.findByRole('link', { name: 'INTJ' });
-    expect(link.getAttribute('href')).toBe(`/personality/r/${ID}`);
+    expect(link.getAttribute('href')).toBe(`/personality/r/${ID}/`);
   });
 });

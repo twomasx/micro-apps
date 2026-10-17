@@ -90,6 +90,8 @@ Functional rules for the test (layout and flow look are Roger's):
 - The report's charts are in `src/components/report/` (`ProfileChart`, `ScaleRuler`, `TraitBars`). They only draw: the numbers come from the report API, and the geometry (ruler ticks, profile line, part numbering, Big Five mapping) is in `src/lib/report-view.ts` and `src/lib/big-five.ts`.
 - `src/lib/compare.ts` does the comparison (shared with the server). `swapSides` puts your own result first on the compare page.
 - `/science` and `/privacy` render `content/science.md` and `content/privacy.md` through `InfoPage`. Those two files are imported into the client; no other content file may be.
+- Search and sharing (SEO.md): `src/seo.ts` holds the titles, descriptions, structured data, private routes and the share image. The build prerenders the intro, `/science/` and `/privacy/` through `src/prerender.tsx` (React in Node, so nothing may touch `window` during render), and serves `test`, `pass`, `r/*` and `c/*` from a noindex app shell. Every in-app link ends in a slash (`appHref`).
+- The intro reads this device's saved state before the first render (`preloadIntroState` in `src/lib/intro-state.ts`, called from `main.tsx`), so a returning visitor's screen draws once.
 - `DESIGN-TODO.md` lists every open design decision and the class names and `data-*` attributes for each screen. Update it when a screen changes.
 
 ## Free result

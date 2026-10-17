@@ -223,7 +223,7 @@ describe('test flow', () => {
 
     choose(4);
     fireEvent.click(screen.getByRole('button', { name: 'See your result' }));
-    await waitFor(() => expect(window.location.pathname).toBe(`/personality/r/${RESULT_ID}`));
+    await waitFor(() => expect(window.location.pathname).toBe(`/personality/r/${RESULT_ID}/`));
 
     const posts = fetchMock.mock.calls.filter(([, options]) => options?.method === 'POST');
     expect(posts).toHaveLength(1);
@@ -250,7 +250,7 @@ describe('test flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'See your result' }));
 
     await waitFor(() =>
-      expect(window.location.pathname).toBe(`/personality/c/zzzzzzzzzzzzzzzz/${RESULT_ID}`),
+      expect(window.location.pathname).toBe(`/personality/c/zzzzzzzzzzzzzzzz/${RESULT_ID}/`),
     );
     // Used once: the next test you take ends on the plain result.
     expect(await loadCompareWith()).toBeNull();
@@ -270,7 +270,7 @@ describe('test flow', () => {
 
     respondWithResult();
     fireEvent.click(screen.getByRole('button', { name: 'See your result' }));
-    await waitFor(() => expect(window.location.pathname).toBe(`/personality/r/${RESULT_ID}`));
+    await waitFor(() => expect(window.location.pathname).toBe(`/personality/r/${RESULT_ID}/`));
   });
 });
 

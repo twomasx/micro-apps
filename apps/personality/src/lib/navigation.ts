@@ -1,8 +1,26 @@
 const NAVIGATE_EVENT = 'personality:navigate';
 
-/** Full path for an app path: appHref('test') is '/personality/test'. */
+/**
+ * Full path for an app path: appHref('test') is '/personality/test/'. Every page ends in a slash,
+ * the one form search engines see; the other form redirects to it, keeping the query.
+ */
 export function appHref(path: string): string {
-  return `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+  const cut = path.search(/[?#]/);
+  const page = (cut === -1 ? path : path.slice(0, cut)).replace(/^\//, '');
+  const query = cut === -1 ? '' : path.slice(cut);
+  const slashed = page === '' || page.endsWith('/') ? page : `${page}/`;
+  return `${import.meta.env.BASE_URL}${slashed}${query}`;
+}
+
+/** The address being rendered at build time, when there is no browser (see src/prerender.tsx). */
+let serverLocation = '/';
+
+export function setServerLocation(path: string): void {
+  serverLocation = path;
+}
+
+export function serverLocationSnapshot(): string {
+  return serverLocation;
 }
 
 export function navigate(path: string, options: { replace?: boolean } = {}): void {

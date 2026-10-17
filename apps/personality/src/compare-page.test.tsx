@@ -232,7 +232,7 @@ describe('compare link on the intro', () => {
     open(`/personality/?with=${A}`);
 
     const link = await screen.findByRole('link', { name: 'Compare using your last result, ISFP' });
-    expect(link.getAttribute('href')).toBe(`/personality/c/${A}/${B}`);
+    expect(link.getAttribute('href')).toBe(`/personality/c/${A}/${B}/`);
   });
 
   it('says so when the link is your own', async () => {
@@ -258,7 +258,7 @@ describe('science and privacy pages', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'The science' })).toBeTruthy();
     expect(screen.getByRole('heading', { level: 2, name: 'Sources' })).toBeTruthy();
     expect(screen.getByText(/It is not a clinical tool/)).toBeTruthy();
-    expect(document.title).toContain('The science');
+    expect(document.title).toBe('How This Personality Test Works: Big Five Research');
   });
 
   it('shows the privacy note', async () => {
@@ -271,10 +271,10 @@ describe('science and privacy pages', () => {
     open('/personality/');
     const footer = await screen.findByRole('navigation', { name: 'About this test' });
     expect(within(footer).getByRole('link', { name: 'The science' }).getAttribute('href')).toBe(
-      '/personality/science',
+      '/personality/science/',
     );
     expect(within(footer).getByRole('link', { name: 'Privacy' }).getAttribute('href')).toBe(
-      '/personality/privacy',
+      '/personality/privacy/',
     );
   });
 });

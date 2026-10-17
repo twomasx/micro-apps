@@ -4,20 +4,24 @@ import { useRoute } from './hooks/useRoute.ts';
 import type { Route } from './lib/router.ts';
 import { Link } from './components/Link.tsx';
 import { ComparePage } from './pages/ComparePage.tsx';
-import { InfoPage, infoTitle } from './pages/InfoPage.tsx';
+import { InfoPage } from './pages/InfoPage.tsx';
 import { IntroPage } from './pages/IntroPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 import { PassPage } from './pages/PassPage.tsx';
 import { ReportPage } from './pages/ReportPage.tsx';
 import { ResultPage } from './pages/ResultPage.tsx';
 import { TestPage } from './pages/TestPage.tsx';
+import { PAGES } from './seo.ts';
 
 const SITE_TITLE = 'Personality test';
 
 function pageTitle(route: Route): string {
   switch (route.name) {
+    // Pages that search engines see keep the title from src/seo.ts, the same as in the HTML the server sent.
     case 'intro':
-      return SITE_TITLE;
+    case 'science':
+    case 'privacy':
+      return PAGES[route.name].title;
     case 'test':
       return `Questions | ${SITE_TITLE}`;
     case 'result':
@@ -26,9 +30,6 @@ function pageTitle(route: Route): string {
       return `Full report | ${SITE_TITLE}`;
     case 'compare':
       return `Comparison | ${SITE_TITLE}`;
-    case 'science':
-    case 'privacy':
-      return `${infoTitle(route.name)} | ${SITE_TITLE}`;
     case 'pass':
       return `PolymadLabs pass | ${SITE_TITLE}`;
     case 'notFound':

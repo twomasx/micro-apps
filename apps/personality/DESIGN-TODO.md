@@ -109,3 +109,10 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - [ ] **TEST MODE label:** staging only (`.test-mode-label`, `data-mode="test"`, in `src/components/TestModeLabel.tsx`, shown when the hostname starts with `staging.`). For now it is fixed to the top edge in the middle, in plain system colors, and taps go through it. Production never shows it.
 - [x] **Pass offer** (`.pass-offer` under the report and couple report buy buttons): styled by Claude on Oct 16 at your request, in this app's look (`src/styles/pass.css`): a hairline above, muted text, bold links with the blue underline.
 - [x] **Pass page** (`/personality/pass?back=...`, `.pass-page`): styled the same day: blue kicker, big title, a 56px code field and a solid ink button, status in a blue-edged box. Change anything you like.
+
+## Search and sharing (SEO.md step 1)
+
+- [ ] **Share image** (`/personality/og.png`, 1200x630, made at build time from `shareImageSvg()` in `src/seo.ts`): paper background, "Personality test" in bold Inter Tight on the left with "Four scales. Sixteen types." above it, an ink rule, "40 questions. A four-letter type with a percentage on each scale." and `polymadlabs.com/personality`. On the right, four scales drawn like the result page (E/I, S/N, T/F, J/P) with accent markers at sample positions. Claude's draft: change the layout, the words or the sample positions.
+- [ ] **Search titles** follow SEO.md: the browser tab now says "Free Personality Test: Your Type in 6 Minutes" on the intro and "How This Personality Test Works: Big Five Research" on the science page. The H1s on the pages are unchanged ("Personality test", "The science").
+- [ ] **The test page (`/personality/test/`) is not offered to search engines.** It is served as the plain app with `noindex`, like results and comparisons, because it shows the answers saved on this device. Search finds the intro, which links to it.
+- [ ] **Every link now ends in a slash** (`/personality/science/`). The old form redirects to it.

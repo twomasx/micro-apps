@@ -177,7 +177,7 @@ describe('report page', () => {
     expect(screen.getByText('2.5 points')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Print or save as PDF' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Back to the result' }).getAttribute('href')).toBe(
-      `/personality/r/${ID}`,
+      `/personality/r/${ID}/`,
     );
   });
 
@@ -188,7 +188,7 @@ describe('report page', () => {
     expect(await screen.findByText('Strengths text.')).toBeTruthy();
     expect(calls('/report')).toEqual([`/personality/api/results/${ID}/report?session_id=cs_test_1`]);
     await waitFor(() => expect(window.location.search).toBe(''));
-    expect(window.location.pathname).toBe(`/personality/r/${ID}/report`);
+    expect(window.location.pathname).toBe(`/personality/r/${ID}/report/`);
   });
 
   it('offers to check again when the payment is not confirmed yet', async () => {
@@ -211,7 +211,7 @@ describe('result page', () => {
   it('links to the report with its price while it is locked', async () => {
     open(`/personality/r/${ID}`);
     const link = await screen.findByRole('link', { name: 'See the full report' });
-    expect(link.getAttribute('href')).toBe(`/personality/r/${ID}/report`);
+    expect(link.getAttribute('href')).toBe(`/personality/r/${ID}/report/`);
     expect(screen.getByText('$9.99 once. No renewals.')).toBeTruthy();
     expect(screen.getByText('A short summary.')).toBeTruthy();
   });

@@ -1,46 +1,17 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from '../components/Link.tsx';
 import { useLoaded } from '../hooks/useLoaded.ts';
-import { looksLikeResultId } from '../lib/compare.ts';
+import { earlyIntroState, forgetEarlyIntroState, loadIntroState } from '../lib/intro-state.ts';
 import { navigate } from '../lib/navigation.ts';
-import { answeredCount, restoreProgress } from '../lib/progress.ts';
 import { CURRENT_VERSION, currentQuestions } from '../lib/questions.ts';
-import {
-  clearCompareWith,
-  clearProgress,
-  loadCompareWith,
-  loadProgress,
-  loadResults,
-  saveCompareWith,
-} from '../lib/store.ts';
-
-/** `withId` is the result in a compare link, `?with=<id>`. */
-async function loadSaved(withId: string | null) {
-  const progress = restoreProgress(await loadProgress(CURRENT_VERSION), currentQuestions);
-  const results = await loadResults();
-  const answered = progress ? answeredCount(progress) : 0;
-
-  const linked = looksLikeResultId(withId) ? withId : null;
-  const ownLink = linked !== null && results.some((saved) => saved.id === linked);
-  if (linked && !ownLink) {
-    // Remembered until the test is submitted, which then opens the comparison.
-    await saveCompareWith(linked);
-  } else if (answered === 0) {
-    // No link and no test under way: an old compare link should not come back later.
-    await clearCompareWith();
-  }
-
-  return {
-    answered,
-    lastResult: results.at(-1),
-    compareWith: ownLink ? null : await loadCompareWith(),
-    ownLink,
-  };
-}
+import { clearProgress } from '../lib/store.ts';
 
 export function IntroPage({ withId }: { withId: string | null }) {
-  const load = useCallback(() => loadSaved(withId), [withId]);
-  const saved = useLoaded(load);
+  const load = useCallback(() => loadIntroState(withId), [withId]);
+  // Read before the first render when the app opened here, so a returning visitor's screen draws once.
+  const [early] = useState(() => earlyIntroState(withId));
+  useEffect(() => forgetEarlyIntroState(), []);
+  const saved = useLoaded(load, early);
   const answered = saved?.answered ?? 0;
   const total = currentQuestions.items.length;
 

@@ -9,10 +9,6 @@ const PAGES = { science: parseContent(science), privacy: parseContent(privacy) }
 
 export type InfoPageName = keyof typeof PAGES;
 
-export function infoTitle(page: InfoPageName): string {
-  return PAGES[page].title;
-}
-
 export function InfoPage({ page }: { page: InfoPageName }) {
   const content = PAGES[page];
   return (
