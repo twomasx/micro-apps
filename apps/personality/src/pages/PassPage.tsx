@@ -33,8 +33,11 @@ export function PassPage({ back }: { back: string | null }) {
   if (status === 'active') {
     return (
       <main className="pass-page" data-state="active">
-        <h1 className="pass-title">PolymadLabs pass</h1>
-        <p role="status">Your pass is on for this device. Every full report and couple report is unlocked.</p>
+        <p className="pass-kicker">PolymadLabs pass</p>
+        <h1 className="pass-title">Your pass is on</h1>
+        <p role="status" className="pass-intro">
+          Every full report and couple report is unlocked on this device.
+        </p>
         <p>{backLink}</p>
       </main>
     );
@@ -43,8 +46,11 @@ export function PassPage({ back }: { back: string | null }) {
   const message = status === 'idle' ? '' : status === 'checking' ? 'Checking your code.' : PASS_MESSAGES[status];
   return (
     <main className="pass-page" data-state={status}>
+      <p className="pass-kicker">PolymadLabs pass</p>
       <h1 className="pass-title">Enter your pass code</h1>
-      <p>A PolymadLabs pass unlocks every full report and couple report. Enter the code you saved after buying it.</p>
+      <p className="pass-intro">
+        A PolymadLabs pass unlocks every full report and couple report. Enter the code you saved after buying it.
+      </p>
       <form className="pass-form" onSubmit={submit} noValidate>
         <label className="pass-label" htmlFor="pass-code">
           Pass code
@@ -68,7 +74,7 @@ export function PassPage({ back }: { back: string | null }) {
           aria-invalid={status !== 'idle' && status !== 'checking'}
         />
         <button type="submit" className="pass-submit" disabled={status === 'checking'}>
-          Use this code
+          {status === 'checking' ? 'Checking' : 'Use this code'}
         </button>
         <p id="pass-status" role="status" className="pass-status">
           {message}

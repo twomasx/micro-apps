@@ -107,5 +107,5 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 
 - [ ] **"Unlocks open soon":** while payments are closed (the kill switch), the buy button is disabled, says "Unlocks open soon" and has `data-state="closed"` (open is `data-state="open"`). Style the closed state.
 - [ ] **TEST MODE label:** staging only (`.test-mode-label`, `data-mode="test"`, in `src/components/TestModeLabel.tsx`, shown when the hostname starts with `staging.`). For now it is fixed to the top edge in the middle, in plain system colors, and taps go through it. Production never shows it.
-- [ ] **Pass offer** (`.pass-offer` under the report and couple report buy buttons): "Or get every app for $19.99 once.", a link to the pass page, and "Have a PolymadLabs pass? Enter your pass code".
-- [ ] **Pass page** (`/personality/pass?back=...`, `.pass-page`): enter a pass code, then go back to the report or comparison.
+- [x] **Pass offer** (`.pass-offer` under the report and couple report buy buttons): styled by Claude on Oct 16 at your request, in this app's look (`src/styles/pass.css`): a hairline above, muted text, bold links with the blue underline.
+- [x] **Pass page** (`/personality/pass?back=...`, `.pass-page`): styled the same day: blue kicker, big title, a 56px code field and a solid ink button, status in a blue-edged box. Change anything you like.

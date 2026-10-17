@@ -10,6 +10,7 @@ import './styles/result.css';
 import './styles/report.css';
 import './styles/compare.css';
 import './styles/info.css';
+import './styles/pass.css';
 
 // The all-app pass: take a one-time token off the address at once, use the saved answer, ask again when due.
 void pass.start();
