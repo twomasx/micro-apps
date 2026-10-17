@@ -34,7 +34,10 @@ export interface PrerenderOptions {
   /** Module, relative to the app root, exporting `render(url: string): string`: the page's HTML for that URL. */
   entry: string;
   pages: readonly PageSeo[];
-  /** Routes under the base that are served by a noindex app shell (codes, payments, personal data). */
+  /**
+   * Routes under the base that are served by a noindex app shell (codes, payments, personal data): 'unlock',
+   * or 'r/*' for every path under /r/.
+   */
   privateRoutes: readonly string[];
   /** The 404 page's title. */
   notFoundTitle: string;
@@ -148,7 +151,9 @@ export function seoPrerender(options: PrerenderOptions): Plugin {
         // ?passToken= reach the app untouched, with no redirect.
         const shellHead = `<title>${options.notFoundTitle.split('|').pop()?.trim() ?? site.siteName}</title>\n    <meta name="robots" content="noindex" />`;
         write('app.html', withHead(template, shellHead));
-        const rewrites = options.privateRoutes.flatMap((route) => [`/${route} /app 200`, `/${route}/ /app 200`]);
+        const rewrites = options.privateRoutes.flatMap((route) =>
+          route.endsWith('/*') ? [`/${route} /app 200`] : [`/${route} /app 200`, `/${route}/ /app 200`],
+        );
         appendFileSync(join(outDir, '_redirects'), `${rewrites.join('\n')}\n`);
 
         // Unknown paths: Pages answers with this file and a real 404 status.
