@@ -74,13 +74,13 @@ function withRoot(template: string, html: string): string {
 export async function svgToPng(svg: string, fonts: readonly string[] = [], width = 1200): Promise<Buffer> {
   const folder = mkdtempSync(join(tmpdir(), 'micro-seo-fonts-'));
   try {
-    const fontFiles = await Promise.all(
-      fonts.map(async (file, index) => {
-        const ttf = join(folder, `${index}.ttf`);
-        writeFileSync(ttf, await decompress(readFileSync(file)));
-        return ttf;
-      }),
-    );
+    // One at a time, each copied out at once: wawoff2 returns a view into memory that its next call reuses.
+    const fontFiles: string[] = [];
+    for (const [index, file] of fonts.entries()) {
+      const ttf = join(folder, `${index}.ttf`);
+      writeFileSync(ttf, Buffer.from(await decompress(readFileSync(file))));
+      fontFiles.push(ttf);
+    }
     return new Resvg(svg, { font: { fontFiles, loadSystemFonts: false }, fitTo: { mode: 'width', value: width } })
       .render()
       .asPng();
