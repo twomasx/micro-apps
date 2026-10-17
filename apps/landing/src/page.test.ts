@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { experiments, protocol, studySheet } from './content.ts';
-import { renderPage } from './render.ts';
+import { seoProblems } from '@micro/seo';
+import { DESCRIPTION, renderPage, TITLE } from './render.ts';
 import { STILL_FRAME } from './motion.ts';
 import { specimens } from './specimens/index.ts';
 import { techniques, fit } from './specimens/breathwork.ts';
@@ -112,6 +113,13 @@ describe('page', () => {
     for (const url of urls.filter((u) => !u.startsWith('https://polymadlabs.com/'))) {
       expect(url).not.toMatch(/^(https?:)?\/\//);
     }
+  });
+
+  it('has the search title and description from SEO.md, the same in the tags and the share tags', () => {
+    expect(seoProblems([{ path: '', title: TITLE, description: DESCRIPTION }])).toEqual([]);
+    expect(html).toContain(`<title>${TITLE}</title>`);
+    expect(html).toContain(`<meta name="description" content="${DESCRIPTION}" />`);
+    expect(html).toContain(`<meta property="og:title" content="${TITLE}" />`);
   });
 });
 

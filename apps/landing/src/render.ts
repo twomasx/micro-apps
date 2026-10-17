@@ -28,8 +28,8 @@ function row(e: Experiment): string {
 </li>`;
 }
 
-const TITLE = 'PolymadLabs: You Are The Experiment';
-const DESCRIPTION = 'Five small apps. Each one measures, trains or tests one part of your mind. Free to start, no account needed.';
+export const TITLE = 'PolymadLabs: Five Free Experiments on Your Mind';
+export const DESCRIPTION = 'Five small apps that measure, train or test one part of your mind. Free to start, no account, no ads.';
 
 /** Link preview tags. Previews need absolute URLs, so these use the published origin. */
 function meta(): string {
