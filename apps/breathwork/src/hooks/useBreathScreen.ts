@@ -3,7 +3,7 @@ import { customToTechnique, type CustomPattern } from '../lib/custom';
 import { recordId } from '../lib/history';
 import { sessionPlan, type SessionPlan } from '../lib/limits';
 import { CUSTOM_ID, DEFAULT_SETTINGS, type Settings } from '../lib/settings';
-import { loadSettings, recordSession, saveSettings } from '../lib/store';
+import { introSeenHint, loadSettings, recordSession, saveSettings } from '../lib/store';
 import { findTechnique, techniques, type Technique } from '../lib/techniques';
 import type { StageMoment } from '../themes/types';
 import { useBreathController } from './useBreathController';
@@ -20,6 +20,8 @@ export function useBreathScreen() {
   const unlocked = useUnlocked();
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [loaded, setLoaded] = useState(false);
+  // Until the saved settings arrive, the quick flag decides between the first-visit screen and the breathing screen.
+  const [introSeenEarly] = useState(introSeenHint);
   const technique = techniqueFor(settings);
   const plan: SessionPlan = sessionPlan(technique, settings.minutes, unlocked);
   const { controller, snapshot } = useBreathController(technique, plan.durationMs);
@@ -36,6 +38,8 @@ export function useBreathScreen() {
       if (!live) return;
       setSettings(saved);
       setLoaded(true);
+      // People who saw the intro before the quick flag existed get it now.
+      if (saved.introSeen && !introSeenEarly) void saveSettings(saved);
       const t = techniqueFor(saved);
       controller.select(t, sessionPlan(t, saved.minutes, unlocked).durationMs);
       if (saved.muted) controller.setMuted(true);
@@ -102,8 +106,8 @@ export function useBreathScreen() {
     controller.start();
   };
 
-  const moment: StageMoment =
-    loaded && !settings.introSeen ? 'intro' : snapshot.status === 'complete' ? 'complete' : 'live';
+  const introSeen = loaded ? settings.introSeen : introSeenEarly;
+  const moment: StageMoment = !introSeen ? 'intro' : snapshot.status === 'complete' ? 'complete' : 'live';
 
   return {
     controller,

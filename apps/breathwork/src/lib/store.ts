@@ -19,10 +19,35 @@ export async function loadSettings(): Promise<Settings> {
 }
 
 export async function saveSettings(settings: Settings): Promise<void> {
+  if (settings.introSeen) rememberIntroSeen();
   try {
     await storage.set(SETTINGS_KEY, settings);
   } catch {
     // Nothing to do: the settings stay in memory for this visit.
+  }
+}
+
+/**
+ * A one-word copy of `introSeen` that can be read before the first render. The settings live in IndexedDB,
+ * which answers only after the page has drawn. The page the server sends shows the first-visit screen, so a
+ * first visit draws it once and keeps it; this flag lets a returning visitor's first render go straight to
+ * the breathing screen.
+ */
+const INTRO_SEEN_KEY = storageKey(appConfig.name, 'intro-seen');
+
+export function introSeenHint(): boolean {
+  try {
+    return typeof window !== 'undefined' && window.localStorage.getItem(INTRO_SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function rememberIntroSeen(): void {
+  try {
+    window.localStorage.setItem(INTRO_SEEN_KEY, '1');
+  } catch {
+    // Storage is blocked. The intro may show again on the next visit, as before.
   }
 }
 

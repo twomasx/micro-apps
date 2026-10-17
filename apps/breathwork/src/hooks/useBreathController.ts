@@ -20,6 +20,7 @@ export function useBreathController(
 ): { controller: BreathController; snapshot: BreathSnapshot } {
   const [controller] = useState(() => createBreathController(technique, durationMs, browserDeps(parts)));
   useEffect(() => controller.connect(), [controller]);
-  const snapshot = useSyncExternalStore(controller.subscribe, controller.snapshot);
+  // At build time the controller has not started, so its first snapshot is what the page shows before Start.
+  const snapshot = useSyncExternalStore(controller.subscribe, controller.snapshot, controller.snapshot);
   return { controller, snapshot };
 }

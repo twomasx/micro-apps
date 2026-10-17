@@ -22,7 +22,8 @@ const STYLE: CSSProperties = {
 
 /** "TEST MODE" on staging, where every purchase uses Stripe test cards. Never shown in production. */
 export function TestModeLabel() {
-  if (!isStagingHost(window.location.hostname)) return null;
+  // Pages rendered at build time have no address; the label appears once the app starts on staging.
+  if (typeof window === 'undefined' || !isStagingHost(window.location.hostname)) return null;
   return (
     <p className="test-mode-label" data-mode="test" role="note" style={STYLE}>
       TEST MODE

@@ -6,6 +6,11 @@
 export const appConfig = {
   name: 'breathwork',
   base: '/breathwork/',
+  /**
+   * Production address. Canonical links, share tags and the sitemap use it, on staging builds too.
+   * A build can override it with PUBLIC_ORIGIN.
+   */
+  origin: 'https://polymadlabs.com',
   sitePort: 3003,
   functionsPort: 8803,
 } as const;
