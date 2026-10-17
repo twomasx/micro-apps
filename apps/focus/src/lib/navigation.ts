@@ -5,9 +5,10 @@ const NAVIGATE_EVENT = 'focus:navigate';
  * the one form search engines see; the other form redirects to it, keeping the query.
  */
 export function appHref(path: string): string {
-  const [page = '', query] = path.replace(/^\//, '').split(/(?=[?#])/, 2);
+  // A path with no page ('?t=box') is all query: the page part is empty, and the query stays as it is.
+  const [, page = '', query = ''] = /^([^?#]*)(.*)$/.exec(path.replace(/^\//, '')) ?? [];
   const slashed = page === '' || page.endsWith('/') ? page : `${page}/`;
-  return `${import.meta.env.BASE_URL}${slashed}${query ?? ''}`;
+  return `${import.meta.env.BASE_URL}${slashed}${query}`;
 }
 
 /** The address being rendered at build time, when there is no browser (see src/prerender.tsx). */

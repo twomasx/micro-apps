@@ -10,6 +10,7 @@ describe('links', () => {
     ['unlock?session_id=cs_1', '/intention/unlock/?session_id=cs_1'],
     ['science#sources-title', '/intention/science/#sources-title'],
     ['privacy/', '/intention/privacy/'],
+    ['?pair=ember', '/intention/?pair=ember'],
   ])('%s links to %s, the slashed form search engines see', (path, href) => {
     // Tests run with the base Vite gives them; the app's own base is '/intention/'.
     expect(appHref(path)).toBe(href.replace('/intention/', import.meta.env.BASE_URL));
