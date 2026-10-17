@@ -1,5 +1,6 @@
 import { comingSoonPage, notFoundPage } from './pages.ts';
 import { landingPath, parseLiveApps, route, type App } from './routes.ts';
+import { httpsRedirect, robotsTxt, sitemapIndex, withRobots } from './seo.ts';
 
 type Env = {
   STRIP_PREFIX: string;
@@ -11,6 +12,8 @@ type Env = {
   LANDING_ORIGIN: string;
   /** "true" on staging: search engines are asked not to index anything. */
   NOINDEX?: string;
+  /** This environment's address, like https://polymadlabs.com. Used in robots.txt and the sitemap index. */
+  PUBLIC_ORIGIN?: string;
 } & Record<`${Uppercase<App>}_ORIGIN`, string>;
 
 /** Forwards a request to `path` on an app and fixes redirects so they stay under the app's path. */
@@ -40,12 +43,18 @@ export function withoutInjection(response: Response): Response {
 
 async function handle(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
+  const toHttps = httpsRedirect(url);
+  if (toHttps) return toHttps;
 
   // Browser storage is kept per hostname, so www and the bare domain must not both serve the apps:
   // someone's saved results would exist on one and not the other.
   if (env.CANONICAL_HOST && url.hostname !== env.CANONICAL_HOST && url.hostname.endsWith(`.${env.CANONICAL_HOST}`)) {
     return Response.redirect(`https://${env.CANONICAL_HOST}${url.pathname}${url.search}`, 308);
   }
+
+  const origin = env.PUBLIC_ORIGIN ?? url.origin;
+  if (url.pathname === '/robots.txt') return robotsTxt(origin);
+  if (url.pathname === '/sitemap.xml') return sitemapIndex(origin, parseLiveApps(env.LIVE_APPS));
 
   const strip = env.STRIP_PREFIX === 'true';
   const target = route(url.pathname, parseLiveApps(env.LIVE_APPS));
@@ -66,16 +75,9 @@ async function handle(request: Request, env: Env): Promise<Response> {
   }
 }
 
-/** Staging is a test copy of the site. Asks search engines to leave it out. */
-export function withNoindex(response: Response): Response {
-  const marked = new Response(response.body, response);
-  marked.headers.set('x-robots-tag', 'noindex, nofollow');
-  return marked;
-}
-
 export default {
   async fetch(request, env): Promise<Response> {
     const response = withoutInjection(await handle(request, env));
-    return env.NOINDEX === 'true' ? withNoindex(response) : response;
+    return withRobots(response, new URL(request.url), env.NOINDEX === 'true');
   },
 } satisfies ExportedHandler<Env>;

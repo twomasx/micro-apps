@@ -17,6 +17,7 @@
     "STRIP_PREFIX": "true",
     "LIVE_APPS": "personality,focus,breathwork,attention,intention,pass",
     "CANONICAL_HOST": "polymadlabs.com",
+    "PUBLIC_ORIGIN": "https://polymadlabs.com",
     "PERSONALITY_ORIGIN": "https://micro-personality.pages.dev",
     "FOCUS_ORIGIN": "https://micro-focus.pages.dev",
     "BREATHWORK_ORIGIN": "https://micro-breathwork.pages.dev",
@@ -31,6 +32,7 @@
       "routes": [],
       "vars": {
         "STRIP_PREFIX": "false",
+        "PUBLIC_ORIGIN": "http://localhost:3000",
         "LIVE_APPS": "personality,focus,breathwork,attention,intention,pass",
         "PERSONALITY_ORIGIN": "http://localhost:3001",
         "FOCUS_ORIGIN": "http://localhost:3002",
@@ -51,6 +53,7 @@
         "STRIP_PREFIX": "true",
         "LIVE_APPS": "personality,focus,breathwork,attention,intention,pass",
         "CANONICAL_HOST": "staging.polymadlabs.com",
+        "PUBLIC_ORIGIN": "https://staging.polymadlabs.com",
         "NOINDEX": "true",
         "PERSONALITY_ORIGIN": "https://staging.micro-personality.pages.dev",
         "FOCUS_ORIGIN": "https://staging.micro-focus.pages.dev",
