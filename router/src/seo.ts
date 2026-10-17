@@ -32,11 +32,43 @@ export function withRobots(response: Response, url: URL, noindexAll: boolean): R
 }
 
 /**
- * Our robots.txt has only the sitemap line. Cloudflare's managed robots.txt (the content signals and the AI
- * crawler rules) is put in front of it by Cloudflare. If that ever stops, this file alone still allows everything.
+ * Crawlers that collect text to train AI models. The same list Cloudflare's managed robots.txt blocks.
+ * Search crawlers (Googlebot, Bingbot) and AI search tools that link back (OAI-SearchBot, Claude-SearchBot,
+ * PerplexityBot) are not on it, so the pages can still be found and cited.
+ */
+export const AI_TRAINING_CRAWLERS = [
+  'Amazonbot',
+  'Applebot-Extended',
+  'Bytespider',
+  'CCBot',
+  'ClaudeBot',
+  'Google-Extended',
+  'GPTBot',
+  'meta-externalagent',
+] as const;
+
+/**
+ * The whole robots.txt, served by the router on every host. Cloudflare's managed file can't take our Sitemap
+ * line, so this replaces it with the same rules (SEO.md step 1). Google-Extended only controls AI training;
+ * it has no effect on Google Search. Staging uses the same file: its protection is the noindex header (rule 7).
  */
 export function robotsTxt(origin: string): Response {
-  return new Response(`# PolymadLabs. Every page is listed in the sitemap.\nSitemap: ${origin}/sitemap.xml\n`, {
+  const text = [
+    '# PolymadLabs. Search engines and AI search tools may crawl every page.',
+    '# Crawlers that gather text to train AI models are asked not to.',
+    '# Content-Signal says the same: use for search yes, use for AI training no.',
+    '',
+    'User-agent: *',
+    'Content-Signal: search=yes,ai-train=no',
+    'Allow: /',
+    '',
+    ...AI_TRAINING_CRAWLERS.map((agent) => `User-agent: ${agent}`),
+    'Disallow: /',
+    '',
+    `Sitemap: ${origin}/sitemap.xml`,
+    '',
+  ].join('\n');
+  return new Response(text, {
     headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' },
   });
 }

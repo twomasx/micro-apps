@@ -10,6 +10,7 @@ This file covers all five apps, the landing page and the router. It is a suite-w
 - **All five apps:** the HTML is an empty shell. The title is one word ("Focus", "Attention", "Personality test"), there is no canonical link, no Open Graph tags and no body text until JavaScript runs. Personality has no meta description.
 - **No sitemap.** `/sitemap.xml` does not load.
 - **robots.txt** is Cloudflare's managed file. It blocks AI training crawlers (GPTBot, ClaudeBot, CCBot, Google-Extended), allows everything else and sets `Content-Signal: search=yes, ai-train=no`. Google-Extended does not affect Google Search. Keep this as is unless Roger says otherwise.
+  - **Update, Oct 16:** Cloudflare does not combine its managed file with one from the router, and on production the managed file turned out to hold only the content-signal comments, with no rules. Decision: the router serves the whole robots.txt with the rules above plus the Sitemap line, and the managed file is turned off when the production router goes out (DEPLOY.md, "Deploy the router").
 
 Why the empty shell matters: Google can run JavaScript, but pages that need it wait in a second queue, sometimes for days or weeks, and new low-authority sites wait longest. Titles and descriptions set by JavaScript can be missed in the first pass. Many other crawlers (Bing's previews, link previews in messaging apps, AI search tools) read only the raw HTML. So every page we want found must have its title, description, canonical, share tags, structured data and its main text in the HTML the server sends.
 

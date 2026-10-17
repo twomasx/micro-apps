@@ -52,10 +52,16 @@ describe('withRobots', () => {
 });
 
 describe('robots.txt and the sitemap index', () => {
-  it('robots.txt names the sitemap and blocks nothing itself', async () => {
+  it('robots.txt allows search, blocks only AI training crawlers and names the sitemap', async () => {
     const text = await robotsTxt('https://polymadlabs.com').text();
     expect(text).toContain('Sitemap: https://polymadlabs.com/sitemap.xml');
-    expect(text).not.toMatch(/Disallow/i);
+    expect(text).toContain('User-agent: *\nContent-Signal: search=yes,ai-train=no\nAllow: /\n');
+    // One Disallow, for the training crawlers' group only. Search crawlers are never named.
+    expect(text.match(/Disallow/g)).toHaveLength(1);
+    expect(text).toMatch(/User-agent: GPTBot\n(User-agent: [^\n]+\n)*Disallow: \/\n/);
+    for (const searchBot of ['Googlebot', 'Bingbot', 'OAI-SearchBot', 'Claude-SearchBot', 'PerplexityBot']) {
+      expect(text).not.toContain(searchBot);
+    }
   });
 
   it('the sitemap index lists the landing page and every live app', async () => {

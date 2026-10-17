@@ -249,6 +249,8 @@ pnpm exec wrangler deploy --env=""        # production: polymadlabs.com and www
 
 The preview Worker serves staging, so its app origins are the `staging.micro-<app>.pages.dev` addresses, not production's.
 
+**robots.txt is the router's.** It serves the whole file (`router/src/seo.ts`): everything allowed, AI training crawlers blocked, `Content-Signal: search=yes,ai-train=no`, and the `Sitemap:` line. Cloudflare's managed robots.txt can't take a Sitemap line, so when this router first goes to production, turn off the "Manage your robots.txt" setting for polymadlabs.com in the Cloudflare dashboard (under the bot or AI crawler settings), then check that `https://polymadlabs.com/robots.txt` shows the router's file.
+
 ### Turning on the next app
 
 1. Deploy the app as its own Pages project (`micro-focus` and so on), built with its base path.
