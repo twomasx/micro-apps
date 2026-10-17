@@ -203,6 +203,9 @@ importers:
       '@micro/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@micro/seo':
+        specifier: workspace:*
+        version: link:../../packages/seo
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0
@@ -319,9 +322,15 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^5.20261006.1
         version: 5.20261009.1
+      '@fontsource/manrope':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@micro/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@micro/seo':
+        specifier: workspace:*
+        version: link:../../packages/seo
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0
@@ -386,6 +395,9 @@ importers:
       '@micro/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@micro/seo':
+        specifier: workspace:*
+        version: link:../../packages/seo
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0
@@ -521,9 +533,15 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^5.20261006.1
         version: 5.20261009.1
+      '@fontsource/inter-tight':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@micro/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@micro/seo':
+        specifier: workspace:*
+        version: link:../../packages/seo
       '@testing-library/dom':
         specifier: ^10.4.2
         version: 10.4.2
@@ -1528,6 +1546,9 @@ packages:
 
   '@fontsource/inter-tight@5.3.0':
     resolution: {integrity: sha512-uRwIrjKSUcCKIFeO2qm3yECA9phwge6Y1qQZvUmwqFgiIVWUELwwuq7pFlmlpPtO33ZtFQVOXQGNuvna1JPs6A==}
+
+  '@fontsource/manrope@5.3.0':
+    resolution: {integrity: sha512-obJ1Dv3+uCA6HlHgW8u4BGYxJR9In2HW7gjJhlflEvkrj1X1iSEwu0fToL+JYGC/FEKFfIz1sBuPduvcL2gIAA==}
 
   '@fontsource/outfit@5.3.0':
     resolution: {integrity: sha512-0AVHzTTVJSxWDOxPKSfMeHhZeBFDU3cmgrcOb76ZEyhGo0+xgyG3GsLF3h9+X8w0IX7G4jzjJgFQEBiWdX6VgA==}
@@ -4788,6 +4809,8 @@ snapshots:
   '@fontsource/ibm-plex-sans@5.3.0': {}
 
   '@fontsource/inter-tight@5.3.0': {}
+
+  '@fontsource/manrope@5.3.0': {}
 
   '@fontsource/outfit@5.3.0': {}
 

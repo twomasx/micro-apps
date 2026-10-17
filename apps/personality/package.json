@@ -23,7 +23,9 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261006.1",
+    "@fontsource/inter-tight": "^5.3.0",
     "@micro/config": "workspace:*",
+    "@micro/seo": "workspace:*",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
     "@types/react": "^19.3.0",
