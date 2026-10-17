@@ -15,27 +15,33 @@ export function downloadCalendar(now: number): void {
   setTimeout(() => URL.revokeObjectURL(link.href), 10_000);
 }
 
-/** Intention Hour on the global page: when it is, its combined result and the recent ones. */
-export function HourPanel({ hour }: { hour: HourAnswer | null }) {
+/**
+ * Intention Hour on the global page: when it is, its combined result and the recent ones.
+ * `hour` is undefined while the numbers load (and in the HTML made at build time), null if they failed.
+ */
+export function HourPanel({ hour }: { hour: HourAnswer | null | undefined }) {
   const now = useNow(1000);
-  const status = hourStatus(now);
+  // Null in the HTML made at build time: the countdown and your own time appear when the app starts.
+  const status = now === null ? null : hourStatus(now);
   return (
-    <section className="hour" aria-labelledby="hour-title" data-live={status.kind === 'live'}>
+    <section className="hour" aria-labelledby="hour-title" data-live={status?.kind === 'live'}>
       <h2 id="hour-title">Intention Hour</h2>
       <p>
-        Every day at {hourWhen(status.event)}, everyone runs at the same time for {HOUR.minutes} minutes. Runs in
-        that window also count in a result of their own.
+        Every day at {status ? hourWhen(status.event) : HOUR.label}, everyone runs at the same time for{' '}
+        {HOUR.minutes} minutes. Runs in that window also count in a result of their own.
       </p>
       <p className="hour-status">
-        {status.kind === 'live'
-          ? `Live now. ${formatCountdown(status.leftMs)} left.`
-          : `Next one in ${formatCountdown(status.event.startsAt - now)}.`}
+        {status === null || now === null
+          ? '\u00a0'
+          : status.kind === 'live'
+            ? `Live now. ${formatCountdown(status.leftMs)} left.`
+            : `Next one in ${formatCountdown(status.event.startsAt - now)}.`}
       </p>
-      <button type="button" className="button-secondary" onClick={() => downloadCalendar(now)}>
+      <button type="button" className="button-secondary" onClick={() => downloadCalendar(Date.now())}>
         Add to calendar
       </button>
 
-      {hour && hour.all.runs > 0 ? (
+      {hour === undefined ? null : hour && hour.all.runs > 0 ? (
         <>
           <p className="hour-total">
             <b>{formatZ(hour.all.combinedZ)}</b> {totalVerdict(hour.all.combinedZ, hour.all.runs, 'the Intention Hour total')}

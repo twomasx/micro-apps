@@ -111,6 +111,11 @@ button {
   width: 100%;
   height: 100%;
   display: block;
+  /*
+   * The two colors at rest, split in the middle, until the first frame is drawn. The HTML the server sends
+   * shows this, so the page opens in color instead of on the dark background.
+   */
+  background: linear-gradient(90deg, var(--left) 50%, var(--right) 50%);
 }
 
 .tug-ui {

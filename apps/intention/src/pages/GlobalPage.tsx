@@ -51,7 +51,7 @@ export function GlobalPage() {
       )}
       {global.state === 'ready' && <GlobalNumbers data={global.data} />}
 
-      <HourPanel hour={hour.state === 'ready' ? hour.data : null} />
+      <HourPanel hour={hour.state === 'ready' ? hour.data : hour.state === 'loading' ? undefined : null} />
     </main>
   );
 }

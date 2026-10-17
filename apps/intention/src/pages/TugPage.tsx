@@ -44,7 +44,8 @@ export function TugPage() {
   const session = useMemo(() => new RunSession({ kind: 'tug', getDeviceId, getUnlockCode: loadUnlockCode }), []);
   useEffect(() => session.setSeconds(seconds), [session, seconds]);
   useEffect(() => () => session.dispose(), [session]);
-  const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot);
+  // At build time no run has started, so the first snapshot is the screen before Begin.
+  const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
   const reducedMotion = useReducedMotion();
   const { lock } = useWakeLock();
   const [choice, setChoice] = useState<ColorChoice>(DEFAULT_CHOICE);
@@ -97,7 +98,7 @@ export function TugPage() {
 
   const text = tugText(snapshot, pair, runId !== null && headlineDoneFor !== runId, seconds);
   const progress = start ? n / start.lengthBits : 0;
-  const hour = hourLine(hourStatus(now));
+  const hour = now === null ? null : hourLine(hourStatus(now));
   const style = {
     '--left': pair.left.hex,
     '--right': pair.right.hex,

@@ -74,7 +74,7 @@ export function MenuSheet({ open, onClose, unlocked, seconds, onSeconds }: Props
       <section className="menu-hour">
         <h3>Intention Hour</h3>
         <p>
-          Every day at {hourWhen(hourStatus(now).event)}, for {HOUR.minutes} minutes.
+          Every day at {now === null ? HOUR.label : hourWhen(hourStatus(now).event)}, for {HOUR.minutes} minutes.
         </p>
         <button type="button" className="button-secondary" onClick={() => downloadCalendar(Date.now())}>
           Add to calendar

@@ -158,3 +158,11 @@ Run on the production build (`pnpm build` + `vite preview`, service worker on) w
 ### Icon
 
 A dark square with a circle split by a curved seam: Ember on the left, Glacier on the right, a thin white line between. The circle sits inside the middle 80%, so the 512 px file is also the maskable icon.
+
+## Search and sharing (SEO.md step 1, Oct 16, 2026)
+
+- **Real HTML for the tug, everyone's runs, the science and privacy.** The build renders each page in Node and the app replaces it with the same markup when it starts. Your runs, Lab Pass and restore are served by a noindex app shell.
+- **The field shows color before the first frame.** The canvas has a plain two-color background, split in the middle, from the pair's colors. The HTML the server sends opens in Ember and Glacier, not on the dark background, and the first drawn frame replaces it with the living seam.
+- **Nothing that depends on the time is in the HTML the server sends.** The Intention Hour line on the main screen, the countdown on everyone's runs and "your time" next to 9:00 pm Pacific appear when the app starts. On the main screen the line sits under the headline, at the top, so nothing else moves (layout shift 0.000 measured with the hour live and coming up).
+- **Everyone's runs no longer says "No Intention Hour runs yet" while the numbers load.** It says nothing until they arrive.
+- **Share image** (`og.png`, made at build time from `src/seo.ts`): the tug at rest, Ember and Glacier with a soft seam, the Night style's dark shading, "Can your mind move a random number?" in Unbounded light and "A 20-second test against chance." in Inter Tight.

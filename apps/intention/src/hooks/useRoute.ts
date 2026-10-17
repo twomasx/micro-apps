@@ -1,11 +1,12 @@
 import { useMemo, useSyncExternalStore } from 'react';
-import { currentLocation, subscribeToLocation } from '../lib/navigation.ts';
+import { currentLocation, serverLocationSnapshot, subscribeToLocation } from '../lib/navigation.ts';
 import { parseRoute, type Route } from '../lib/router.ts';
 
 export function useRoute(): Route {
-  const location = useSyncExternalStore(subscribeToLocation, currentLocation);
+  const location = useSyncExternalStore(subscribeToLocation, currentLocation, serverLocationSnapshot);
   return useMemo(() => {
-    const url = new URL(location, window.location.origin);
+    // The origin only lets URL parse the path; any will do when there is no browser.
+    const url = new URL(location, 'https://origin.invalid');
     return parseRoute(url.pathname, url.search, import.meta.env.BASE_URL);
   }, [location]);
 }

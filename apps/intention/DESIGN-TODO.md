@@ -33,6 +33,11 @@ Check on Android Chrome first, then iPhone Safari. Locally at http://localhost:3
 - [ ] The science page's five sources were written from the literature as I know it. Please check the page ranges and author lists against the papers before launch.
 - [ ] Your history follows the device, not the Lab Pass code. Restoring Lab Pass on a new phone unlocks the features there, but that phone starts a new list. Linking history to the code would need a decision about privacy. Fine as it is?
 
+## Search and sharing (SEO.md)
+
+- [ ] The share image (`/intention/og.png`): the tug at rest with "Can your mind move a random number?". Paste a link into a messaging app to see it.
+- [ ] The main screen's heading is "Pull your color across". Search engines read it as the page's main heading, and it does not say what the page is (a psychokinesis test). The title and description do. Keep it, or add a line that names the test?
+
 ## Lab Pass (step 6)
 
 - [ ] Stripe Checkout shows the seller as "Roger Tafoya", the Stripe account's public business name, as it does for every app on this account. If you would rather buyers see "PolymadLabs", change it in the Stripe dashboard (Settings, Public details).
