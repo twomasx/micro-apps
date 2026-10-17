@@ -1,6 +1,7 @@
 import { appConfig } from '../app.config.ts';
 import { experiments, passLine, protocol, studySheet, type Experiment } from './content.ts';
 import { refunds, terms, type LegalPage } from './legal.ts';
+import { jsonLdScript, organization, website } from '@micro/seo';
 import { specimens } from './specimens/index.ts';
 
 /**
@@ -49,6 +50,8 @@ function meta(): string {
     `<meta name="twitter:title" content="${TITLE}" />`,
     `<meta name="twitter:description" content="${DESCRIPTION}" />`,
     `<meta name="twitter:image" content="${image}" />`,
+    jsonLdScript(website(appConfig.origin, 'PolymadLabs')),
+    jsonLdScript(organization(appConfig.origin, 'PolymadLabs', `${appConfig.origin}${appConfig.base}logo-512.png`)),
   ].join('\n    ');
 }
 

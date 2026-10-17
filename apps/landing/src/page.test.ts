@@ -94,6 +94,12 @@ describe('page', () => {
     expect(html).toContain('viewport-fit=cover');
   });
 
+  it('has WebSite and Organization structured data, with the 512 px logo', () => {
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((m) => JSON.parse(m[1]!) as Record<string, unknown>);
+    expect(blocks.map((b) => b['@type'])).toEqual(['WebSite', 'Organization']);
+    expect(blocks[1]).toMatchObject({ name: 'PolymadLabs', url: 'https://polymadlabs.com/', logo: 'https://polymadlabs.com/_landing/logo-512.png' });
+  });
+
   it('loads nothing from other sites', () => {
     const urls = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]!);
     // Absolute URLs are only our own address, for link previews and the canonical link.
