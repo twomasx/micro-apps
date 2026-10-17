@@ -565,7 +565,7 @@ button {
   gap: 12px;
   width: 100%;
   min-height: 64px;
-  padding: 0;
+  padding: 10px 0;
   border: 0;
   background: transparent;
   text-align: left;
@@ -578,6 +578,7 @@ button {
 .app-link-name {
   font-size: 1.25rem;
   font-weight: 600;
+  line-height: 1.25;
   letter-spacing: -0.015em;
 }
 

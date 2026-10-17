@@ -47,7 +47,10 @@ export function AppLinks({ code }: { code: string }) {
         <h2 id="apps-title" className="app-links-title">
           Open an app with your pass
         </h2>
-        {links && <p className="section-count">{links.length} apps</p>}
+        {links && (
+          // Staging also lists each app on a second address; count apps, not buttons.
+          <p className="section-count">{new Set(links.map((link) => link.app)).size} apps</p>
+        )}
       </div>
       {links === null && !failed && (
         <p role="status" className="app-links-loading">
