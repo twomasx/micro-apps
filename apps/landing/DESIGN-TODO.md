@@ -18,7 +18,8 @@ In this order: Android Chrome, iPhone Safari, tablet, desktop.
 
 ## The all-app pass
 
-- [ ] **One line about the pass** under the protocol steps (`.protocol-pass`): "One pass unlocks every app, including the ones we add later." with a link to `/pass/`. No price, as with the rest of the page. Where should it sit and how should it look?
+- [x] **The pass panel** under the protocol steps (`.protocol-pass`), done by Claude on Oct 16 at your request: a ruled panel with the specimen corner mark, an "All-app pass" label, the line in large type, and a light "See the PolymadLabs pass" button. No price, as with the rest of the page.
+- [x] **"Pass" in the header nav**, after Index and Protocol, on the home, terms and refund pages. On phones the nav links are a little tighter (7px padding) and "Index of experiments" sits on its own line under the wordmark, so nothing wraps.
 - [ ] With a pass on this browser, the app links open each app with a one-time token (`src/pass-links.ts`). Nothing visible changes.
 
 ## Terms and refunds (drafts)

@@ -150,9 +150,9 @@ a {
   grid-template-columns: 1fr auto;
   grid-template-areas:
     'mark nav'
-    'label nav';
+    'label label';
   align-items: center;
-  column-gap: 16px;
+  column-gap: 12px;
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -180,7 +180,7 @@ a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 10px;
+  padding: 0 7px;
   font-family: var(--mono);
   font-size: 0.875rem;
   text-decoration: none;
@@ -188,7 +188,7 @@ a {
 }
 
 .masthead-nav a:last-child {
-  margin-right: -10px;
+  margin-right: -7px;
 }
 
 /* Hero */
@@ -484,6 +484,89 @@ h1 {
   outline-color: var(--band-accent);
 }
 
+/* The all-app pass: a ruled panel under the steps, with the same corner mark as the specimens. */
+.protocol-pass {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  margin-top: 40px;
+  padding: 20px 16px;
+  border: 1px solid var(--band-ink);
+}
+
+.protocol-pass::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 12px;
+  height: 12px;
+  border-top: 3px solid var(--band-accent);
+  border-right: 3px solid var(--band-accent);
+}
+
+.protocol-pass-label {
+  color: var(--band-accent);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.protocol-pass-text {
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.protocol-pass-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  margin-top: 6px;
+  padding: 0 20px;
+  border: 1px solid var(--band-ink);
+  background: var(--band-ink);
+  color: var(--band);
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.protocol-pass-link:active {
+  background: var(--band-accent);
+  border-color: var(--band-accent);
+}
+
+@media (hover: hover) {
+  .protocol-pass-link:hover {
+    background: var(--band-accent);
+    border-color: var(--band-accent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .protocol-pass-link {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+
+  @media (hover: hover) {
+    .protocol-pass-link:hover .entry-arrow {
+      transform: translateX(3px);
+    }
+  }
+}
+
 /* Footer */
 
 .colophon {
@@ -542,6 +625,14 @@ h1 {
     border-left: 1px solid var(--rule);
   }
 
+  .masthead-nav a {
+    padding: 0 10px;
+  }
+
+  .masthead-nav a:last-child {
+    margin-right: -10px;
+  }
+
   .hero {
     padding-top: 64px;
     padding-bottom: 72px;
@@ -571,6 +662,21 @@ h1 {
   .step {
     border-bottom: 0;
     padding-bottom: 0;
+  }
+
+  .protocol-pass {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 32px;
+    padding: 28px;
+  }
+
+  .protocol-pass-label {
+    grid-column: 1 / -1;
+  }
+
+  .protocol-pass-link {
+    margin-top: 0;
   }
 
   .colophon-inner {

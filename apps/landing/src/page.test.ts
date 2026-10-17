@@ -76,8 +76,14 @@ describe('page', () => {
     }
   });
 
-  it('has one line about the all-app pass, linking to it, with no price', () => {
-    expect(html).toContain('<p class="protocol-pass">One pass unlocks every app, including the ones we add later. <a href="/pass/">See the PolymadLabs pass</a></p>');
+  it('has a panel about the all-app pass, linking to it, with no price', () => {
+    expect(html).toContain('<p class="protocol-pass-text">One pass unlocks every app, including the ones we add later.</p>');
+    expect(html).toContain('<a class="protocol-pass-link" href="/pass/">See the PolymadLabs pass');
+    expect(html).not.toMatch(/\$\d/);
+  });
+
+  it('links to the pass from the header', () => {
+    expect(html).toContain('<a href="/pass/">Pass</a>');
   });
 
   it('has one h1, then h2 sections, then h3 entries', () => {

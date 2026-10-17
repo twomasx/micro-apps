@@ -66,8 +66,9 @@ export const studySheet: readonly [label: string, value: string][] = [
   ['Full version', 'One-time unlock'],
 ];
 
-/** The one line about the all-app pass. No price here: prices live in the pass service's products.json. */
+/** The panel about the all-app pass. No price here: prices live in the pass service's products.json. */
 export const passLine = {
+  label: 'All-app pass',
   text: 'One pass unlocks every app, including the ones we add later.',
   link: 'See the PolymadLabs pass',
   path: '/pass/',

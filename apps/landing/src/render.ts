@@ -79,7 +79,11 @@ const parts: Record<string, () => string> = {
       )
       .join('\n'),
   pass: () =>
-    `<p class="protocol-pass">${escape(passLine.text)} <a href="${passLine.path}">${escape(passLine.link)}</a></p>`,
+    `<div class="protocol-pass">
+  <p class="protocol-pass-label">${escape(passLine.label)}</p>
+  <p class="protocol-pass-text">${escape(passLine.text)}</p>
+  <a class="protocol-pass-link" href="${passLine.path}">${escape(passLine.link)}<span class="entry-arrow" aria-hidden="true">&#8594;</span></a>
+</div>`,
   terms: () => legal(terms),
   refunds: () => legal(refunds),
   'legal-links': () => '<li><a href="/terms">Terms of use</a></li>\n<li><a href="/refunds">Refund policy</a></li>',
