@@ -3,10 +3,16 @@ import catalog from '../../config/products.json';
 
 export const PASS = catalog.products[0]!;
 
+/** "$19.99", from products.json. */
+export function amountLabel(): string {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: PASS.currency.toUpperCase() }).format(PASS.amount / 100);
+}
+
+export const ONE_TIME = 'once. No renewals.';
+
 /** "$19.99 once. No renewals." Every price we show says it is one-time. */
 export function priceLine(): string {
-  const amount = new Intl.NumberFormat('en-US', { style: 'currency', currency: PASS.currency.toUpperCase() }).format(PASS.amount / 100);
-  return `${amount} once. No renewals.`;
+  return `${amountLabel()} ${ONE_TIME}`;
 }
 
 export const SAVE_CODE_LINE = 'Save this code to unlock every PolymadLabs app on any device.';

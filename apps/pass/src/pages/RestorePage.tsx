@@ -25,52 +25,73 @@ export function RestorePage() {
   if (status === 'active' && code) {
     return (
       <main className="restore" data-state="active">
-        <h1>PolymadLabs pass</h1>
-        <p role="status">Your pass is on this device.</p>
+        <section className="pass-hero" aria-labelledby="restore-title">
+          <div className="pass-hero-text">
+            <p className="eyebrow">Code accepted</p>
+            <h1 className="pass-title" id="restore-title">
+              Your pass is on this device
+            </h1>
+            <p role="status" className="pass-lead">
+              Open any app below and it is already unlocked.
+            </p>
+          </div>
+        </section>
         <AppLinks code={code} />
-        <p>
-          <Link to="">Back to the pass</Link>
-        </p>
       </main>
     );
   }
 
   const message =
-    status === 'idle' ? '' : status === 'checking' ? 'Checking your code.' : status === 'active' ? 'Your pass is on this device.' : PASS_MESSAGES[status];
+    status === 'idle'
+      ? ''
+      : status === 'checking'
+        ? 'Checking your code.'
+        : status === 'active'
+          ? 'Your pass is on this device.'
+          : PASS_MESSAGES[status];
   return (
     <main className="restore" data-state={status}>
-      <h1>Enter your pass code</h1>
-      <p>Enter the code you saved after buying the pass. It puts the pass on this device.</p>
-      <form className="code-form" onSubmit={submit} noValidate>
-        <label htmlFor="code">Pass code</label>
-        <input
-          id="code"
-          name="code"
-          value={input}
-          onChange={(event) => {
-            setInput(event.target.value);
-            if (status !== 'checking') setStatus('idle');
-          }}
-          placeholder="XXXX-XXXX-XXXX-XXXX"
-          autoComplete="off"
-          autoCapitalize="characters"
-          autoCorrect="off"
-          spellCheck={false}
-          maxLength={40}
-          aria-describedby="code-status"
-          aria-invalid={status !== 'idle' && status !== 'checking'}
-        />
-        <button type="submit" disabled={status === 'checking'}>
-          Use this code
-        </button>
-        <p id="code-status" role="status">
-          {message}
-        </p>
-      </form>
-      <p>{CONTACT_LINE}</p>
-      <p>
-        No pass yet? <Link to="">See the pass</Link>
-      </p>
+      <section className="pass-hero" aria-labelledby="restore-title">
+        <div className="pass-hero-text">
+          <p className="eyebrow">Already bought</p>
+          <h1 className="pass-title" id="restore-title">
+            Enter your pass code
+          </h1>
+          <p className="pass-lead">Enter the code you saved after buying the pass. It puts the pass on this device.</p>
+        </div>
+        <form className="code-form" onSubmit={submit} noValidate>
+          <label className="code-label" htmlFor="code">
+            Pass code
+          </label>
+          <input
+            id="code"
+            name="code"
+            value={input}
+            onChange={(event) => {
+              setInput(event.target.value);
+              if (status !== 'checking') setStatus('idle');
+            }}
+            placeholder="XXXX-XXXX-XXXX-XXXX"
+            autoComplete="off"
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
+            maxLength={40}
+            aria-describedby="code-status"
+            aria-invalid={status !== 'idle' && status !== 'checking'}
+          />
+          <button type="submit" className="code-submit" disabled={status === 'checking'}>
+            {status === 'checking' ? 'Checking' : 'Use this code'}
+          </button>
+          <p id="code-status" role="status" className="code-status">
+            {message}
+          </p>
+          <p className="pass-note">{CONTACT_LINE}</p>
+          <p className="pass-note">
+            No pass yet? <Link to="">See the pass</Link>
+          </p>
+        </form>
+      </section>
     </main>
   );
 }

@@ -43,12 +43,19 @@ export function AppLinks({ code }: { code: string }) {
 
   return (
     <section className="app-links" aria-labelledby="apps-title">
-      <h2 id="apps-title" className="app-links-title">
-        Open an app with your pass
-      </h2>
-      {links === null && !failed && <p role="status">Loading the apps.</p>}
-      <ul className="app-links-list">
-        {links?.map((link) => (
+      <div className="section-head">
+        <h2 id="apps-title" className="app-links-title">
+          Open an app with your pass
+        </h2>
+        {links && <p className="section-count">{links.length} apps</p>}
+      </div>
+      {links === null && !failed && (
+        <p role="status" className="app-links-loading">
+          Loading the apps.
+        </p>
+      )}
+      <ol className="app-links-list">
+        {links?.map((link, index) => (
           <li key={link.url} className="app-link" data-app={link.app}>
             <button
               type="button"
@@ -58,11 +65,19 @@ export function AppLinks({ code }: { code: string }) {
               aria-busy={opening === link.url}
               data-state={opening === link.url ? 'opening' : 'idle'}
             >
-              {opening === link.url ? `Opening ${link.name}` : `Open ${link.name}`}
+              <span className="app-link-number" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className="app-link-name">
+                {opening === link.url ? `Opening ${link.name}` : `Open ${link.name}`}
+              </span>
+              <span className="app-link-arrow" aria-hidden="true">
+                &#8594;
+              </span>
             </button>
           </li>
         ))}
-      </ul>
+      </ol>
       <p role="status" className="app-links-status">
         {failed ? 'This did not work. Check your connection and try again, or type your code in the app.' : ''}
       </p>

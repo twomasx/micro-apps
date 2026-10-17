@@ -1,4 +1,28 @@
-/* A tiny reset and the mobile rules only. Roger designs this app (see DESIGN-TODO.md). */
+/*
+ * The PolymadLabs pass. It belongs to the whole suite, so it wears the landing page's Lab Index look:
+ * cool-gray ground, near-black ink, thin rules, one burnt-orange accent. IBM Plex Sans for reading,
+ * IBM Plex Mono for labels, numbers and codes. Phone layout first; min-width queries at 640px and 1024px only.
+ */
+
+:root {
+  --ground: #eef0f2;
+  --paper: #f8f9fa;
+  --ink: #111315;
+  --ink-muted: #4a5058;
+  --rule: #c5cad0;
+  --accent: #c2410c;
+
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --gutter: 16px;
+  --pad-left: max(var(--gutter), env(safe-area-inset-left));
+  --pad-right: max(var(--gutter), env(safe-area-inset-right));
+  --measure: 1200px;
+
+  color-scheme: light;
+}
+
 *,
 *::before,
 *::after {
@@ -7,30 +31,833 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
-    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
-  font-size: 16px;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 1rem;
   line-height: 1.5;
+  overflow-x: clip;
   overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+main {
+  flex: 1;
+}
+
+h1,
+h2,
+p,
+dl,
+dd,
+ol,
+ul {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+p a {
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
 }
 
 input,
 button {
   font: inherit;
   font-size: 16px;
+  color: inherit;
 }
 
-button,
-input {
-  min-height: 48px;
+button {
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
-a {
-  display: inline-block;
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Shared: a mono label, small caps-style. */
+.eyebrow,
+.masthead-label,
+.section-count,
+.pass-sheet-title,
+.pass-app-number,
+.app-link-number,
+.code-title,
+.code-label,
+.test-mode-label {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Every block keeps to one measure with safe-area gutters. */
+.masthead-inner,
+.pass-hero,
+.app-links,
+.pass-terms,
+.colophon-inner {
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-left: var(--pad-left);
+  padding-right: var(--pad-right);
+}
+
+/* Staging only. Click-through, so it never covers a control. */
+.test-mode-label {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 10;
+  margin: 0;
+  padding: calc(env(safe-area-inset-top) + 3px) 10px 3px;
+  background: var(--accent);
+  color: var(--paper);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+/* Header */
+
+.masthead {
+  border-bottom: 1px solid var(--ink);
+  padding-top: env(safe-area-inset-top);
+}
+
+.masthead-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'mark nav'
+    'label nav';
+  align-items: center;
+  column-gap: 16px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.wordmark {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.masthead .wordmark {
+  grid-area: mark;
+  justify-self: start;
+}
+
+.masthead-label {
+  grid-area: label;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
+.masthead-nav {
+  grid-area: nav;
+  display: flex;
+}
+
+.masthead-nav a {
+  display: inline-flex;
+  align-items: center;
   min-height: 44px;
-  padding-block: 10px;
+  padding: 0 10px;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.masthead-nav a:last-child {
+  margin-right: -10px;
+}
+
+/* The top of every page: a headline, and a panel beside it on desktop. */
+
+.pass-hero {
+  display: grid;
+  gap: 32px;
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+.eyebrow {
+  color: var(--accent);
+}
+
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 10px;
+  background: var(--accent);
+  vertical-align: 0.05em;
+}
+
+.pass-title {
+  margin-top: 16px;
+  font-size: clamp(2.5rem, 12.5vw, 5.5rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.pass-lead {
+  max-width: 34rem;
+  margin-top: 20px;
+  color: var(--ink-muted);
+  font-size: 1.125rem;
+}
+
+.pass-have-code {
+  margin-top: 16px;
+}
+
+.pass-note {
+  margin-top: 12px;
+  color: var(--ink-muted);
+  font-size: 0.9375rem;
+}
+
+/* A panel: a ruled sheet of paper with an accent corner, like the landing page's specimens. */
+
+.pass-sheet,
+.code-card,
+.code-form {
+  position: relative;
+  align-self: start;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.pass-sheet::after,
+.code-card::after,
+.code-form::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 12px;
+  height: 12px;
+  border-top: 3px solid var(--accent);
+  border-right: 3px solid var(--accent);
+  pointer-events: none;
+}
+
+.pass-sheet-title {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--ink);
+}
+
+/* What the pass unlocks */
+
+.pass-app {
+  display: grid;
+  gap: 2px;
+  padding: 12px 16px;
+}
+
+.pass-app + .pass-app {
+  border-top: 1px solid var(--rule);
+}
+
+.pass-app dt {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.pass-app-number {
+  flex: none;
+  width: 1.5rem;
+  color: var(--accent);
+}
+
+.pass-app dd {
+  padding-left: calc(1.5rem + 12px);
+  color: var(--ink-muted);
+  font-size: 0.9375rem;
+}
+
+.pass-app[data-app='later'] dd {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Price and buy */
+
+.pass-checkout {
+  display: grid;
+  padding: 20px 16px;
+  border-top: 1px solid var(--ink);
+}
+
+.pass-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pass-amount {
+  font-size: 2.75rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.pass-once {
+  color: var(--ink-muted);
+}
+
+/* The primary action: a solid ink bar in mono capitals, accent when pressed. */
+.pass-buy,
+.code-submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 20px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.code-submit {
+  justify-content: center;
+}
+
+.pass-buy:not(:disabled):active,
+.code-submit:not(:disabled):active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.pass-buy[data-state='busy'],
+.code-submit:disabled {
+  background: var(--ink-muted);
+  border-color: var(--ink-muted);
+  cursor: progress;
+}
+
+/* Payments are closed: a dashed outline that reads as not available, not as broken. */
+.pass-buy[data-state='closed'] {
+  justify-content: center;
+  border-style: dashed;
+  border-color: var(--ink-muted);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: default;
+}
+
+.pass-status:not(:empty),
+.app-links-status:not(:empty),
+.code-status:not(:empty) {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  background: var(--ground);
+}
+
+/* A secondary action: an outline in mono capitals. */
+.code-copy,
+.thanks-retry,
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  margin-top: 16px;
+  padding: 0 18px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.button-link {
+  margin-top: 24px;
+}
+
+.code-copy:active,
+.thanks-retry:active,
+.button-link:active {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+/* The code */
+
+.code-card {
+  padding: 16px;
+}
+
+.code-title {
+  color: var(--ink-muted);
+}
+
+.code {
+  margin-top: 10px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: clamp(1.25rem, 6.2vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  user-select: all;
+}
+
+.code-note {
+  margin-top: 12px;
+}
+
+.code-copy {
+  width: 100%;
+}
+
+.code-copy[data-state='copied'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.code-copy[data-state='copied']::before {
+  content: '';
+  width: 6px;
+  height: 11px;
+  margin-top: -3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+/* Entering a code */
+
+.code-form {
+  display: grid;
+  padding: 16px;
+}
+
+.code-label {
+  color: var(--ink-muted);
+}
+
+.code-form input {
+  width: 100%;
+  min-height: 56px;
+  margin: 8px 0 12px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: #fff;
+  font-family: var(--mono);
+  font-size: 1.125rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.code-form input::placeholder {
+  color: var(--rule);
+}
+
+.code-form input[aria-invalid='true'] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.restore[data-state='checking'] .code-status {
+  border-left-color: var(--rule);
+}
+
+/* Section heads: a heavy rule over a hairline, as on the landing page. */
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+.section-head h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.section-count {
+  color: var(--ink-muted);
+}
+
+/* Open an app: one ruled row per app, like the landing page's index. */
+
+.app-links {
+  padding-bottom: 56px;
+}
+
+.app-links-loading {
+  padding: 16px 0;
+  color: var(--ink-muted);
+}
+
+.app-link {
+  border-bottom: 1px solid var(--rule);
+}
+
+.app-link-button {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.app-link-number {
+  color: var(--accent);
+}
+
+.app-link-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.app-link-arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--ink);
+  font-size: 1.125rem;
+}
+
+.app-link-button:not(:disabled):active .app-link-arrow,
+.app-link-button[data-state='opening'] .app-link-arrow {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+.app-link-button[data-state='opening'] .app-link-name {
+  color: var(--accent);
+}
+
+.app-link-button:disabled:not([data-state='opening']) {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* What the pass covers */
+
+.pass-terms {
+  padding-bottom: 64px;
+  counter-reset: term;
+}
+
+.pass-terms-list li {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 12px;
+  max-width: 48rem;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+  counter-increment: term;
+}
+
+.pass-terms-list li::before {
+  content: counter(term, decimal-leading-zero);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.85;
+}
+
+/* Thanks: a small square that pulses while the payment is checked. */
+
+.thanks-checking {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.checking-mark {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .checking-mark {
+    animation: checking 1s ease-in-out infinite alternate;
+  }
+
+  .pass-buy,
+  .code-submit,
+  .code-copy,
+  .button-link,
+  .app-link-arrow,
+  .pass-arrow {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease,
+      transform 150ms ease;
+  }
+}
+
+@keyframes checking {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.2;
+  }
+}
+
+.thanks[data-state='revoked'] .pass-lead,
+.thanks[data-state='notFound'] .pass-lead {
+  color: var(--ink);
+}
+
+/* Privacy: one readable column. */
+
+.privacy {
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+  padding: 40px var(--pad-right) 64px var(--pad-left);
+}
+
+.privacy-title {
+  margin-top: 16px;
+  font-size: clamp(2.25rem, 10vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.privacy-section {
+  margin-top: 32px;
+  padding-top: 14px;
+  border-top: 2px solid var(--ink);
+}
+
+.privacy-section h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.privacy-section p {
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+/* Footer */
+
+.colophon {
+  border-top: 1px solid var(--ink);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.colophon-inner {
+  display: grid;
+  gap: 16px;
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+.motto {
+  margin-top: 4px;
+  color: var(--ink-muted);
+}
+
+.colophon-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 20px;
+}
+
+.colophon-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+}
+
+@media (hover: hover) {
+  .masthead-nav a:hover,
+  .colophon-links a:hover {
+    text-decoration: underline;
+  }
+
+  .pass-buy:not(:disabled):hover,
+  .code-submit:not(:disabled):hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .pass-buy:not(:disabled):hover .pass-arrow {
+    transform: translateX(3px);
+  }
+
+  .code-copy:hover,
+  .thanks-retry:hover,
+  .button-link:hover {
+    background: var(--ink);
+    color: var(--ground);
+  }
+
+  .app-link-button:not(:disabled):hover .app-link-arrow {
+    background: var(--ink);
+    color: var(--ground);
+  }
+}
+
+/* Tablet */
+
+@media (min-width: 640px) {
+  :root {
+    --gutter: 32px;
+  }
+
+  .masthead-inner {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'mark label nav';
+    column-gap: 20px;
+  }
+
+  .masthead-label {
+    padding-left: 20px;
+    border-left: 1px solid var(--rule);
+  }
+
+  .pass-hero {
+    padding-top: 64px;
+    padding-bottom: 72px;
+  }
+
+  .pass-app {
+    grid-template-columns: 13rem 1fr;
+    gap: 12px;
+    align-items: baseline;
+  }
+
+  .pass-app dd {
+    padding-left: 0;
+  }
+
+  .code-card,
+  .code-form {
+    padding: 20px;
+  }
+
+  .code-copy {
+    width: auto;
+  }
+
+  .app-links-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+  }
+
+  .colophon-inner {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+
+  .colophon-links {
+    justify-content: flex-end;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 48px;
+  }
+
+  .pass-hero {
+    grid-template-columns: 1fr 28rem;
+    gap: 64px;
+    padding-top: 96px;
+    padding-bottom: 104px;
+  }
+
+  .pass-app {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .pass-app dd {
+    padding-left: calc(1.5rem + 12px);
+  }
+
+  .app-links-list {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
 }

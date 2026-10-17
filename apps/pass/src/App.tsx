@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Frame } from './components/Frame';
 import { TestModeLabel } from './components/TestModeLabel';
 import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
@@ -42,7 +43,9 @@ export function App() {
   return (
     <>
       <TestModeLabel />
-      <Page route={route} />
+      <Frame>
+        <Page route={route} />
+      </Frame>
     </>
   );
 }

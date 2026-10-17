@@ -54,6 +54,7 @@ export function ThanksPage({ sessionId }: { sessionId: string | null }) {
   const retry = (
     <button
       type="button"
+      className="thanks-retry"
       onClick={() => {
         setState({ kind: 'checking' });
         setAttempt((n) => n + 1);
@@ -66,23 +67,26 @@ export function ThanksPage({ sessionId }: { sessionId: string | null }) {
   let body;
   switch (state.kind) {
     case 'checking':
-      body = <p role="status">Checking your payment.</p>;
+      body = (
+        <p role="status" className="pass-lead thanks-checking">
+          <span className="checking-mark" aria-hidden="true" />
+          Checking your payment.
+        </p>
+      );
       break;
     case 'paid':
       body = (
-        <>
-          <p role="status" className="thanks-lead">
-            Thank you. Your pass is ready.
-          </p>
-          <CodeCard code={state.code} />
-          <AppLinks code={state.code} />
-        </>
+        <p role="status" className="pass-lead">
+          Thank you. Save the code, then open any app. It is already unlocked.
+        </p>
       );
       break;
     case 'pending':
       body = (
         <>
-          <p role="status">Your payment is not confirmed yet. This can take a minute.</p>
+          <p role="status" className="pass-lead">
+            Your payment is not confirmed yet. This can take a minute.
+          </p>
           {retry}
         </>
       );
@@ -90,7 +94,9 @@ export function ThanksPage({ sessionId }: { sessionId: string | null }) {
     case 'offline':
       body = (
         <>
-          <p role="status">We could not reach the server to check your payment. Check your connection and try again.</p>
+          <p role="status" className="pass-lead">
+            We could not reach the server to check your payment. Check your connection and try again.
+          </p>
           {retry}
         </>
       );
@@ -98,16 +104,20 @@ export function ThanksPage({ sessionId }: { sessionId: string | null }) {
     case 'revoked':
       body = (
         <>
-          <p role="status">This payment was refunded or disputed, so the pass does not unlock anything.</p>
-          <p>{CONTACT_LINE}</p>
+          <p role="status" className="pass-lead">
+            This payment was refunded or disputed, so the pass does not unlock anything.
+          </p>
+          <p className="pass-note">{CONTACT_LINE}</p>
         </>
       );
       break;
     case 'notFound':
       body = (
         <>
-          <p role="status">We could not find this payment.</p>
-          <p>
+          <p role="status" className="pass-lead">
+            We could not find this payment.
+          </p>
+          <p className="pass-note">
             If you paid and have your pass code, <Link to="restore">enter it here</Link>. {CONTACT_LINE}
           </p>
         </>
@@ -115,10 +125,20 @@ export function ThanksPage({ sessionId }: { sessionId: string | null }) {
       break;
   }
 
+  const paid = state.kind === 'paid' ? state.code : null;
   return (
     <main className="thanks" data-state={state.kind}>
-      <h1>PolymadLabs pass</h1>
-      {body}
+      <section className="pass-hero" aria-labelledby="thanks-title">
+        <div className="pass-hero-text">
+          <p className="eyebrow">{paid ? 'Paid' : 'Your payment'}</p>
+          <h1 className="pass-title" id="thanks-title">
+            {paid ? 'Your pass is ready' : 'PolymadLabs pass'}
+          </h1>
+          {body}
+        </div>
+        {paid && <CodeCard code={paid} />}
+      </section>
+      {paid && <AppLinks code={paid} />}
     </main>
   );
 }

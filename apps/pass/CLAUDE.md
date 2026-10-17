@@ -4,7 +4,7 @@ Path `/pass/`, at polymadlabs.com for good. Site port 3007, functions port 8807.
 
 One purchase ($19.99, in `config/products.json`) unlocks everything in every PolymadLabs app, including apps added later. The full plan is PAYMENTS.md in the repo root.
 
-- **Roger owns the design.** Pages are plain semantic HTML with class names and `data-*` state. Only a tiny reset and the mobile rules are styled. Open decisions: `DESIGN-TODO.md`.
+- **Design:** the landing page's Lab Index look (IBM Plex, thin rules, one orange accent), done by Claude at Roger's request. Styles in `src/styles.css`; what was decided is in `DESIGN-TODO.md`. Roger can change any of it.
 - **Nothing depends on the apps sharing a domain.** Apps never read this service's storage or database. Each app keeps its own copy of the pass code (`<app>:pass`) and asks `POST /pass/api/verify`, through `createPassState` in `@micro/payments/pass`. App servers that check passes themselves (personality, intention) use `requestHasPass` from `@micro/payments/server`.
 - **Codes** are made from `PASS_CODE_SECRET` and the Stripe session (see `packages/payments/src/pass-codes.ts`). Only their hash is stored. Never change the secret once real codes exist.
 - **One-time tokens** carry a pass into an app with no typing: the pass pages make one per tap (`POST /api/token`), the app trades it for the code once (`POST /api/redeem`). 10 minutes, single use, stored as a hash.

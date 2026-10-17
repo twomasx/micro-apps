@@ -6,9 +6,37 @@ import { Link } from '../components/Link';
 import { usePass } from '../hooks/usePass';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus';
 import { ApiError, startCheckout } from '../lib/api';
-import { priceLine, TERMS } from '../lib/copy';
+import { amountLabel, ONE_TIME, TERMS } from '../lib/copy';
 import { leaveTo } from '../lib/navigation';
 import apps from '../../config/apps.json';
+
+/** What the pass unlocks, one row per app, like the landing page's study sheet. */
+function CoverSheet() {
+  return (
+    <dl className="pass-apps">
+      {apps.apps.map((app, index) => (
+        <div key={app.app} className="pass-app" data-app={app.app}>
+          <dt>
+            <span className="pass-app-number" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            {app.name}
+          </dt>
+          <dd>{app.covers}</dd>
+        </div>
+      ))}
+      <div className="pass-app" data-app="later">
+        <dt>
+          <span className="pass-app-number" aria-hidden="true">
+            +
+          </span>
+          Apps we add later
+        </dt>
+        <dd>Included</dd>
+      </div>
+    </dl>
+  );
+}
 
 function Offer() {
   const [busy, setBusy] = useState(false);
@@ -28,37 +56,36 @@ function Offer() {
   };
 
   return (
-    <>
-      <p className="pass-lead">
-        One pass unlocks everything in every PolymadLabs app, on any device where you enter your code. That includes
-        apps we add later.
-      </p>
-      <ul className="pass-apps">
-        {apps.apps.map((app) => (
-          <li key={app.app} data-app={app.app}>
-            <strong>{app.name}:</strong> {app.covers.charAt(0).toLowerCase() + app.covers.slice(1)}.
-          </li>
-        ))}
-      </ul>
-      <p className="pass-price">{priceLine()}</p>
-      <button
-        type="button"
-        className="pass-buy"
-        onClick={buy}
-        disabled={busy || closed}
-        aria-busy={busy}
-        data-state={closed ? 'closed' : 'open'}
-      >
-        {closed ? CLOSED_LABEL : busy ? 'Opening checkout' : 'Buy the pass'}
-      </button>
-      <p role="status" className="pass-status">
-        {failed ? 'The checkout could not open. Check your connection and try again.' : ''}
-      </p>
-      <p>You pay on Stripe's checkout page. There is no account to make.</p>
-      <p>
-        Have a pass code already? <Link to="restore">Enter your code</Link>
-      </p>
-    </>
+    <aside className="pass-sheet" aria-labelledby="sheet-title">
+      <h2 className="pass-sheet-title" id="sheet-title">
+        What the pass unlocks
+      </h2>
+      <CoverSheet />
+      <div className="pass-checkout">
+        <p className="pass-price">
+          <span className="pass-amount">{amountLabel()}</span> <span className="pass-once">{ONE_TIME}</span>
+        </p>
+        <button
+          type="button"
+          className="pass-buy"
+          onClick={buy}
+          disabled={busy || closed}
+          aria-busy={busy}
+          data-state={closed ? 'closed' : busy ? 'busy' : 'open'}
+        >
+          {closed ? CLOSED_LABEL : busy ? 'Opening checkout' : 'Buy the pass'}
+          {!closed && !busy && (
+            <span className="pass-arrow" aria-hidden="true">
+              &#8594;
+            </span>
+          )}
+        </button>
+        <p role="status" className="pass-status">
+          {failed ? 'The checkout could not open. Check your connection and try again.' : ''}
+        </p>
+        <p className="pass-note">You pay on Stripe's checkout page. There is no account to make.</p>
+      </div>
+    </aside>
   );
 }
 
@@ -71,27 +98,43 @@ export function HomePage() {
 
   return (
     <main className="pass" data-state={active ? 'has-pass' : 'offer'}>
-      <h1 className="pass-title">Every PolymadLabs app</h1>
-      {active && code ? (
-        <>
-          <p role="status" className="pass-lead">
-            Your pass is on this device.
-          </p>
-          <CodeCard code={code} />
-          <AppLinks code={code} />
-        </>
-      ) : (
-        <Offer />
-      )}
-      <section className="pass-terms" aria-labelledby="terms-title">
-        <h2 id="terms-title">What the pass covers</h2>
-        {TERMS.map((line) => (
-          <p key={line}>{line}</p>
-        ))}
+      <section className="pass-hero" aria-labelledby="pass-title">
+        <div className="pass-hero-text">
+          <p className="eyebrow">{active ? 'Your pass' : 'One purchase'}</p>
+          <h1 className="pass-title" id="pass-title">
+            Every PolymadLabs app
+          </h1>
+          {active && code ? (
+            <p role="status" className="pass-lead">
+              Your pass is on this device. Open any app below and it is already unlocked.
+            </p>
+          ) : (
+            <>
+              <p className="pass-lead">
+                One pass unlocks everything in every PolymadLabs app, on any device where you enter your code. That
+                includes apps we add later.
+              </p>
+              <p className="pass-have-code">
+                Have a pass code already? <Link to="restore">Enter your code</Link>
+              </p>
+            </>
+          )}
+        </div>
+        {active && code ? <CodeCard code={code} /> : <Offer />}
       </section>
-      <footer className="pass-footer">
-        <Link to="privacy">Privacy</Link> <a href="/">PolymadLabs</a>
-      </footer>
+
+      {active && code && <AppLinks code={code} />}
+
+      <section className="pass-terms" aria-labelledby="terms-title">
+        <div className="section-head">
+          <h2 id="terms-title">What the pass covers</h2>
+        </div>
+        <ol className="pass-terms-list">
+          {TERMS.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ol>
+      </section>
     </main>
   );
 }
