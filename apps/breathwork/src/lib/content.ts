@@ -1,4 +1,4 @@
-import type { EvidenceLabel, Technique } from './techniques';
+import type { EvidenceLabel, Technique } from './techniques.ts';
 
 /** How long finished sessions are kept on this device. Said on the privacy page; the history code deletes older ones. */
 export const HISTORY_DAYS = 365;

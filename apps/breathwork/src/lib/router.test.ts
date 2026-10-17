@@ -21,6 +21,12 @@ describe('parseRoute', () => {
     expect(route('/breathwork/unlock/')).toEqual({ name: 'unlock', sessionId: null });
   });
 
+  it('opens a guide page by its slug', () => {
+    expect(route('/breathwork/box-breathing/')).toEqual({ name: 'guide', slug: 'box-breathing' });
+    expect(route('/breathwork/box-breathing')).toEqual({ name: 'guide', slug: 'box-breathing' });
+    expect(route('/breathwork/box-breathing/extra')).toEqual({ name: 'notFound' });
+  });
+
   it('says not found for anything else', () => {
     expect(route('/focus/')).toEqual({ name: 'notFound' });
     expect(route('/breathwork/nope')).toEqual({ name: 'notFound' });

@@ -1,4 +1,4 @@
-import data from '../data/techniques.json';
+import data from '../data/techniques.json' with { type: 'json' };
 
 /** Breathing in, holding (with full or empty lungs), or breathing out. */
 export type PhaseKind = 'in' | 'hold' | 'out';

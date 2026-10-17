@@ -2,9 +2,10 @@ import { lazy, Suspense, useEffect } from 'react';
 import { TestModeLabel } from './components/TestModeLabel';
 import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
-import { PAGES } from './seo';
+import { GUIDE_PAGES, PAGES } from './seo';
 import { BreathePage } from './pages/BreathePage';
 import { CustomPage } from './pages/CustomPage';
+import { GuidePage } from './pages/GuidePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { RestorePage } from './pages/RestorePage';
@@ -19,7 +20,7 @@ const BenchPage = import.meta.env.DEV
   ? lazy(() => import('./pages/BenchPage').then((module) => ({ default: module.BenchPage })))
   : null;
 
-const PAGE_TITLES: Record<Exclude<Route['name'], 'breathe'>, string> = {
+const PAGE_TITLES: Record<Exclude<Route['name'], 'breathe' | 'guide'>, string> = {
   week: 'Your week',
   custom: 'Custom patterns',
   unlock: 'Lifetime unlock',
@@ -46,6 +47,8 @@ function Page({ route }: { route: Route }) {
       return <SciencePage />;
     case 'privacy':
       return <PrivacyPage />;
+    case 'guide':
+      return <GuidePage slug={route.slug} />;
     case 'bench':
       if (BenchPage) {
         return (
@@ -65,8 +68,15 @@ export function App() {
 
   useEffect(() => {
     // Pages that search engines see keep the title from src/seo.ts, the same as in the HTML the server sent.
-    const seo = route.name === 'breathe' || route.name === 'science' || route.name === 'privacy' ? PAGES[route.name] : null;
-    document.title = seo ? seo.title : `${PAGE_TITLES[route.name as Exclude<Route['name'], 'breathe'>]} | ${SITE_TITLE}`;
+    const seo =
+      route.name === 'breathe' || route.name === 'science' || route.name === 'privacy'
+        ? PAGES[route.name]
+        : route.name === 'guide'
+          ? GUIDE_PAGES[route.slug]
+          : null;
+    document.title = seo
+      ? seo.title
+      : `${PAGE_TITLES[route.name as Exclude<Route['name'], 'breathe' | 'guide'>] ?? 'Page not found'} | ${SITE_TITLE}`;
     // A link to a section (science#sigh) scrolls there itself.
     if (!window.location.hash) window.scrollTo(0, 0);
   }, [route]);

@@ -1,3 +1,5 @@
+import { findGuide } from './guides';
+
 export type Route =
   | { name: 'breathe' }
   | { name: 'week' }
@@ -6,6 +8,7 @@ export type Route =
   | { name: 'restore' }
   | { name: 'science' }
   | { name: 'privacy' }
+  | { name: 'guide'; slug: string }
   | { name: 'bench' }
   | { name: 'notFound' };
 
@@ -25,6 +28,7 @@ export function parseRoute(pathname: string, search: string, base: string): Rout
     // Stripe Checkout sends the buyer back with ?session_id=.
     return { name: 'unlock', sessionId: new URLSearchParams(search).get('session_id') };
   }
+  if (findGuide(first)) return { name: 'guide', slug: first };
   const simple = SIMPLE.find((name) => name === first);
   return simple ? { name: simple } : { name: 'notFound' };
 }

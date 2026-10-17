@@ -4,7 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { seoPrerender } from '@micro/seo/build';
 import { fileURLToPath } from 'node:url';
 import { appConfig } from './app.config.ts';
-import { PAGES, PRIVATE_ROUTES, SITE, shareImageSvg } from './src/seo.ts';
+import { GUIDES } from './src/lib/guides.ts';
+import { GUIDE_PAGES, guideImageSvg, PAGES, PRIVATE_ROUTES, SITE, shareImageSvg } from './src/seo.ts';
 
 const { name, base, sitePort, functionsPort } = appConfig;
 
@@ -23,17 +24,22 @@ const server = { host: '0.0.0.0', port: sitePort, strictPort: true, proxy };
 
 // The share image uses static Outfit files: the renderer cannot pick weights from the variable font.
 const outfit = [500, 600, 700].map((weight) =>
-  fileURLToPath(new URL(`./node_modules/@fontsource/outfit/files/outfit-latin-${weight}-normal.woff2`, import.meta.url)),
+  fileURLToPath(
+    new URL(`./node_modules/@fontsource/outfit/files/outfit-latin-${weight}-normal.woff2`, import.meta.url),
+  ),
 );
 
 // Real HTML for every page search engines should find, the 404 page, the sitemap and the share image (SEO.md).
 const prerender = seoPrerender({
   site: { ...SITE, origin: process.env.PUBLIC_ORIGIN ?? SITE.origin },
   entry: '/src/prerender.tsx',
-  pages: Object.values(PAGES),
+  pages: [...Object.values(PAGES), ...Object.values(GUIDE_PAGES)],
   privateRoutes: PRIVATE_ROUTES,
   notFoundTitle: 'Page not found | Breathwork',
-  images: [{ file: 'og.png', svg: shareImageSvg, fonts: outfit }],
+  images: [
+    { file: 'og.png', svg: shareImageSvg, fonts: outfit },
+    ...GUIDES.map((guide) => ({ file: `${guide.slug}/og.png`, svg: () => guideImageSvg(guide), fonts: outfit })),
+  ],
   preloadFonts: [/^outfit-latin-wght/],
 });
 

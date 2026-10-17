@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link } from '../components/Link';
 import { MiniShape } from '../components/TechniquePicker';
 import { HOW_TO_FOLLOW, LABEL_MEANINGS, patternText, SAFETY_LINE } from '../lib/content';
+import { GUIDES } from '../lib/guides';
 import { techniques, type Technique } from '../lib/techniques';
 import '../styles/page.css';
 
@@ -17,6 +18,7 @@ function useScrollToHash() {
 
 function TechniqueEvidence({ technique }: { technique: Technique }) {
   const evidence = technique.evidence;
+  const guide = GUIDES.find((item) => item.techniqueId === technique.id);
   if (!evidence) return null;
   return (
     <section className="evidence" id={technique.id} aria-labelledby={`${technique.id}-title`}>
@@ -47,6 +49,13 @@ function TechniqueEvidence({ technique }: { technique: Technique }) {
           </li>
         ))}
       </ul>
+      {guide && (
+        <p>
+          <Link to={guide.slug} className="page-link">
+            {guide.heading.charAt(0).toUpperCase() + guide.heading.slice(1)}: how to do it
+          </Link>
+        </p>
+      )}
     </section>
   );
 }

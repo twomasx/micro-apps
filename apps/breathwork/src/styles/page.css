@@ -587,3 +587,135 @@
     align-items: center;
   }
 }
+
+/* ---------- Guide pages (one per technique, SEO.md step 2) ---------- */
+
+/* The first screen on a phone: the answer, the start button, then the shape. */
+.guide-hero {
+  display: grid;
+  gap: 16px;
+}
+
+.page .guide-answer {
+  color: var(--white);
+  font-size: 1.1875rem;
+  line-height: 1.45;
+}
+
+.guide-start {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 28px;
+  border-radius: 999px;
+  background: var(--sun);
+  color: var(--cobalt);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.guide-start:active {
+  transform: scale(0.97);
+}
+
+.page .guide-cost {
+  font-size: 0.9375rem;
+}
+
+.guide-hero .shape-preview {
+  justify-self: center;
+  width: min(72%, 260px);
+  margin: 12px 0 4px;
+}
+
+.guide-steps {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.guide-steps li::marker {
+  color: var(--sun);
+  font-weight: 800;
+}
+
+.guide-question {
+  display: grid;
+  gap: 6px;
+}
+
+.guide-question h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.guide-end {
+  gap: 8px;
+}
+
+.guide-more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .guide-hero {
+    grid-template-columns: minmax(0, 1fr) 220px;
+    grid-template-areas:
+      'title shape'
+      'answer shape'
+      'start shape'
+      'cost shape';
+    column-gap: 32px;
+    align-items: start;
+  }
+
+  .guide-hero .page-title {
+    grid-area: title;
+  }
+
+  .guide-answer {
+    grid-area: answer;
+  }
+
+  .guide-start {
+    grid-area: start;
+    justify-self: start;
+  }
+
+  .guide-cost {
+    grid-area: cost;
+  }
+
+  .guide-hero .shape-preview {
+    grid-area: shape;
+    width: 100%;
+    margin: 8px 0 0;
+  }
+
+  .guide-end .guide-start {
+    justify-self: start;
+  }
+}
+
+@media (hover: hover) {
+  .guide-start:hover {
+    filter: brightness(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-start {
+    transition: none;
+  }
+}

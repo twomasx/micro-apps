@@ -1,4 +1,4 @@
-import type { Phase, PhaseKind } from './techniques';
+import type { Phase, PhaseKind } from './techniques.ts';
 
 /**
  * The shape of a breathing pattern: one side per phase, side length in proportion to its

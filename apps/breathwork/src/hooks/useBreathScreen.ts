@@ -3,6 +3,7 @@ import { customToTechnique, type CustomPattern } from '../lib/custom';
 import { recordId } from '../lib/history';
 import { sessionPlan, type SessionPlan } from '../lib/limits';
 import { CUSTOM_ID, DEFAULT_SETTINGS, type Settings } from '../lib/settings';
+import { navigate } from '../lib/navigation';
 import { introSeenHint, loadSettings, recordSession, saveSettings } from '../lib/store';
 import { findTechnique, techniques, type Technique } from '../lib/techniques';
 import type { StageMoment } from '../themes/types';
@@ -15,10 +16,27 @@ export function techniqueFor(settings: Pick<Settings, 'techniqueId' | 'custom'>)
   return findTechnique(settings.techniqueId) ?? techniques[0]!;
 }
 
+/**
+ * The technique the address asks for, from a guide page's start button: '?t=box'. Null for none or an unknown id.
+ * Locked techniques still open: they run their one-minute preview, as when picked on the screen.
+ */
+export function techniqueFromAddress(search: string): string | null {
+  const id = new URLSearchParams(search).get('t');
+  return id !== null && findTechnique(id) ? id : null;
+}
+
+function askedTechnique(): string | null {
+  return typeof window === 'undefined' ? null : techniqueFromAddress(window.location.search);
+}
+
 /** Everything the breathing screen does, without any markup. */
 export function useBreathScreen() {
   const unlocked = useUnlocked();
-  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  // A guide's start button picks the technique for the very first frame, so the shape never swaps.
+  const [settings, setSettings] = useState<Settings>(() => {
+    const asked = askedTechnique();
+    return asked ? { ...DEFAULT_SETTINGS, techniqueId: asked } : DEFAULT_SETTINGS;
+  });
   const [loaded, setLoaded] = useState(false);
   // Until the saved settings arrive, the quick flag decides between the first-visit screen and the breathing screen.
   const [introSeenEarly] = useState(introSeenHint);
@@ -34,8 +52,15 @@ export function useBreathScreen() {
 
   useEffect(() => {
     let live = true;
-    void loadSettings().then((saved) => {
+    void loadSettings().then((stored) => {
       if (!live) return;
+      // The asked technique becomes the saved choice, and the address goes back to plain /breathwork/.
+      const asked = askedTechnique();
+      const saved = asked ? { ...stored, techniqueId: asked } : stored;
+      if (asked) {
+        void saveSettings(saved);
+        navigate('', { replace: true });
+      }
       setSettings(saved);
       setLoaded(true);
       // People who saw the intro before the quick flag existed get it now.
