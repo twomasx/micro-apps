@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { TestModeLabel } from './components/TestModeLabel';
 import { useRoute } from './hooks/useRoute';
 import type { Route } from './lib/router';
+import { PAGES } from './seo';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { ProgressPage } from './pages/ProgressPage';
@@ -67,7 +68,9 @@ export function App() {
   const route = useRoute();
 
   useEffect(() => {
-    document.title = route.name === 'today' ? SITE_TITLE : `${PAGE_TITLES[route.name]} | ${SITE_TITLE}`;
+    // Pages that search engines see keep the title from src/seo.ts, the same as in the HTML the server sent.
+    const seo = route.name === 'today' || route.name === 'science' || route.name === 'privacy' ? PAGES[route.name] : null;
+    document.title = seo ? seo.title : `${PAGE_TITLES[route.name as Exclude<Route['name'], 'today'>]} | ${SITE_TITLE}`;
     // A link to a section (science#score) scrolls there once the page is drawn.
     const hash = window.location.hash.slice(1);
     if (hash) document.getElementById(hash)?.scrollIntoView();

@@ -1,4 +1,4 @@
-import { bodyShare, bristleInks, buildLineStroke, buildStroke, type Stroke } from './brush';
+import { bodyShare, bristleInks, buildLineStroke, buildStroke, type Stroke } from './brush.ts';
 
 /** The only three colors in the app. Kept in sync with the tokens in base.css. */
 export const PAPER = '#f3f3ef';

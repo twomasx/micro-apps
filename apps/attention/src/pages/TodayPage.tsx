@@ -21,7 +21,7 @@ function sizeLabel(size: SessionSize): string {
 export function TodayPage() {
   const today = useToday();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  if (!today.loaded) return <main className="screen today" data-state="loading" aria-busy="true" />;
+  if (!today.ready) return <main className="screen today" data-state="loading" aria-busy="true" />;
 
   const { status, last, prompt, unlocked } = today;
   const allowed = allowedSizes(unlocked);

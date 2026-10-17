@@ -31,6 +31,12 @@ Decisions built the simplest way for now that need your call. What has been deci
 
 21. **Small gray text is a shade darker** than the spec's gray: #6e6c66 instead of #77756f, so it meets the WCAG AA contrast minimum (4.7:1 against 4.1:1). The two grays look nearly the same. The spec gray is still used for strokes and graphics.
 
+## Search and sharing (SEO.md)
+
+22. **The share image** (`og.png`, built from `shareImageSvg()` in `src/seo.ts`): paper, the app's own brushed enso on the right, "Attention training" in Shippori Mincho, two plain lines and the address. Check how it looks in a message preview.
+23. **Today's heading** is still "One breath, one circle". Search engines read the page title ("Attention Training: 10 Minutes a Day, Eyes Closed"), but the H1 does not name the thing. It could say "Attention training" with the current line under it.
+24. **The circle on Today appears when the app starts.** The page the server sends has an empty canvas in the same place, so nothing moves, but on a slow phone the circle comes in a moment after the text.
+
 ## Device checks still open
 
 - Android Chrome: tok and bell through the speaker and headphones, the double buzz at the start and the single buzz at the end, the screen staying awake, the dimming during a stretch.

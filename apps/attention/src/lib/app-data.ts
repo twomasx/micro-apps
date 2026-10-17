@@ -1,7 +1,7 @@
 import { upsertSession } from './history';
 import type { SessionRecord, TestRecord } from './records';
 import { DEFAULT_SETTINGS, type Settings } from './settings';
-import { loadSessions, loadSettings, loadTests, saveSessions, saveSettings, saveTests } from './store';
+import { loadSessions, loadSettings, loadTests, rememberSavedData, savedDataHint, saveSessions, saveSettings, saveTests } from './store';
 import { addTest } from './tests';
 
 /** Everything the screens read, loaded once from this device and kept in memory. */
@@ -33,6 +33,9 @@ export function subscribeAppData(listener: () => void): () => void {
 export function loadAppData(): Promise<void> {
   loading ??= Promise.all([loadSettings(), loadSessions(), loadTests()]).then(([settings, sessions, tests]) => {
     set({ ...data, loaded: true, settings, sessions, tests });
+    // Devices that saved records before the quick note existed get it now.
+    const saved = settings !== DEFAULT_SETTINGS || sessions.length > 0 || tests.length > 0;
+    if (saved && !savedDataHint()) rememberSavedData();
   });
   return loading;
 }

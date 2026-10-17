@@ -4,3 +4,10 @@
   Content-Security-Policy: script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   Referrer-Policy: no-referrer
   X-Content-Type-Options: nosniff
+
+# The project's own pages.dev addresses are copies of polymadlabs.com: never index them (SEO.md rule 7).
+# The router removes this header on polymadlabs.com, where the pages are meant to be found.
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex, nofollow
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex, nofollow

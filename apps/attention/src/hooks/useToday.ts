@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { latestSession } from '../lib/history';
 import { canTrainToday, effectiveSize, targetSeconds } from '../lib/limits';
 import { currentLevel, dayStatus, localDate, testPrompt } from '../lib/program';
+import { savedDataHint } from '../lib/store';
 import { useAppData } from './useAppData';
 import { useUnlocked } from './useUnlocked';
 
@@ -10,11 +11,16 @@ export function useToday() {
   const data = useAppData();
   const unlocked = useUnlocked();
   const date = useLocalDate();
+  // Read once, before the records load: nothing saved on this device means the first-visit Today, the same
+  // screen as the page the server sent, can draw at once.
+  const [returning] = useState(savedDataHint);
   return useMemo(() => {
     const status = dayStatus(data.sessions, date);
     const size = effectiveSize(data.settings.size, unlocked);
     return {
       loaded: data.loaded,
+      /** Today can draw: the records have loaded, or this device has none, so the defaults are its records. */
+      ready: data.loaded || !returning,
       settings: data.settings,
       unlocked,
       status,
@@ -25,7 +31,7 @@ export function useToday() {
       prompt: testPrompt(status.completedDays, data.tests),
       last: latestSession(data.sessions),
     };
-  }, [data, unlocked, date]);
+  }, [data, unlocked, date, returning]);
 }
 
 /** Today's local date. Checked again when the app comes back into view, so it rolls over at midnight. */
