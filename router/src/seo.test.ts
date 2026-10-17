@@ -19,13 +19,18 @@ describe('isPrivate', () => {
       '/pass/restore',
       '/focus/?passToken=abcdefghijkmnpqrstuvwx',
       '/intention/unlock?session_id=cs_test_1',
+      '/attention/session/',
+      '/attention/test/',
+      '/attention/progress',
+      '/intention/me/',
+      '/personality/test/',
     ]) {
       expect(isPrivate(url(path)), path).toBe(true);
     }
   });
 
   it('is false for pages meant to be found', () => {
-    for (const path of ['/', '/breathwork/', '/breathwork/science/', '/personality/', '/pass/', '/focus/privacy/', '/terms']) {
+    for (const path of ['/', '/breathwork/', '/breathwork/science/', '/breathwork/box-breathing/', '/personality/', '/pass/', '/focus/privacy/', '/attention/science/', '/intention/global/', '/terms']) {
       expect(isPrivate(url(path)), path).toBe(false);
     }
   });

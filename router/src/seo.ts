@@ -9,8 +9,10 @@ import { APPS, type App } from './routes.ts';
 const PRIVATE_IN_EVERY_APP = new Set(['unlock', 'restore', 'app']);
 /** Pages private to one app: personal results and comparisons, where a code is typed, the pass thanks page. */
 const PRIVATE_IN_APP: Partial<Record<App, ReadonlySet<string>>> = {
-  personality: new Set(['r', 'c', 'pass']),
+  personality: new Set(['r', 'c', 'pass', 'test']),
   breathwork: new Set(['week', 'custom']),
+  attention: new Set(['session', 'test', 'progress']),
+  intention: new Set(['me']),
   pass: new Set(['thanks']),
 };
 
