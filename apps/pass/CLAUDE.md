@@ -9,6 +9,7 @@ One purchase ($19.99, in `config/products.json`) unlocks everything in every Pol
 - **Codes** are made from `PASS_CODE_SECRET` and the Stripe session (see `packages/payments/src/pass-codes.ts`). Only their hash is stored. Never change the secret once real codes exist.
 - **One-time tokens** carry a pass into an app with no typing: the pass pages make one per tap (`POST /api/token`), the app trades it for the code once (`POST /api/redeem`). 10 minutes, single use, stored as a hash.
 - **CORS:** `ALLOWED_ORIGINS` in `wrangler.jsonc`, per environment. Add an app's own domain there when it moves.
+- **Search (SEO.md):** `/` and `/privacy/` are prerendered at build time (`src/seo.ts`, `src/prerender.tsx`); `/thanks` and `/restore` are a noindex shell. `public/pass-hint.js` runs before the first paint and hides the offer for a browser that holds a pass (flag `pass:has-pass`, kept in step by `src/lib/pass-hint.ts`), so pass holders never see the offer flash before "Your pass".
 - The landing page reads `pass:pass` from this site's storage to open apps with a token. Keep that key and its shape (`SavedPass` in `packages/payments/src/pass.ts`).
 
 ## API (Pages Functions in `functions/api/`)

@@ -57,6 +57,11 @@ main {
   flex: 1;
 }
 
+/* A returning pass holder: the offer stays hidden until "Your pass" replaces it (public/pass-hint.js). */
+html[data-pass-hint='has-pass'] .pass[data-state='offer'] {
+  visibility: hidden;
+}
+
 h1,
 h2,
 p,

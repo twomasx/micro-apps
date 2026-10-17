@@ -8,13 +8,14 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { RestorePage } from './pages/RestorePage';
 import { ThanksPage } from './pages/ThanksPage';
+import { PAGES } from './seo';
 
 const SITE_TITLE = 'PolymadLabs pass';
 const TITLES: Record<Route['name'], string> = {
-  home: SITE_TITLE,
+  home: PAGES.home.title,
   thanks: `Thank you | ${SITE_TITLE}`,
   restore: `Enter your code | ${SITE_TITLE}`,
-  privacy: `Privacy | ${SITE_TITLE}`,
+  privacy: PAGES.privacy.title,
   notFound: `Page not found | ${SITE_TITLE}`,
 };
 
