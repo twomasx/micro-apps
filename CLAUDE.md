@@ -68,7 +68,7 @@ Run an app: `pnpm dev:<app>` (site and functions together). Router: `pnpm dev:ro
 
 ## Payments
 
-- Stripe Checkout, test mode only until Roger says otherwise.
+- Stripe Checkout. Live in production since Oct 19, 2026 (Roger's go-ahead); staging stays in test mode. Never test with real cards except the go-live checks Roger runs himself.
 - Always go through `packages/payments`. Never call Stripe directly from an app.
 - Prices live in `apps/<app>/config/products.json`, never in code or copy. Client and functions both read that one file.
 - Unlocks are confirmed on the server from the Stripe webhook (signature verified). The client never decides on its own that something is paid.

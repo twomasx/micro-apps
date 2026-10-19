@@ -66,7 +66,7 @@ Three secrets live in the Pages project, not in the repo:
 
 | Name | Value |
 | --- | --- |
-| `STRIPE_SECRET_KEY` | The Stripe key. Test mode (`sk_test_...`) until Roger says otherwise. Live uses a restricted key (`rk_live_...`), see PAYMENTS.md section 6. |
+| `STRIPE_SECRET_KEY` | The Stripe key, a restricted key with only the permissions the apps use (PAYMENTS.md section 6). Production: the live key `polymadlabs-apps` (`rk_live_...`, saved at `~/.config/polymadlabs/stripe-live-apps-key`). Staging: its test-mode twin (`stripe-test-apps-key`). |
 | `STRIPE_WEBHOOK_SECRET` | The signing secret of the Stripe webhook below (`whsec_...`). |
 | `PUBLIC_ORIGIN` | `https://polymadlabs.com`. Stripe Checkout sends buyers back here. |
 
@@ -315,8 +315,10 @@ curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"
 
 ## Stripe
 
-- Test mode. The code refuses a key that does not match `PAYMENTS_MODE` (see the kill switch above). Going live is the procedure in PAYMENTS.md section 6. `PAYMENTS_MODE` is a plain variable in each `wrangler.jsonc`, so going live includes one commit that sets it to `live` in the production `vars` of the five apps and the pass.
-- Since Oct 16, 2026 the five test-mode webhooks point at **staging**, not production, and receive `checkout.session.completed`, `charge.refunded` and `charge.dispute.created`. Moving them kept their signing secrets. Production has no webhook until go-live.
+- **Live in production since Oct 19, 2026; staging stays in test mode.** The code refuses a key that does not match `PAYMENTS_MODE` (see the kill switch above), a plain variable in each `wrangler.jsonc`: `live` in the production `vars`, `test` under `env.preview`.
+- Production's live webhooks (created by `stripe-sync --live --webhooks https://polymadlabs.com`) are `https://polymadlabs.com/<app>/api/stripe/webhook` for the five apps and the pass, with the same three events. Their signing secrets are at `~/.config/polymadlabs/live/<app>-stripe-webhook-secret`. The scripts use the restricted admin keys: `~/.config/polymadlabs/stripe-live-admin-key` and `stripe-test-admin-key`.
+- Before going live, every test purchase in production was exported to `~/polymadlabs-backups/production-2026-10-19/` and deleted.
+- Since Oct 16, 2026 the five test-mode webhooks point at **staging**, not production, and receive `checkout.session.completed`, `charge.refunded` and `charge.dispute.created`. Moving them kept their signing secrets.
 - Personality: `https://staging.polymadlabs.com/personality/api/stripe/webhook`, endpoint id `we_1UPxeIIbd3re6uBdIm3vv1hN`. Signing secret at `~/.config/polymadlabs/stripe-webhook-secret`.
 - Focus: `https://staging.polymadlabs.com/focus/api/stripe/webhook`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.
 - Breathwork: `https://staging.polymadlabs.com/breathwork/api/stripe/webhook`, endpoint id `we_1UQVAQIbd3re6uBdkogYUm05`. Signing secret at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`.
@@ -426,7 +428,7 @@ Passed on Oct 13, 2026 in headless Chromium, through the preview router and then
 6. In another browser, `/focus/restore` with that code (lower case and spaces are fine) unlocks it there too.
 7. In Stripe, the `checkout.session.completed` event shows 0 pending webhooks, and the row in D1 `micro-focus` is `paid` with a 64-character hash and no code.
 
-One test purchase from that check is in the production database (`cs_test_a1CV2u...`, test mode).
+The test purchase from that check was deleted at go-live (Oct 19, 2026).
 
 ### Check breathwork
 
@@ -440,7 +442,7 @@ Passed on Oct 14, 2026 in headless Chromium, through the preview router and then
 6. In another browser, `/breathwork/restore` with that code (lower case and spaces are fine) unlocks it there too. A wrong code is refused.
 7. In Stripe, the `checkout.session.completed` event shows 0 pending webhooks, and the row in D1 `micro-breathwork` is `paid` with a 64-character hash and no code.
 
-One test purchase from that check is in the production database (`cs_test_a1iypjsyee...`, test mode), and one unpaid `pending` row from a direct API check.
+The test purchase from that check was deleted at go-live (Oct 19, 2026).
 
 ### Check attention
 
@@ -453,7 +455,7 @@ Passed on Oct 15, 2026 in headless Chromium, through the preview router and then
 5. In Stripe, the `checkout.session.completed` event shows 0 pending webhooks, and the row in D1 `micro-attention` is `paid` with a 64-character hash and no code.
 6. `test_results` on production is still empty (no tests were taken there).
 
-One test purchase from that check is in the production database (`cs_test_a15CDWiO...`, test mode).
+The test purchase from that check was deleted at go-live (Oct 19, 2026).
 
 ### Check landing
 
@@ -472,7 +474,7 @@ Passed on Oct 15, 2026, with curl and headless Chromium, on micro-intention.page
 7. In Stripe, the `checkout.session.completed` event shows 0 pending webhooks, and the row in D1 `micro-intention` is `paid` with a 64-character hash and no code.
 8. The five check runs were deleted afterwards. `runs` on production started empty.
 
-One test purchase from that check is in the production database (`cs_test_a1e7dNvr...`, test mode).
+The test purchase from that check was deleted at go-live (Oct 19, 2026).
 
 ## Undo
 

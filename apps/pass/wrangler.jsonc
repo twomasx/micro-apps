@@ -6,7 +6,7 @@
   // Production: polymadlabs.com/pass/. PAYMENTS_ENABLED, the kill switch, is a secret.
   // ALLOWED_ORIGINS: every site whose pages may call the pass API. Add an app's own domain here when it moves.
   "vars": {
-    "PAYMENTS_MODE": "test",
+    "PAYMENTS_MODE": "live",
     "ENVIRONMENT": "production",
     "ALLOWED_ORIGINS": "https://polymadlabs.com"
   },

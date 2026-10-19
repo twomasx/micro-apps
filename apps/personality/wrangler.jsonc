@@ -5,7 +5,7 @@
   "compatibility_date": "2026-10-01",
   // Production. PAYMENTS_ENABLED, the kill switch, is a secret so it can be flipped without a code change.
   "vars": {
-    "PAYMENTS_MODE": "test",
+    "PAYMENTS_MODE": "live",
     "ENVIRONMENT": "production",
     "PASS_API_ORIGIN": "https://polymadlabs.com"
   },
