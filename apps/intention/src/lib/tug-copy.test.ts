@@ -80,6 +80,9 @@ describe('tug screen text', () => {
     expect(before.line).toBe('You stopped early. This run still counts, scored over its full 20 seconds.');
     const after = tugText({ ...stopped, saved: { z: 0.66 } as RunResult }, DEFAULT_PAIR, false);
     expect(after.score).toBe('+0.66');
+    const early = tugText({ ...base, phase: 'stopped', stoppedBy: 'you' }, DEFAULT_PAIR, false);
+    expect(early.line).toBe('You stopped before any bits arrived.');
+    expect(early.score).toBeNull();
     const dropped = tugText({ ...stopped, stoppedBy: 'connection' }, DEFAULT_PAIR, false);
     expect(dropped.line).toBe('The connection dropped. This run still counts, with the bits it had.');
   });

@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from '../components/Link.tsx';
 import { ProfileChart } from '../components/report/ProfileChart.tsx';
 import { ScaleRuler } from '../components/report/ScaleRuler.tsx';
 import { TraitBars } from '../components/report/TraitBars.tsx';
 import { useReport } from '../hooks/useReport.ts';
 import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { CONTACT_EMAIL } from '@micro/payments/contact';
 import { PassOffer } from '../components/PassOffer.tsx';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
 import { ApiError, startCheckout, type PublicResult } from '../lib/api.ts';
-import { leaveTo } from '../lib/navigation.ts';
+import { leaveTo, onPageRestored } from '../lib/navigation.ts';
 import { getProduct, priceLine } from '../lib/products.ts';
 import { paragraphs, type Report, type ReportBlock } from '../lib/report.ts';
 import { formatReportDate, reportParts, stepSize, type ReportPart } from '../lib/report-view.ts';
@@ -201,14 +202,17 @@ function ReportView({ report }: { report: Report }) {
 interface OfferProps {
   result: PublicResult;
   unconfirmed: boolean;
+  revoked: boolean;
   onCheckAgain: () => void;
 }
 
-function Offer({ result, unconfirmed, onCheckAgain }: OfferProps) {
+function Offer({ result, unconfirmed, revoked, onCheckAgain }: OfferProps) {
   const [starting, setStarting] = useState(false);
   const [failed, setFailed] = useState(false);
   const [closedByServer, setClosedByServer] = useState(false);
   const status = usePaymentsStatus();
+  // Back from Stripe's page can show this page as it was left, with the button still waiting.
+  useEffect(() => onPageRestored(() => setStarting(false)), []);
   const closed = status?.enabled === false || closedByServer;
 
   const unlock = async () => {
@@ -238,6 +242,12 @@ function Offer({ result, unconfirmed, onCheckAgain }: OfferProps) {
         ))}
       </ul>
 
+      {revoked && (
+        <div className="report-unconfirmed" data-state="revoked" role="status">
+          <p>This payment was refunded or disputed, so it does not unlock the report.</p>
+          <p>Questions? Write to {CONTACT_EMAIL}.</p>
+        </div>
+      )}
       {unconfirmed && (
         <div className="report-unconfirmed" role="status">
           <p>We could not confirm a payment yet. If you paid, wait a few seconds and check again.</p>
@@ -293,8 +303,8 @@ export function ReportPage({ id, sessionId }: { id: string; sessionId: string | 
           <p>This result does not exist. It may have been deleted.</p>
           <p>
             <Link to="" className="home-link">
-            Go to the personality test
-          </Link>
+              Go to the personality test
+            </Link>
           </p>
         </main>
       );
@@ -309,7 +319,9 @@ export function ReportPage({ id, sessionId }: { id: string; sessionId: string | 
         </main>
       );
     case 'locked':
-      return <Offer result={state.result} unconfirmed={state.unconfirmed} onCheckAgain={retry} />;
+      return (
+        <Offer result={state.result} unconfirmed={state.unconfirmed} revoked={state.revoked} onCheckAgain={retry} />
+      );
     case 'ready':
       return <ReportView report={state.report} />;
   }

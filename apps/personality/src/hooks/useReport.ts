@@ -6,8 +6,11 @@ import type { Report } from '../lib/report.ts';
 export type ReportState =
   | { status: 'loading' }
   | { status: 'ready'; report: Report }
-  /** Not paid. `unconfirmed` is true when the buyer came back from Checkout and it still is not paid. */
-  | { status: 'locked'; result: PublicResult; unconfirmed: boolean }
+  /**
+   * Not paid. `unconfirmed` is true when the buyer came back from Checkout and it still is not paid.
+   * `revoked` is true when they came back and that payment was refunded or disputed.
+   */
+  | { status: 'locked'; result: PublicResult; unconfirmed: boolean; revoked: boolean }
   | { status: 'notFound' }
   | { status: 'error' };
 
@@ -15,14 +18,15 @@ async function load(id: string, sessionId: string | null): Promise<ReportState> 
   const result = await fetchResult(id);
   // Only ask for the report when it should be there, so a locked report is not a failed request.
   if (!result.unlocked && sessionId === null) {
-    return { status: 'locked', result, unconfirmed: false };
+    return { status: 'locked', result, unconfirmed: false, revoked: false };
   }
   try {
     return { status: 'ready', report: await fetchReport(id, sessionId) };
   } catch (cause) {
     if (!(cause instanceof ApiError) || cause.status !== 402) throw cause;
-    // The server decides what is paid. 402 means the payment is not confirmed.
-    return { status: 'locked', result, unconfirmed: sessionId !== null };
+    // The server decides what is paid. 402 means the payment is not confirmed, or was taken back.
+    const revoked = cause.code === 'payment_revoked';
+    return { status: 'locked', result, unconfirmed: sessionId !== null && !revoked, revoked };
   }
 }
 

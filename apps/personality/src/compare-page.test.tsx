@@ -38,6 +38,7 @@ const COMPARE: CompareResponse = {
   a: { id: A, type: 'INTJ', reportUnlocked: false },
   b: { id: B, type: 'ISFP', reportUnlocked: false },
   unlocked: false,
+  revoked: false,
   couple: null,
 };
 
@@ -209,6 +210,14 @@ describe('compare page', () => {
     expect((await screen.findByRole('status')).textContent).toContain('could not confirm a payment');
     fireEvent.click(screen.getByRole('button', { name: 'Check again' }));
     expect(await screen.findByText('You both lean toward quiet.')).toBeTruthy();
+  });
+
+  it('says when the payment it came back from was refunded or disputed', async () => {
+    answers = [{ ...COMPARE, revoked: true }];
+    open(`/personality/c/${A}/${B}?session_id=cs_test_1`);
+
+    expect((await screen.findByRole('status')).textContent).toContain('refunded or disputed');
+    expect(screen.queryByText(/could not confirm/)).toBeNull();
   });
 
   it('says when one of the results does not exist', async () => {

@@ -14,8 +14,10 @@ let holders = 0;
  * While something is open, the browser or Android Back button closes it
  * and the user stays on the page. One history entry is added on open and
  * removed again when it closes another way.
+ * `key` names what is open. When it changes while still open (one sheet gives way to another),
+ * the entry is added again if Back has just used it up.
  */
-export function useBackToClose(open: boolean, onClose: () => void): void {
+export function useBackToClose(open: boolean, onClose: () => void, key?: string): void {
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -37,5 +39,5 @@ export function useBackToClose(open: boolean, onClose: () => void): void {
         if (holders === 0 && onSheetEntry()) window.history.back();
       }, 0);
     };
-  }, [open]);
+  }, [open, key]);
 }

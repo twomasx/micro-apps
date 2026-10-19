@@ -8,7 +8,7 @@ import { CONTACT_EMAIL } from '@micro/payments/contact';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus';
 import { ApiError, fetchPurchase, startCheckout } from '../lib/api';
 import { unlockWithCode } from '../lib/app-player';
-import { leaveTo } from '../lib/navigation';
+import { leaveTo, onPageRestored } from '../lib/navigation';
 import { getProduct, priceLine } from '../lib/products';
 import { confirmPurchase, type PurchaseState } from '../lib/unlock';
 import { SAVE_CODE_LINE, UNLOCK_ADDS } from '../lib/unlock-copy';
@@ -42,6 +42,8 @@ function Offer() {
   const [failed, setFailed] = useState(false);
   const [closedByServer, setClosedByServer] = useState(false);
   const status = usePaymentsStatus();
+  // Back from Stripe's page can show this page as it was left, with the button still waiting.
+  useEffect(() => onPageRestored(() => setBusy(false)), []);
   const closed = status?.enabled === false || closedByServer;
   const product = getProduct('lifetime');
 
@@ -194,7 +196,7 @@ export function UnlockPage({ sessionId }: { sessionId: string | null }) {
 
   let body;
   if (sessionId) body = <Returned sessionId={sessionId} />;
-  else if (state.unlocked && saved)
+  else if (state.unlocked && saved?.valid)
     body = (
       <>
         <p role="status" className="page-strong">

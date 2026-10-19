@@ -122,6 +122,8 @@ export interface SoundPlayer {
   prepare(): Promise<void>;
   play(name: SoundName): void;
   setVolume(volume: number): void;
+  /** Lets the audio context go when the screen that made it goes away. A later prepare() makes a new one. */
+  close(): void;
   readonly state: AudioContextState | 'none' | 'unsupported';
 }
 
@@ -164,6 +166,13 @@ export function createSoundPlayer(volume: number): SoundPlayer {
     },
     setVolume(value) {
       current = value;
+    },
+    close() {
+      // Phones allow only a few audio contexts at a time, and an open one keeps the audio hardware awake.
+      const closing = ctx;
+      ctx = null;
+      out = null;
+      if (closing && closing.state !== 'closed') closing.close().catch(() => undefined);
     },
     get state() {
       if (!hasAudioContext()) return 'unsupported';

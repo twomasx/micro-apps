@@ -151,7 +151,7 @@ export async function startRun(request: Request, deps: RunDeps): Promise<Respons
   let closed = false;
   let saved: Promise<void> | null = null;
 
-  /** The one write at the end. Safe to call twice; only the first call writes. */
+  /** The one write at the end. Safe to call twice; only the first call writes, unless it failed. */
   const save = (status: EndEvent['status']): Promise<void> => {
     saved ??= db
       .prepare(
@@ -169,7 +169,14 @@ export async function startRun(request: Request, deps: RunDeps): Promise<Respons
         runId,
       )
       .run()
-      .then(() => undefined);
+      .then(
+        () => undefined,
+        (error: unknown) => {
+          // A failed write can be tried again, for example as abandoned after the final write failed.
+          saved = null;
+          throw error;
+        },
+      );
     return saved;
   };
 
@@ -210,8 +217,16 @@ export async function startRun(request: Request, deps: RunDeps): Promise<Respons
       };
       deps.waitUntil(
         loop().catch(() => {
-          // A failure mid-run keeps what was made. The run counts as abandoned.
-          closed = true;
+          // A failure mid-run or in the final write keeps what was made. The run counts as abandoned, and the
+          // stream closes, so the browser stops waiting for an end event that will not come.
+          if (!closed) {
+            closed = true;
+            try {
+              controller.close();
+            } catch {
+              // Already closed or cancelled.
+            }
+          }
           return save('abandoned');
         }),
       );

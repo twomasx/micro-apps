@@ -81,7 +81,3 @@ export function oklabDistance(a: Rgb, b: Rgb): number {
   const [l2, a2, b2] = oklab(b);
   return Math.hypot(l1 - l2, a1 - a2, b1 - b2);
 }
-
-export function rgbToHex(c: Rgb): string {
-  return `#${c.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('')}`;
-}

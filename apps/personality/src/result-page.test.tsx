@@ -134,6 +134,21 @@ describe('result page', () => {
     expect(await loadResults()).toEqual([]);
   });
 
+  it('treats a result the server no longer has as deleted', async () => {
+    await saveAsOwn();
+    fetchMock.mockImplementation(async (_input, init) =>
+      init?.method === 'DELETE'
+        ? Response.json({ error: 'not_found', message: 'No result with this id.' }, { status: 404 })
+        : Response.json(RESULT),
+    );
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    open(`/personality/r/${ID}`);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete this result' }));
+    await waitFor(() => expect(window.location.pathname).toBe('/personality/'));
+    expect(await loadResults()).toEqual([]);
+  });
+
   it('does not delete when you cancel', async () => {
     await saveAsOwn();
     respond();
@@ -151,6 +166,16 @@ describe('result page', () => {
     );
     open(`/personality/r/${ID}`);
     expect(await screen.findByRole('heading', { name: 'Result not found' })).toBeTruthy();
+  });
+
+  it('forgets a saved result the server no longer has', async () => {
+    await saveAsOwn();
+    fetchMock.mockResolvedValue(
+      Response.json({ error: 'not_found', message: 'No result with this id.' }, { status: 404 }),
+    );
+    open(`/personality/r/${ID}`);
+    expect(await screen.findByRole('heading', { name: 'Result not found' })).toBeTruthy();
+    await waitFor(async () => expect(await loadResults()).toEqual([]));
   });
 
   it('offers a retry when loading fails', async () => {

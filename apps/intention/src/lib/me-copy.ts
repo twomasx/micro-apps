@@ -1,5 +1,6 @@
 import { formatCount, formatZ } from './copy.ts';
 import type { MeRun } from './me-types.ts';
+import { BITS_PER_SECOND, lengthBitsFor, STANDARD_SECONDS } from './protocol.ts';
 
 /** "Oct 15, 9:03 pm" in the viewer's own time. */
 export function runWhen(iso: string, timeZone?: string): string {
@@ -19,8 +20,8 @@ export function runDetails(run: MeRun): string {
   const parts = [`Score ${formatZ(run.z)}`, `Your color was on the ${run.aim}`];
   if (run.status === 'abandoned') {
     parts.push(`Stopped early after ${formatCount(run.n)} of ${formatCount(run.lengthBits)} bits`);
-  } else if (run.lengthBits !== 4000) {
-    parts.push(`${Math.round(run.lengthBits / 200)} seconds`);
+  } else if (run.lengthBits !== lengthBitsFor(STANDARD_SECONDS)) {
+    parts.push(`${Math.round(run.lengthBits / BITS_PER_SECOND)} seconds`);
   }
   if (run.hourEvent) parts.push('Intention Hour');
   return `${parts.join('. ')}.`;

@@ -145,6 +145,35 @@ describe('a full run', () => {
     // Reads (the free-run count) are fine; writes happen exactly twice.
     expect(statements.filter((sql) => sql !== 'SELECT')).toEqual(['INSERT', 'UPDATE']);
   });
+
+  it('when the final write fails, closes the stream and saves the run as abandoned', async () => {
+    let failed = false;
+    const flaky = new Proxy(db, {
+      get(target, key) {
+        if (key === 'prepare') {
+          return (sql: string) => {
+            if (!failed && sql.trim().startsWith('UPDATE')) {
+              failed = true;
+              const broken = { run: () => Promise.reject(new Error('D1 is down')) };
+              return { bind: () => broken };
+            }
+            return target.prepare(sql);
+          };
+        }
+        const value = Reflect.get(target, key) as unknown;
+        return typeof value === 'function' ? (value as (...args: unknown[]) => unknown).bind(target) : value;
+      },
+    });
+    const { deps: d, settled } = deps(jumpingClock(), { db: flaky });
+    // Resolves: the stream ends instead of leaving the browser waiting.
+    const events = await readEvents(await startRun(post({ deviceId: DEVICE, kind: 'tug' }), d));
+    await settled();
+    expect(events.some((e) => e.event === 'end')).toBe(false);
+    const { runId } = JSON.parse(events[0]!.data) as StartEvent;
+    const saved = await result(runId);
+    expect(saved.status).toBe('abandoned');
+    expect(saved.n).toBe(4000);
+  });
 });
 
 describe('real time', () => {

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { BELL, peakGain, soundSeconds, TICK, TOK } from './sounds';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { BELL, createSoundPlayer, peakGain, soundSeconds, TICK, TOK } from './sounds';
 
 describe('sounds', () => {
   it('makes the tok low and short, around 196 Hz', () => {
@@ -30,5 +30,45 @@ describe('sounds', () => {
   it('clamps the volume', () => {
     expect(peakGain('bell', 3)).toBe(peakGain('bell', 1));
     expect(peakGain('bell', -1)).toBe(0);
+  });
+});
+
+describe('sound player', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  class FakeContext {
+    static made: FakeContext[] = [];
+    state: AudioContextState = 'running';
+    destination = {};
+    constructor() {
+      FakeContext.made.push(this);
+    }
+    createDynamicsCompressor() {
+      return { threshold: { value: 0 }, ratio: { value: 0 }, connect: () => undefined };
+    }
+    resume() {
+      return Promise.resolve();
+    }
+    close() {
+      this.state = 'closed';
+      return Promise.resolve();
+    }
+  }
+
+  it('closes its audio context, and makes a new one if asked again', async () => {
+    FakeContext.made = [];
+    vi.stubGlobal('AudioContext', FakeContext);
+    vi.stubGlobal('window', { AudioContext: FakeContext });
+    const player = createSoundPlayer(0.8);
+    await player.prepare();
+    expect(player.state).toBe('running');
+    player.close();
+    expect(FakeContext.made[0]!.state).toBe('closed');
+    expect(player.state).toBe('none');
+    player.close();
+    await player.prepare();
+    expect(FakeContext.made).toHaveLength(2);
   });
 });

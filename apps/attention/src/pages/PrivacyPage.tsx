@@ -77,8 +77,8 @@ export function PrivacyPage() {
         <p>
           Attention keeps your pass code and a random device id in this browser's storage. To check the pass, it sends both
           to the PolymadLabs pass service, at most about once a day. The pass service keeps the device ids that used
-          each code, with the day each was first seen, so one code cannot be shared widely. The 
-          <a href="https://polymadlabs.com/pass/privacy">pass privacy note</a> has the details.
+          each code, with the day each was first seen, so one code cannot be shared widely. The{' '}
+          <a href="https://polymadlabs.com/pass/privacy/">pass privacy note</a> has the details.
         </p>
       </section>
 

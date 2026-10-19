@@ -7,7 +7,7 @@ import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
 import { CONTACT_EMAIL } from '@micro/payments/contact';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
 import { ApiError, fetchPurchase, startCheckout } from '../lib/api.ts';
-import { leaveTo } from '../lib/navigation.ts';
+import { leaveTo, onPageRestored } from '../lib/navigation.ts';
 import { priceLine } from '../lib/products.ts';
 import { confirmPurchase, type PurchaseState } from '../lib/unlock.ts';
 import { ALWAYS_FREE, LAB_PASS_ADDS, SAVE_CODE_LINE } from '../lib/unlock-copy.ts';
@@ -41,6 +41,8 @@ function Offer() {
   const [failed, setFailed] = useState(false);
   const [closedByServer, setClosedByServer] = useState(false);
   const status = usePaymentsStatus();
+  // Back from Stripe's page can show this page as it was left, with the button still waiting.
+  useEffect(() => onPageRestored(() => setBusy(false)), []);
   const closed = status?.enabled === false || closedByServer;
 
   const buy = () => {
@@ -207,7 +209,7 @@ export function UnlockPage({ sessionId }: { sessionId: string | null }) {
             <li key={line}>{line}</li>
           ))}
         </ul>
-        {saved && <CodeCard code={saved.code} />}
+        {saved?.valid && <CodeCard code={saved.code} />}
       </>
     );
   else body = <Offer />;

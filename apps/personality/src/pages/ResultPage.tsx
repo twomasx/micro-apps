@@ -1,21 +1,16 @@
-import { share, type ShareResult } from '@micro/platform';
-import { useCallback, useState, type CSSProperties } from 'react';
+import { share } from '@micro/platform';
+import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { Link } from '../components/Link.tsx';
 import { useLoaded } from '../hooks/useLoaded.ts';
 import { useResult } from '../hooks/useResult.ts';
 import { revealStep, useReveal } from '../hooks/useReveal.ts';
-import { deleteResult, type PublicResult } from '../lib/api.ts';
+import { ApiError, deleteResult, type PublicResult } from '../lib/api.ts';
 import { appHref, navigate } from '../lib/navigation.ts';
 import { getProduct, priceLine } from '../lib/products.ts';
 import { getQuestions } from '../lib/questions.ts';
 import { COMPARE_WARNING, describeAxes, SAME_ANSWERS_MESSAGE } from '../lib/result-view.ts';
+import { shareMessage } from '../lib/share-message.ts';
 import { loadResults, removeResult, type SavedResult } from '../lib/store.ts';
-
-function shareMessage(outcome: ShareResult): string | null {
-  if (outcome === 'copied') return 'Link copied.';
-  if (outcome === 'unavailable') return 'Sharing did not work. Copy the link from the address bar.';
-  return null;
-}
 
 // The reveal: letters and axes come in one after another, numbers count up from 50.
 const STEP_DELAY_MS = 150;
@@ -61,7 +56,12 @@ function ResultView({ result, own }: ResultViewProps) {
     if (!window.confirm('Delete this result? This cannot be undone.')) return;
     setDeleting(true);
     try {
-      await deleteResult(result.id, own.deleteToken);
+      try {
+        await deleteResult(result.id, own.deleteToken);
+      } catch (cause) {
+        // 404: already gone, for example when the first try worked but its answer was lost.
+        if (!(cause instanceof ApiError && cause.status === 404)) throw cause;
+      }
       await removeResult(result.id);
       navigate('', { replace: true });
     } catch {
@@ -212,6 +212,12 @@ export function ResultPage({ id }: { id: string }) {
     [id],
   );
   const own = useLoaded(loadOwn);
+
+  // A result this device saved that the server no longer has: drop it, so the intro stops linking to it.
+  const missing = state.status === 'notFound';
+  useEffect(() => {
+    if (missing) void removeResult(id);
+  }, [missing, id]);
 
   if (state.status === 'notFound') {
     return (

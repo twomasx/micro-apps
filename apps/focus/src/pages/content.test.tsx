@@ -44,6 +44,11 @@ describe('page content', () => {
     expect(intro).toContain(HEADPHONES_LINE);
   });
 
+  it('keeps a space between words and the links inside them', () => {
+    // textOf() turns tags into spaces, so a missing space before a link only shows in the markup.
+    expect(renderToStaticMarkup(<PrivacyPage />)).toContain('The <a href="https://polymadlabs.com/pass/privacy/">');
+  });
+
   it('keeps the wording honest: no banned claims, no em dashes, no exclamation marks', () => {
     for (const text of [science, privacy, intro]) {
       for (const banned of [

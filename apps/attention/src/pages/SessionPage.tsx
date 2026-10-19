@@ -1,4 +1,4 @@
-import { useCallback, useEffect, type PointerEvent } from 'react';
+import { useCallback, useEffect, useState, type PointerEvent } from 'react';
 import { EnsoCanvas } from '../components/EnsoCanvas';
 import { EnsoRow } from '../components/EnsoRow';
 import { UnlockOffer } from '../components/UnlockOffer';
@@ -13,8 +13,12 @@ import { SessionComplete } from './SessionComplete';
 
 export function SessionPage() {
   const today = useToday();
+  // Decided once, when the session opens. Today rolls over at midnight, and a free user pausing
+  // past midnight on their last free day must not be thrown out of the session they started.
+  const [admitted, setAdmitted] = useState(false);
+  if (!admitted && today.loaded && today.canTrain) setAdmitted(true);
   if (!today.loaded) return <main className="screen session" data-phase="loading" aria-busy="true" />;
-  if (!today.canTrain) {
+  if (!admitted && !today.canTrain) {
     return (
       <main className="screen session" data-phase="locked">
         <UnlockOffer />

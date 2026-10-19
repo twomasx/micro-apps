@@ -17,7 +17,7 @@ export function PrivacyPage() {
         <p>Intention keeps these in your browser's storage on this device:</p>
         <ul className="bullets">
           <li>A random id for this device, made the first time you open the app. It ties your runs together. It says nothing about you.</li>
-          <li>The colors you picked.</li>
+          <li>The colors and the run length you picked.</li>
           <li>If you bought Lab Pass: your unlock code.</li>
         </ul>
         <p>They stay until you clear this site's data in your browser.</p>
@@ -63,8 +63,8 @@ export function PrivacyPage() {
         <p>
           Intention keeps your pass code and a random device id in this browser's storage. To check the pass, it sends both
           to the PolymadLabs pass service, at most about once a day. The pass service keeps the device ids that used
-          each code, with the day each was first seen, so one code cannot be shared widely. The 
-          <a href="https://polymadlabs.com/pass/privacy">pass privacy note</a> has the details.
+          each code, with the day each was first seen, so one code cannot be shared widely. The{' '}
+          <a href="https://polymadlabs.com/pass/privacy/">pass privacy note</a> has the details.
         </p>
       </section>
 

@@ -1,7 +1,8 @@
 import type { ReportAxis } from './report.ts';
+import { BALANCED_MAX_PCT } from './scoring.ts';
 
 /** The winning side must be this close to 50% for a scale to count as balanced. */
-export const BALANCED_HALF_WIDTH = 5;
+export const BALANCED_HALF_WIDTH = BALANCED_MAX_PCT - 50;
 
 export interface RulerTick {
   /** Position from the left end, 0 to 100. */

@@ -1,4 +1,4 @@
-import type { PaymentsContext } from '@micro/payments/server';
+import type { PaymentsContext, PurchaseStatus } from '@micro/payments/server';
 import {
   bulletLines,
   compareScores,
@@ -10,7 +10,7 @@ import { getQuestions, type QuestionFile } from '../src/lib/questions.ts';
 import type { AxisScore } from '../src/lib/scoring.ts';
 import { getContent } from './content.ts';
 import { error, json } from './http.ts';
-import { confirmSession } from './payments.ts';
+import { confirmSession, isRevoked } from './payments.ts';
 import { findResult, isCoupleUnlocked, isReportUnlocked } from './results.ts';
 
 /** The couple report for one pair. Only call this after the unlock is confirmed. */
@@ -54,15 +54,17 @@ export async function getCompare(
 
   let unlocked = await isCoupleUnlocked(db, a.id, b.id, mode);
   const sessionId = new URL(request.url).searchParams.get('session_id');
+  let purchase: PurchaseStatus | null = null;
   if (!unlocked && sessionId) {
-    await confirmSession(ctx, sessionId, (purchase) => {
-      const pair = [purchase.result_id, purchase.partner_result_id] as unknown[];
+    purchase = await confirmSession(ctx, sessionId, (candidate) => {
+      const pair = [candidate.result_id, candidate.partner_result_id] as unknown[];
       return pair.includes(a.id) && pair.includes(b.id);
     });
     unlocked = await isCoupleUnlocked(db, a.id, b.id, mode);
   }
-  // An all-app pass unlocks every couple report and every full report.
-  const pass = unlocked ? false : await hasPass();
+  const [aOwn, bOwn] = await Promise.all([isReportUnlocked(db, a.id, mode), isReportUnlocked(db, b.id, mode)]);
+  // An all-app pass unlocks every couple report and every full report. Asked only when something is still locked.
+  const pass = unlocked && aOwn && bOwn ? false : await hasPass();
   unlocked ||= pass;
 
   const comparison = compareScores(
@@ -70,15 +72,12 @@ export async function getCompare(
     JSON.parse(b.scores) as AxisScore[],
     questions,
   );
-  const [aReport, bReport] = await Promise.all([
-    isReportUnlocked(db, a.id, mode).then((own) => own || pass),
-    isReportUnlocked(db, b.id, mode).then((own) => own || pass),
-  ]);
   const body: CompareResponse = {
     ...comparison,
-    a: { id: a.id, type: a.type, reportUnlocked: aReport },
-    b: { id: b.id, type: b.type, reportUnlocked: bReport },
+    a: { id: a.id, type: a.type, reportUnlocked: aOwn || pass },
+    b: { id: b.id, type: b.type, reportUnlocked: bOwn || pass },
     unlocked,
+    revoked: !unlocked && isRevoked(purchase),
     couple: unlocked ? buildCoupleReport(comparison, questions) : null,
   };
   return json(body);

@@ -18,7 +18,7 @@ interface SheetProps {
  */
 export function Sheet({ open, onClose, title, name, children }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null);
-  useBackToClose(open, onClose);
+  useBackToClose(open, onClose, name);
 
   useEffect(() => {
     const dialog = ref.current;

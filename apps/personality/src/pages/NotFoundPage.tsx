@@ -6,8 +6,8 @@ export function NotFoundPage() {
       <h1 className="not-found-title">Page not found</h1>
       <p>
         <Link to="" className="home-link">
-            Go to the personality test
-          </Link>
+          Go to the personality test
+        </Link>
       </p>
     </main>
   );

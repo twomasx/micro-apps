@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { createSoundPlayer } from '../audio/sounds';
 import { updateSettings } from '../lib/app-data';
 import type { Settings } from '../lib/settings';
@@ -13,6 +13,7 @@ interface SettingsSheetProps {
 
 export function SettingsSheet({ open, onClose, settings }: SettingsSheetProps) {
   const player = useMemo(() => createSoundPlayer(settings.volume), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => player.close(), [player]);
 
   async function preview() {
     player.setVolume(settings.volume);

@@ -62,7 +62,7 @@ const REPORT: Report = {
 
 const fetchMock = vi.fn<typeof fetch>();
 /** What the report endpoint answers, in order. The last one repeats. */
-let reportAnswers: (Report | 402)[];
+let reportAnswers: (Report | 402 | 'revoked')[];
 /** What the result endpoint says: null means the result does not exist. */
 let result: PublicResult | null;
 
@@ -70,6 +70,9 @@ function reportResponse(): Response {
   const answer = reportAnswers.length > 1 ? reportAnswers.shift() : reportAnswers[0];
   if (answer === 402) {
     return Response.json({ error: 'payment_required', message: 'Not unlocked.' }, { status: 402 });
+  }
+  if (answer === 'revoked') {
+    return Response.json({ error: 'payment_revoked', message: 'Refunded or disputed.' }, { status: 402 });
   }
   return Response.json(answer);
 }
@@ -127,6 +130,17 @@ describe('report page', () => {
     const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(post?.[0]).toBe('/personality/api/checkout');
     expect(JSON.parse(String(post?.[1]?.body))).toEqual({ product: 'report', resultId: ID });
+  });
+
+  it('wakes the button again when Back from Stripe shows the page as it was left', async () => {
+    open(`/personality/r/${ID}/report`);
+    const button = await screen.findByRole('button', { name: 'Unlock the full report' });
+    fireEvent.click(button);
+    await waitFor(() => expect(leaveTo).toHaveBeenCalledWith(CHECKOUT_URL));
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+
+    window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true }));
+    await waitFor(() => expect((button as HTMLButtonElement).disabled).toBe(false));
   });
 
   it('says so when checkout cannot be started', async () => {
@@ -198,6 +212,15 @@ describe('report page', () => {
     expect((await screen.findByRole('status')).textContent).toContain('could not confirm a payment');
     fireEvent.click(screen.getByRole('button', { name: 'Check again' }));
     expect(await screen.findByText('Strengths text.')).toBeTruthy();
+  });
+
+  it('says when the payment it came back from was refunded or disputed', async () => {
+    reportAnswers = ['revoked'];
+    open(`/personality/r/${ID}/report?session_id=cs_test_1`);
+
+    expect((await screen.findByRole('status')).textContent).toContain('refunded or disputed');
+    expect(screen.queryByText(/could not confirm/)).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Check again' })).toBeNull();
   });
 
   it('says when the result does not exist', async () => {

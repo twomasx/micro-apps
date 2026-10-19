@@ -1,17 +1,19 @@
-import { share, type ShareResult } from '@micro/platform';
-import { useState } from 'react';
+import { share } from '@micro/platform';
+import { useEffect, useState } from 'react';
 import { Link } from '../components/Link.tsx';
 import { PairScale } from '../components/compare/PairScale.tsx';
 import { Prose } from '../components/Prose.tsx';
 import { useCompare } from '../hooks/useCompare.ts';
 import { useLoaded } from '../hooks/useLoaded.ts';
 import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { CONTACT_EMAIL } from '@micro/payments/contact';
 import { PassOffer } from '../components/PassOffer.tsx';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
 import { ApiError, startCheckout } from '../lib/api.ts';
 import { swapSides, type CompareResponse } from '../lib/compare.ts';
-import { appHref, leaveTo } from '../lib/navigation.ts';
+import { appHref, leaveTo, onPageRestored } from '../lib/navigation.ts';
 import { getProduct, priceLine, type ProductId } from '../lib/products.ts';
+import { shareMessage } from '../lib/share-message.ts';
 import { loadResults } from '../lib/store.ts';
 
 export const SIMILARITY_LABEL = 'How similar your answers are';
@@ -20,12 +22,6 @@ export const SIMILARITY_NOTE =
 
 async function loadOwnIds(): Promise<string[]> {
   return (await loadResults()).map((saved) => saved.id);
-}
-
-function shareMessage(outcome: ShareResult): string | null {
-  if (outcome === 'copied') return 'Link copied.';
-  if (outcome === 'unavailable') return 'Sharing did not work. Copy the link from the address bar.';
-  return null;
 }
 
 interface CompareViewProps {
@@ -43,6 +39,8 @@ function CompareView({ compare, own, unconfirmed, onCheckAgain }: CompareViewPro
   const [message, setMessage] = useState<string | null>(null);
   const [closedByServer, setClosedByServer] = useState(false);
   const status = usePaymentsStatus();
+  // Back from Stripe's page can show this page as it was left, with the buttons still waiting.
+  useEffect(() => onPageRestored(() => setStarting(false)), []);
   const closed = status?.enabled === false || closedByServer;
   const { a, b } = compare;
   const names = own ? { a: 'You', b: 'Them' } : { a: 'First', b: 'Second' };
@@ -146,6 +144,12 @@ function CompareView({ compare, own, unconfirmed, onCheckAgain }: CompareViewPro
             tends to mean day to day, and four questions to talk through together.
           </p>
 
+          {compare.revoked && (
+            <div className="compare-unconfirmed" data-state="revoked" role="status">
+              <p>This payment was refunded or disputed, so it does not unlock the couple report.</p>
+              <p>Questions? Write to {CONTACT_EMAIL}.</p>
+            </div>
+          )}
           {unconfirmed && (
             <div className="compare-unconfirmed" role="status">
               <p>We could not confirm a payment yet. If you paid, wait a few seconds and check again.</p>

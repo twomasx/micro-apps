@@ -88,8 +88,17 @@ export function TugPage() {
   }, [runId]);
 
   useEffect(() => {
-    if (active) void lock.acquire();
-    else void lock.release();
+    if (!active) {
+      void lock.release();
+      return;
+    }
+    void lock.acquire();
+    // The browser drops the lock while the page is hidden, but the run goes on. Take it again on return.
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') void lock.acquire();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
   }, [active, lock]);
 
   useEffect(() => {

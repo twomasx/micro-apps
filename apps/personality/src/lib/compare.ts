@@ -75,6 +75,8 @@ export interface CompareResponse extends Comparison {
   b: ComparedResult;
   /** True when the couple report for this pair is paid. */
   unlocked: boolean;
+  /** True when the buyer came back from a checkout for this pair whose payment was refunded or disputed. */
+  revoked: boolean;
   /** The couple report, or null until it is unlocked. */
   couple: CoupleSection[] | null;
 }

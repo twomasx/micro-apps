@@ -32,6 +32,10 @@ describe('page copy', () => {
     expect(PAGES.science).toMatch(/about 1 time in \d+/);
   });
 
+  it('keeps the space before a link that starts a new line', () => {
+    expect(renderToStaticMarkup(<PrivacyPage />)).toContain('The <a href="https://polymadlabs.com/pass/privacy/">pass privacy note</a>');
+  });
+
   it('lists its sources with links', () => {
     expect(PAGES.science).toContain('doi.org/10.1038/s41562-019-0611-9');
     expect(PAGES.science).toContain('doi.org/10.1016/S0028-3932(97)00015-8');

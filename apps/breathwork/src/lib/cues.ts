@@ -238,6 +238,11 @@ export interface CuePlayer {
   /** Plays a cue. `phaseS` is the length of the phase it starts, so a cue never outlasts it. */
   play(kind: CueKind, phaseS?: number): void;
   setMuted(muted: boolean): void;
+  /**
+   * Closes the audio context, so leaving the breathing screen does not keep one open. The next
+   * prepare makes a new one. Browsers limit how many contexts a page may hold.
+   */
+  close(): void;
   readonly muted: boolean;
   /** 'none' before prepare, then the context's state. For the test page. */
   readonly state: AudioContextState | 'none' | 'unsupported';
@@ -285,6 +290,13 @@ export function createCuePlayer(volume = DEFAULT_CUE_VOLUME): CuePlayer {
     },
     setMuted(value) {
       muted = value;
+    },
+    close() {
+      const open = ctx;
+      ctx = null;
+      bus = null;
+      voice = null;
+      if (open) void open.close().catch(() => undefined);
     },
     get muted() {
       return muted;

@@ -14,6 +14,7 @@ import {
   type SessionRecord,
   type WeekDay,
 } from '../lib/history';
+import { canSeeWeek } from '../lib/limits';
 import { getProduct, priceLine } from '../lib/products';
 import { loadHistory } from '../lib/store';
 import { techniques } from '../lib/techniques';
@@ -100,7 +101,7 @@ export function WeekPage() {
       </p>
       <h1 className="page-title">Your week</h1>
 
-      {unlocked ? (
+      {canSeeWeek(unlocked) ? (
         <>
           <div className="week-nav">
             <button

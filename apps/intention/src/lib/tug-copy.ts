@@ -86,8 +86,10 @@ export function tugText(
         headlineVisible: false,
         pill,
         score: start ? formatZ(z) : null,
-        line:
-          stoppedBy === 'connection'
+        line: !start
+          ? // Stopped while the run was still starting: no bits, no color, nothing to score on screen.
+            'You stopped before any bits arrived.'
+          : stoppedBy === 'connection'
             ? 'The connection dropped. This run still counts, with the bits it had.'
             : `You stopped early. This run still counts, scored over its full ${runSeconds} seconds.`,
         button: 'Pull again',

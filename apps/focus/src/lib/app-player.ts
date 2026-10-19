@@ -3,6 +3,7 @@ import { createAudioEngine, type OutputRoute } from './audio';
 import { bindMediaSession, setMediaSessionState } from './media-session';
 import { selectedPreset, toneOf, type PlayerState } from './player';
 import { createPlayerController, type PlayerController } from './player-controller';
+import { canSaveHistory } from './limits';
 import { mediaTitle } from './player-view';
 import { loadSettings, loadUnlock, recordSession, saveSettings, saveUnlock } from './store';
 import { elapsedMs, type SessionTimer } from './timer';
@@ -84,7 +85,7 @@ export function getPlayer(): PlayerController {
 /** Session history is part of the lifetime unlock. Only finished sessions are written, not previews. */
 function recordIfFinished(state: PlayerState) {
   if (state.status !== 'complete' || state.completed === 'preview' || state.completed === null) return;
-  if (!state.unlocked || state.timer === recordedTimer) return;
+  if (!canSaveHistory(state.unlocked) || state.timer === recordedTimer) return;
   recordedTimer = state.timer;
   void recordSession({
     at: state.now,

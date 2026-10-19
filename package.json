@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@12.10.1",
   "engines": {
-    "node": ">=22.12"
+    "node": ">=24"
   },
   "scripts": {
     "dev:personality": "pnpm --filter @micro/personality dev",

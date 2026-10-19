@@ -45,6 +45,7 @@ describe('swapSides', () => {
       a: { id: 'a', type: 'INTJ', reportUnlocked: true },
       b: { id: 'b', type: 'ISTP', reportUnlocked: false },
       unlocked: false,
+      revoked: false,
       couple: null,
     };
     const swapped = swapSides(compare);

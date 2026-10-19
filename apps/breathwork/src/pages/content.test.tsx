@@ -74,6 +74,11 @@ describe('safety and privacy', () => {
     expect(privacy).toContain('for as long as Breathwork is online');
     expect(privacy).toContain('We do not copy your email');
   });
+
+  it('keeps the space before the pass privacy link', () => {
+    // textOf turns tags into spaces, so check the markup itself.
+    expect(renderToStaticMarkup(<PrivacyPage />)).toContain('The <a href="https://polymadlabs.com/pass/privacy/">');
+  });
 });
 
 describe('wording', () => {

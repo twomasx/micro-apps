@@ -44,10 +44,11 @@ export function useBreathScreen() {
   const plan: SessionPlan = sessionPlan(technique, settings.minutes, unlocked);
   const { controller, snapshot } = useBreathController(technique, plan.durationMs);
 
-  // The finish handler needs the plan the session ran with.
+  // The finish handler needs the plan the session started with, so an unlock that arrives
+  // during a preview does not turn that preview into a recorded session.
   const planRef = useRef(plan);
   useEffect(() => {
-    planRef.current = plan;
+    if (snapshot.status !== 'running' && snapshot.status !== 'paused') planRef.current = plan;
   });
 
   useEffect(() => {

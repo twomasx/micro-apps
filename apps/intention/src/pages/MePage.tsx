@@ -117,7 +117,8 @@ function MeContent({ me, deviceId, code }: Loaded) {
         </section>
       )}
 
-      {me.full && code && (
+      {/* The server said Lab Pass applies: this app's own code or an all-app pass. */}
+      {me.full && (
         <p>
           <button type="button" className="button-secondary" onClick={() => void download()} disabled={csv === 'working'}>
             {csv === 'working' ? 'Preparing the file' : 'Download your data (CSV)'}

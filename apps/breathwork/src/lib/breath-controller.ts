@@ -51,7 +51,7 @@ export interface ControllerDeps {
   now: () => number;
   requestFrame: (callback: () => void) => number;
   cancelFrame: (id: number) => void;
-  cues: Pick<CuePlayer, 'prepare' | 'play' | 'setMuted' | 'muted'>;
+  cues: Pick<CuePlayer, 'prepare' | 'play' | 'setMuted' | 'close' | 'muted'>;
   vibrate: (kind: CueKind) => void;
   wakeLock: Pick<ScreenWakeLock, 'acquire' | 'release'>;
   visibility: { isHidden(): boolean; subscribe(onChange: () => void): () => void };
@@ -78,7 +78,7 @@ export interface BreathController {
   onComplete(listener: (frame: BreathFrame) => void): () => void;
   /**
    * Starts watching the page: a hidden page pauses the session. Returns a function that
-   * stops watching and stops any running session (for a component unmounting).
+   * stops watching, stops any running session and closes the audio (for a component unmounting).
    */
   connect(): () => void;
 }
@@ -262,6 +262,7 @@ export function createBreathController(
       return () => {
         unsubscribe();
         pauseFor('user');
+        deps.cues.close();
       };
     },
   };

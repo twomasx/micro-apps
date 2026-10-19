@@ -1,6 +1,6 @@
 /**
- * Keeps the screen on during a session (Screen Wake Lock API). Released on pause or finish.
- * The browser also drops the lock when the page is hidden; the session pauses then anyway.
+ * Keeps the screen on during a run (Screen Wake Lock API). Released when the run ends.
+ * The browser also drops the lock when the page is hidden; the run screen takes it again on return.
  * Where the API is missing or refuses, the session runs the same and the screen may dim.
  */
 export type WakeLockStatus = 'unsupported' | 'off' | 'on' | 'refused';

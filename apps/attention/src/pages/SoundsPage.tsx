@@ -15,6 +15,7 @@ export function SoundsPage() {
   const timers = useRef<number[]>([]);
 
   useEffect(() => player.setVolume(volume), [player, volume]);
+  useEffect(() => () => player.close(), [player]);
   useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
 
   async function play(name: SoundName) {

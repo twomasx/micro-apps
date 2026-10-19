@@ -31,6 +31,7 @@ function setup(technique = box, durationMs = 32_000) {
         if (!muted) cues.push(kind);
       },
       setMuted: (value) => (muted = value),
+      close: vi.fn(),
       get muted() {
         return muted;
       },
@@ -231,12 +232,13 @@ describe('breath controller', () => {
     expect(t.controller.snapshot().secondsLeft).toBe(3);
   });
 
-  it('stops the session and stops watching the page on disconnect', () => {
+  it('stops the session, closes the audio and stops watching the page on disconnect', () => {
     const t = setup();
     t.controller.start();
     t.advance(1000);
     t.disconnect();
     expect(t.wakeLock.release).toHaveBeenCalled();
+    expect(t.deps.cues.close).toHaveBeenCalledOnce();
     expect(t.pendingFrames()).toBe(0);
     expect(t.controller.frame().status).toBe('paused');
     t.controller.start();

@@ -75,6 +75,10 @@ describe('copy', () => {
     expect(COPY.science).toMatch(/1 run in 20/);
   });
 
+  it('keeps the space before the pass privacy link', () => {
+    expect(renderToStaticMarkup(<PrivacyPage />)).toContain('The <a href="https://polymadlabs.com/pass/privacy/">');
+  });
+
   it('lists the three studies the app rests on', () => {
     expect(COPY.science).toContain('a review of a 12-year program');
     expect(COPY.science).toContain('PortREG replication experiments');

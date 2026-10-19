@@ -49,3 +49,18 @@ export function currentLocation(): string {
 export function leaveTo(url: string): void {
   window.location.assign(url);
 }
+
+/**
+ * Calls `onReturn` when the browser shows this page again from its back-forward cache, as after Back on
+ * Stripe's checkout page. The page comes back exactly as it was left, so a button left waiting must reset.
+ */
+export function onPageRestored(
+  onReturn: () => void,
+  target: Pick<Window, 'addEventListener' | 'removeEventListener'> = window,
+): () => void {
+  const listener = (event: Event) => {
+    if ((event as PageTransitionEvent).persisted) onReturn();
+  };
+  target.addEventListener('pageshow', listener);
+  return () => target.removeEventListener('pageshow', listener);
+}

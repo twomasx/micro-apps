@@ -5,7 +5,10 @@ import { navigate } from '../lib/navigation.ts';
 
 export type CompareState =
   | { status: 'loading' }
-  /** `unconfirmed` is true when the buyer came back from Checkout and it still is not paid. */
+  /**
+   * `unconfirmed` is true when the buyer came back from Checkout and it still is not paid. A payment that was
+   * refunded or disputed is not unconfirmed: the response says `revoked`.
+   */
   | { status: 'ready'; compare: CompareResponse; unconfirmed: boolean }
   | { status: 'notFound' }
   | { status: 'error' };
@@ -29,7 +32,7 @@ export function useCompare(
     fetchCompare(a, b, session).then(
       (compare) => {
         if (cancelled) return;
-        setState({ status: 'ready', compare, unconfirmed: session !== null && !compare.unlocked });
+        setState({ status: 'ready', compare, unconfirmed: session !== null && !compare.unlocked && !compare.revoked });
         // A reload or a shared link should not carry the session id.
         if (session && compare.unlocked) navigate(`c/${a}/${b}`, { replace: true });
       },

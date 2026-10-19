@@ -3,9 +3,10 @@ import init from '../migrations/0001_init.sql?raw';
 import paymentsMode from '../migrations/0002_payments_mode.sql?raw';
 import paymentsEvents from '../migrations/0003_payments_events.sql?raw';
 import codeSecurity from '../migrations/0004_code_security.sql?raw';
+import runsStartedIndexes from '../migrations/0005_runs_started_indexes.sql?raw';
 
 // Add each new migration here, in order.
-const MIGRATIONS = [init, paymentsMode, paymentsEvents, codeSecurity];
+const MIGRATIONS = [init, paymentsMode, paymentsEvents, codeSecurity, runsStartedIndexes];
 
 export interface TestDb {
   db: D1Database;

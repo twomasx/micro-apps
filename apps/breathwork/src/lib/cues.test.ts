@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  createCuePlayer,
   CUES,
   cueDuration,
   cueFor,
@@ -234,5 +235,40 @@ describe('roomImpulse', () => {
     expect(channels[0]![0]).toBe(1);
     expect(channels[1]![1000]).toBeCloseTo(0.125);
     expect(Math.abs(channels[0]![1999]!)).toBeLessThan(1e-6);
+  });
+});
+
+describe('createCuePlayer', () => {
+  it('closes its audio context on close and makes a new one on the next prepare', async () => {
+    const made: { close: ReturnType<typeof vi.fn> }[] = [];
+    class FakeAudioContext {
+      state = 'running';
+      sampleRate = 1000;
+      destination = {};
+      close = vi.fn(() => Promise.resolve());
+      constructor() {
+        made.push(this);
+      }
+      createGain = () => ({ gain: { value: 1 }, connect: (next: unknown) => next });
+      createConvolver = () => ({ buffer: null, connect: (next: unknown) => next });
+      createBuffer = () => ({ getChannelData: () => new Float32Array(1) });
+      createPeriodicWave = () => ({});
+      resume = () => Promise.resolve();
+    }
+    vi.stubGlobal('window', { AudioContext: FakeAudioContext });
+    vi.stubGlobal('AudioContext', FakeAudioContext);
+    try {
+      const player = createCuePlayer();
+      await player.prepare();
+      await player.prepare();
+      expect(made).toHaveLength(1);
+      player.close();
+      expect(made[0]!.close).toHaveBeenCalledOnce();
+      expect(player.state).toBe('none');
+      await player.prepare();
+      expect(made).toHaveLength(2);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

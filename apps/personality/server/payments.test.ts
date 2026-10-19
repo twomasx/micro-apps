@@ -79,12 +79,17 @@ async function newResultId(toward = 4): Promise<string> {
   return ((await response.json()) as { id: string }).id;
 }
 
-function checkout(body: unknown, settings: Partial<PaymentsSettings> = {}): Promise<Response> {
+function checkout(
+  body: unknown,
+  settings: Partial<PaymentsSettings> = {},
+  /** PUBLIC_ORIGIN. Null means it is not set. */
+  publicOrigin: string | null = ORIGIN,
+): Promise<Response> {
   const request = new Request('http://127.0.0.1:8801/api/checkout', {
     method: 'POST',
     body: JSON.stringify(body),
   });
-  return createCheckout(request, db, context(settings), ORIGIN);
+  return createCheckout(request, db, context(settings), publicOrigin ?? undefined);
 }
 
 /** Starts a checkout for the full report and returns its session id. */
@@ -154,6 +159,18 @@ describe('POST /api/checkout', () => {
         cancelUrl: `${ORIGIN}/personality/r/${id}/report`,
       },
     ]);
+  });
+
+  it('never sends the buyer back to the address the request came in on, outside local dev', async () => {
+    const id = await newResultId();
+    const staging = await checkout({ product: 'report', resultId: id }, { environment: 'staging' }, null);
+    expect(staging.status).toBe(500);
+    expect(fake.urls).toEqual([]);
+
+    expect((await checkout({ product: 'report', resultId: id }, {}, null)).status).toBe(201);
+    expect(fake.urls[0]?.cancelUrl).toBe(`http://127.0.0.1:8801/personality/r/${id}/report`);
+    expect((await checkout({ product: 'report', resultId: id }, {}, `${ORIGIN}/`)).status).toBe(201);
+    expect(fake.urls[1]?.cancelUrl).toBe(`${ORIGIN}/personality/r/${id}/report`);
   });
 
   it('rejects a bad body, an unknown product and an unknown result', async () => {
@@ -246,6 +263,17 @@ describe('the all-app pass', () => {
     expect(body.couple).not.toBeNull();
     expect(body.a.reportUnlocked && body.b.reportUnlocked).toBe(true);
   });
+
+  it('a pass unlocks both full reports when the couple report was bought on its own', async () => {
+    const [a, b] = [await newResultId(4), await newResultId(2)];
+    const sessionId = await startPairCheckout('couple', a, b);
+    fake.pay(sessionId);
+    await webhook(sessionId);
+    const request = new Request(`http://localhost/api/compare/${a}/${b}`);
+    const body = (await (await getCompare(request, a, b, db, context(), yes)).json()) as CompareResponse;
+    expect(body.unlocked).toBe(true);
+    expect(body.a.reportUnlocked && body.b.reportUnlocked).toBe(true);
+  });
 });
 
 describe('refunds and disputes', () => {
@@ -261,6 +289,24 @@ describe('refunds and disputes', () => {
     expect(await isUnlocked(id)).toBe(false);
     expect((await report(id)).status).toBe(402);
     expect(await purchases(id)).toMatchObject([{ status: 'refunded' }]);
+  });
+
+  it('the return page learns that its payment was disputed, and only for the result it paid for', async () => {
+    const id = await newResultId();
+    const sessionId = await startReportCheckout(id);
+    fake.pay(sessionId);
+    // The dispute can land before the payment is confirmed.
+    const dispute = { type: 'charge.disputed', eventId: eventId(), sessionId, paymentIntentId: null } as const;
+    await handleStripeWebhook(webhookRequest(dispute), context());
+
+    const answer = await report(id, sessionId);
+    expect(answer.status).toBe(402);
+    expect(((await answer.json()) as ErrorBody).error).toBe('payment_revoked');
+    expect(await purchases(id)).toMatchObject([{ status: 'disputed' }]);
+
+    const other = await newResultId();
+    expect(((await (await report(other, sessionId)).json()) as ErrorBody).error).toBe('payment_required');
+    expect(((await (await report(id)).json()) as ErrorBody).error).toBe('payment_required');
   });
 });
 
@@ -531,6 +577,19 @@ describe('GET /api/compare/:a/:b', () => {
     expect(body.b.reportUnlocked).toBe(false);
     expect((await report(mine)).status).toBe(200);
     expect((await report(theirs)).status).toBe(402);
+  });
+
+  it('says when the payment for this pair was refunded', async () => {
+    const [a, b] = [await newResultId(4), await newResultId(2)];
+    const sessionId = await startPairCheckout('couple', a, b);
+    fake.pay(sessionId);
+    await webhook(sessionId);
+    const refund = { type: 'charge.refunded', eventId: eventId(), sessionId, paymentIntentId: null, full: true } as const;
+    await handleStripeWebhook(webhookRequest(refund), context());
+
+    const returned = (await (await compare(b, a, sessionId)).json()) as CompareResponse;
+    expect(returned).toMatchObject({ unlocked: false, revoked: true, couple: null });
+    expect(((await (await compare(a, b)).json()) as CompareResponse).revoked).toBe(false);
   });
 
   it('does not unlock from a session that paid for another pair', async () => {

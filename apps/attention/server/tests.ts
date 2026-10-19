@@ -1,4 +1,4 @@
-import { CV_BEST, CV_WORST, SART_VERSION, SCORE_WEIGHTS } from '../src/lib/sart-score.ts';
+import { SART_VERSION, SCORE_WEIGHTS, steadiness } from '../src/lib/sart-score.ts';
 import { REPEATS } from '../src/lib/sart-sequence.ts';
 import { error, json, randomId } from './http.ts';
 
@@ -34,11 +34,10 @@ const isNum = (x: unknown, lo: number, hi: number): x is number =>
 function expectedScore(s: Omit<TestSummary, 'score'>): number {
   const threes = REPEATS[s.length];
   const others = REPEATS[s.length] * 8;
-  const steady = s.cv === null ? 0 : Math.min(1, Math.max(0, (CV_WORST - s.cv) / (CV_WORST - CV_BEST)));
   return Math.round(
     SCORE_WEIGHTS.holds * (1 - s.commissions / threes) +
       SCORE_WEIGHTS.hits * (1 - s.omissions / others) +
-      SCORE_WEIGHTS.steadiness * steady,
+      SCORE_WEIGHTS.steadiness * steadiness(s.cv),
   );
 }
 

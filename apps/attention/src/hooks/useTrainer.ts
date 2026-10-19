@@ -55,6 +55,7 @@ export function useTrainer(options: TrainerOptions): Trainer {
 
   const player = useMemo(() => createSoundPlayer(options.volume), []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => player.setVolume(options.volume), [player, options.volume]);
+  useEffect(() => () => player.close(), [player]);
   const { lock } = useWakeLock();
   const [meta] = useState(() => {
     const now = Date.now();

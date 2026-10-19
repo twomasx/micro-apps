@@ -48,6 +48,8 @@ export function CustomPage() {
   const unlocked = useUnlocked();
   const [pattern, setPattern] = useState<CustomPattern>(DEFAULT_CUSTOM);
   const [saved, setSaved] = useState<CustomPattern[]>([]);
+  // Saving waits for the stored list, so a quick tap cannot write over patterns saved earlier.
+  const [loaded, setLoaded] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -56,6 +58,7 @@ export function CustomPage() {
       if (!live) return;
       if (settings.custom) setPattern(settings.custom);
       setSaved(patterns);
+      setLoaded(true);
     });
     return () => {
       live = false;
@@ -76,6 +79,7 @@ export function CustomPage() {
   };
 
   const save = () => {
+    if (!loaded) return;
     const next = addSavedPattern(saved, pattern);
     if (!next) {
       setMessage(`You have ${MAX_SAVED_PATTERNS} saved patterns. Delete one to save another.`);
@@ -154,7 +158,7 @@ export function CustomPage() {
           Breathe this pattern
         </button>
         {canSaveCustom(unlocked) ? (
-          <button type="button" className="button-quiet" onClick={save} disabled={isSaved}>
+          <button type="button" className="button-quiet" onClick={save} disabled={isSaved || !loaded}>
             {isSaved ? 'Saved' : 'Save it'}
           </button>
         ) : (

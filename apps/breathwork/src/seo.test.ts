@@ -1,11 +1,11 @@
 import { seoProblems } from '@micro/seo';
 import { describe, expect, it } from 'vitest';
 import catalog from '../config/products.json';
-import { PAGES } from './seo';
+import { GUIDE_PAGES, PAGES } from './seo';
 
 describe('search pages', () => {
-  it('have titles under 60 characters, descriptions under 155, no repeats and no banned words', () => {
-    expect(seoProblems(Object.values(PAGES))).toEqual([]);
+  it('have titles under 60 characters, descriptions under 155, no repeats and no banned words, guides included', () => {
+    expect(seoProblems([...Object.values(PAGES), ...Object.values(GUIDE_PAGES)])).toEqual([]);
   });
 
   it("price the unlock from config/products.json, with the free tier at 0, and no ratings", () => {

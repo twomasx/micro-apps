@@ -1,12 +1,15 @@
 import { createStripePayments, type Product } from '@micro/payments';
 import {
   confirmPurchase,
+  isRecord,
   purchaseStore,
+  readJson,
   requestHasPass,
   SESSION_ID_PATTERN,
   startCheckout,
   type PaymentsContext,
   type PurchaseRow,
+  type PurchaseStatus,
 } from '@micro/payments/server';
 import { paymentsClosed, readSettings } from '@micro/payments/settings';
 import { appConfig } from '../app.config.ts';
@@ -18,12 +21,11 @@ import { error, json } from './http.ts';
 import { findResult, isCoupleUnlocked, isReportUnlocked } from './results.ts';
 
 const PRODUCTS: readonly Product[] = catalog.products;
-const MAX_BODY_CHARS = 1_000;
 
 /** Asks the pass service whether this request carries an active all-app pass. */
 export function passCheck(request: Request, env: Env): () => Promise<boolean> {
-  const { passOrigin } = readSettings(env);
-  return () => requestHasPass(request, { passOrigin, serviceKey: env.PASS_SERVICE_KEY, app: appConfig.name });
+  const { passOrigin, routerKey } = readSettings(env);
+  return () => requestHasPass(request, { passOrigin, serviceKey: env.PASS_SERVICE_KEY, routerKey, app: appConfig.name });
 }
 
 /** Everything the payment routes need for one request, from the Pages environment. Personality has no unlock codes. */
@@ -43,10 +45,6 @@ export function paymentsContext(env: Env): PaymentsContext {
   };
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 /** POST /api/checkout with `{ product, resultId, partnerResultId? }`. Returns `{ url }`. */
 export async function createCheckout(
   request: Request,
@@ -57,16 +55,8 @@ export async function createCheckout(
   // Closed means closed, whatever the request says.
   if (!ctx.settings.enabled) return paymentsClosed();
   const { mode } = ctx.settings;
-  const text = await request.text();
-  if (text.length > MAX_BODY_CHARS) {
-    return error(413, 'too_large', 'The request body is too large.');
-  }
-  let body: unknown;
-  try {
-    body = JSON.parse(text);
-  } catch {
-    return error(400, 'invalid_json', 'The request body must be JSON.');
-  }
+  const body = await readJson(request);
+  if (body instanceof Response) return body;
   if (!isRecord(body) || typeof body.product !== 'string' || typeof body.resultId !== 'string') {
     return error(400, 'invalid_body', 'Send { product, resultId, partnerResultId? }.');
   }
@@ -99,7 +89,16 @@ export async function createCheckout(
     return error(409, 'already_unlocked', 'This is already unlocked.');
   }
 
-  const origin = publicOrigin ?? new URL(request.url).origin;
+  // Behind the router the request's own origin is this app's pages.dev address, where the buyer's saved results
+  // are not. So Stripe sends buyers back to PUBLIC_ORIGIN, and only local dev may fall back to the request.
+  const origin = (publicOrigin || (ctx.settings.environment === 'local' ? new URL(request.url).origin : '')).replace(
+    /\/$/,
+    '',
+  );
+  if (!origin) {
+    await ctx.store.log({ action: 'checkout', product: product.id, result: 'failed', detail: 'PUBLIC_ORIGIN is not set' });
+    return error(500, 'checkout_failed', 'The checkout could not be started.');
+  }
   // Anything bought for a pair is sold on the compare page, so the buyer goes back there.
   const page =
     partnerId !== null
@@ -116,17 +115,31 @@ export async function createCheckout(
 /**
  * Used when the buyer comes back from Checkout before the webhook has arrived.
  * Only a session that we created, for a purchase that `belongs` accepts, can unlock anything.
+ * Returns that purchase's status after the check, or null when the session is not one of these.
  */
 export async function confirmSession(
   ctx: PaymentsContext,
   sessionId: string,
   belongs: (purchase: PurchaseRow) => boolean,
-): Promise<void> {
-  if (!SESSION_ID_PATTERN.test(sessionId)) return;
-  await confirmPurchase(ctx, sessionId, belongs);
+): Promise<PurchaseStatus | null> {
+  if (!SESSION_ID_PATTERN.test(sessionId)) return null;
+  const row = await ctx.store.find(sessionId);
+  if (!row || !belongs(row)) return null;
+  return confirmPurchase(ctx, sessionId);
 }
 
-/** GET /api/results/:id/report. 402 until the report is unlocked. */
+/** True for a purchase that was paid and then refunded or disputed. It unlocks nothing. */
+export function isRevoked(status: PurchaseStatus | null): boolean {
+  return status === 'refunded' || status === 'disputed';
+}
+
+/** What the buyer is told when they come back from a checkout whose payment was refunded or disputed. */
+export const REVOKED_MESSAGE = 'This payment was refunded or disputed, so it does not unlock anything.';
+
+/**
+ * GET /api/results/:id/report. 402 until the report is unlocked: `payment_revoked` when the buyer came back
+ * from a checkout for it that was refunded or disputed, `payment_required` otherwise.
+ */
 export async function getReport(
   request: Request,
   id: string,
@@ -140,12 +153,14 @@ export async function getReport(
 
   if (!(await isReportUnlocked(db, row.id, mode))) {
     const sessionId = new URL(request.url).searchParams.get('session_id');
-    if (sessionId) {
-      await confirmSession(ctx, sessionId, (purchase) => purchase.result_id === row.id);
-    }
+    const purchase = sessionId
+      ? await confirmSession(ctx, sessionId, (candidate) => candidate.result_id === row.id)
+      : null;
     // An all-app pass unlocks every report. The pass service is asked; the device never decides.
     if (!(await isReportUnlocked(db, row.id, mode)) && !(await hasPass())) {
-      return error(402, 'payment_required', 'This report is not unlocked.');
+      return isRevoked(purchase)
+        ? error(402, 'payment_revoked', REVOKED_MESSAGE)
+        : error(402, 'payment_required', 'This report is not unlocked.');
     }
   }
 

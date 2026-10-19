@@ -21,8 +21,8 @@ export interface LabPassAccess {
 }
 
 export function labPassAccess(env: Env): LabPassAccess {
-  const { mode, passOrigin } = readSettings(env);
-  return { mode, pass: { passOrigin, serviceKey: env.PASS_SERVICE_KEY, app: appConfig.name } };
+  const { mode, passOrigin, routerKey } = readSettings(env);
+  return { mode, pass: { passOrigin, serviceKey: env.PASS_SERVICE_KEY, routerKey, app: appConfig.name } };
 }
 
 /**
