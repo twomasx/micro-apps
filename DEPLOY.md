@@ -296,6 +296,17 @@ Staging is the place to try a change before production: deploy it there, check i
 
 If https://staging.polymadlabs.com fails to connect on the Windows machine only some of the time, Windows is still caching the answer from before the name existed. `ipconfig /flushdns` in a Windows terminal clears it.
 
+## Email
+
+help@polymadlabs.com (the contact on the terms and refund pages) is forwarded to Roger's Gmail by Cloudflare Email Routing, set up Oct 19, 2026. Cloudflare added the MX and SPF records. It only receives: replies go out from Gmail. Manage it with wrangler from `router`:
+
+```bash
+pnpm exec wrangler email routing rules list polymadlabs.com
+pnpm exec wrangler email routing rules create polymadlabs.com --name "<name>" --match-type literal --match-field to --match-value <address>@polymadlabs.com --action-type forward --action-value rogermasx@gmail.com
+```
+
+The catch-all rule is off, so mail to any other address at the domain is dropped.
+
 ## Payments kill switch
 
 Every app reads `PAYMENTS_ENABLED`, a Pages secret. Only the exact value `true` opens checkout. Anything else, or no value, keeps it closed: buy buttons say "Unlocks open soon" and `POST <app>/api/checkout` answers 503. Unlocks already bought keep working.
