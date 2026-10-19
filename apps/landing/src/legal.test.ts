@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import refundsSource from '../refunds.html?raw';
 import termsSource from '../terms.html?raw';
 import indexSource from '../index.html?raw';
-import { CONTACT, refunds, terms } from './legal.ts';
+import { CONTACT, OWNER, PLACE, refunds, terms } from './legal.ts';
 import { renderPage } from './render.ts';
 
 const words = (html: string) => html.replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<[^>]+>/g, ' ');
@@ -36,11 +36,15 @@ describe('terms and refund pages', () => {
     expect(all).toContain('The pass covers every app operated by PolymadLabs, including new ones.');
   });
 
-  it('are marked as drafts and kept out of search until Roger approves them', () => {
+  it('are final: no open questions, no placeholder, and say who sells and which law applies', () => {
     for (const { page, html } of pages) {
-      expect(page.updated).toContain('Not yet approved');
+      expect(page.updated).toMatch(/^Last updated /);
+      expect(words(html)).not.toMatch(/\[Roger|FULL-NAME|Draft/);
       expect(html).toContain('<meta name="robots" content="noindex" />');
     }
+    const all = pages.map(({ html }) => words(html)).join(' ');
+    expect(all).toContain(`made and sold by ${OWNER}, an individual in ${PLACE}`);
+    expect(all).toContain('The laws of the State of Oregon, USA, apply to these terms.');
   });
 
   it('are linked from the landing page footer', () => {

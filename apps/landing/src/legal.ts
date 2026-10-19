@@ -1,6 +1,6 @@
 /**
- * The terms of use and the refund policy. DRAFTS: Roger approves every line before they go live
- * (PAYMENTS.md, go-live step 1). Lines marked "[Roger: ...]" are decisions only he can make.
+ * The terms of use and the refund policy, approved by Roger on Oct 19, 2026. PolymadLabs is not a company yet:
+ * the apps are sold by Roger as an individual, so OWNER names him. When the business exists, OWNER becomes it.
  */
 export interface LegalPage {
   path: string;
@@ -12,15 +12,23 @@ export interface LegalPage {
 
 export const CONTACT = 'help@polymadlabs.com';
 
+/** Who sells the unlocks. An individual for now (see above). */
+export const OWNER = 'Roger L. Tafoya III';
+export const PLACE = 'Hillsboro, Oregon, USA';
+const UPDATED = 'Last updated October 19, 2026.';
+
 export const terms: LegalPage = {
   path: '/terms',
   title: 'Terms of use',
-  updated: 'Draft of October 16, 2026. Not yet approved.',
+  updated: UPDATED,
   intro: 'These are the rules for using the PolymadLabs apps and buying unlocks in them. They are short on purpose.',
   sections: [
     {
       heading: 'Who runs the apps',
-      paragraphs: [`PolymadLabs runs the apps at polymadlabs.com. Write to ${CONTACT} with any question.`],
+      paragraphs: [
+        `PolymadLabs is the name of the apps at polymadlabs.com. They are made and sold by ${OWNER}, an individual in ${PLACE}. In these terms, "we" and "PolymadLabs" mean ${OWNER}.`,
+        `Write to ${CONTACT} with any question.`,
+      ],
     },
     {
       heading: 'Using the apps',
@@ -55,7 +63,8 @@ export const terms: LegalPage = {
     {
       heading: 'If an app closes',
       paragraphs: [
-        'If we close an app, we will say so in the app at least 30 days before. [Roger: confirm the notice period, and whether recent buyers of that app get a refund.]',
+        'If we close an app, we will say so in the app at least 30 days before it closes. What you bought keeps working until then.',
+        `If you bought that app in the 30 days before we said so, write to ${CONTACT} and we refund the full price. If every app closes, the same goes for the pass.`,
       ],
     },
     {
@@ -70,7 +79,10 @@ export const terms: LegalPage = {
     },
     {
       heading: 'The law that applies',
-      paragraphs: ['[Roger: name the country and state whose law applies, and the business name and address to show here.]'],
+      paragraphs: [
+        'The laws of the State of Oregon, USA, apply to these terms. Any dispute goes to the courts of Washington County, Oregon.',
+        'This does not take away any rights the consumer law of your own country gives you.',
+      ],
     },
   ],
 };
@@ -78,7 +90,7 @@ export const terms: LegalPage = {
 export const refunds: LegalPage = {
   path: '/refunds',
   title: 'Refund policy',
-  updated: 'Draft of October 16, 2026. Not yet approved.',
+  updated: UPDATED,
   intro: 'If an unlock is not what you hoped, you can have your money back.',
   sections: [
     {
@@ -103,7 +115,7 @@ export const refunds: LegalPage = {
     },
     {
       heading: 'After 14 days',
-      paragraphs: ['Write to us anyway if something went wrong. We look at each case. [Roger: confirm this line, or set a firm rule.]'],
+      paragraphs: ['Write to us anyway if something went wrong, for example if the unlock never worked. We look at each case and refund when it is fair.'],
     },
     {
       heading: 'Asking your bank instead',
