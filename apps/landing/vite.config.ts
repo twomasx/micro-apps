@@ -19,8 +19,7 @@ function searchFiles(): Plugin {
       outDir = join(config.root, config.build.outDir);
     },
     async closeBundle() {
-      const lastmod = new Date().toISOString().slice(0, 10);
-      writeFileSync(join(outDir, 'sitemap.xml'), sitemapXml([{ loc: `${appConfig.origin}/`, lastmod }]));
+      writeFileSync(join(outDir, 'sitemap.xml'), sitemapXml([{ loc: `${appConfig.origin}/` }]));
       const icon = readFileSync(new URL('./public/favicon.svg', import.meta.url), 'utf8');
       // The icon has only a viewBox. Give it a size so it is drawn at 512 px, not 32.
       const sized = icon.replace('<svg ', '<svg width="512" height="512" ');

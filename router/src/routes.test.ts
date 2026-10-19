@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { withoutInjection } from './index.ts';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import worker, { forwardedRequest, withoutInjection } from './index.ts';
 import { comingSoonPage, notFoundPage } from './pages.ts';
 import { landingPath, parseLiveApps, route } from './routes.ts';
 
@@ -105,5 +105,68 @@ describe('pages', () => {
 
   it('not found is a 404', () => {
     expect(notFoundPage().status).toBe(404);
+  });
+});
+
+describe('the worker', () => {
+  const env = {
+    STRIP_PREFIX: 'true',
+    LIVE_APPS: 'focus',
+    CANONICAL_HOST: 'polymadlabs.com',
+    PUBLIC_ORIGIN: 'https://polymadlabs.com',
+    LANDING_ORIGIN: 'https://landing.example',
+    FOCUS_ORIGIN: 'https://focus.example',
+  } as unknown as Parameters<typeof worker.fetch>[1];
+  const call = (address: string) =>
+    worker.fetch(new Request(address), env);
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('redirects once, straight to the final address', async () => {
+    const response = await call('http://www.polymadlabs.com/focus?t=1');
+    expect(response.status).toBe(301);
+    expect(response.headers.get('location')).toBe('https://polymadlabs.com/focus/?t=1');
+  });
+
+  it('serves the landing sitemap from the root', async () => {
+    const upstream = vi.fn(async (request: Request) => new Response(request.url));
+    vi.stubGlobal('fetch', upstream);
+    const response = await call('https://polymadlabs.com/sitemap-landing.xml');
+    expect(await response.text()).toBe('https://landing.example/sitemap.xml');
+  });
+
+  it('puts the app prefix back on the app\'s own redirects, and marks private pages noindex', async () => {
+    vi.stubGlobal('fetch', async () => new Response(null, { status: 308, headers: { location: '/science/' } }));
+    const response = await call('https://polymadlabs.com/focus/science');
+    expect(response.headers.get('location')).toBe('/focus/science/');
+    expect(response.headers.get('x-robots-tag')).toBeNull();
+    expect((await call('https://polymadlabs.com/focus/unlock')).headers.get('x-robots-tag')).toBe('noindex');
+  });
+
+  it('passes the visitor address on with the router key, and drops whatever the visitor sent', async () => {
+    const upstream = vi.fn(async (request: Request) => new Response(request.url));
+    vi.stubGlobal('fetch', upstream);
+    const keyed = { ...(env as object), ROUTER_KEY: 'k'.repeat(64) } as unknown as Parameters<typeof worker.fetch>[1];
+    const request = new Request('https://polymadlabs.com/focus/api/unlock/X', {
+      headers: { 'CF-Connecting-IP': '203.0.113.7', 'X-Visitor-IP': '198.51.100.1', 'X-Router-Key': 'guess' },
+    });
+    await worker.fetch(request as Parameters<typeof worker.fetch>[0], keyed);
+    const sent = upstream.mock.calls[0]![0];
+    expect(sent.url).toBe('https://focus.example/api/unlock/X');
+    expect(sent.headers.get('X-Visitor-IP')).toBe('203.0.113.7');
+    expect(sent.headers.get('X-Router-Key')).toBe('k'.repeat(64));
+  });
+});
+
+describe('forwardedRequest', () => {
+  it('sends no visitor address without a router key', () => {
+    const request = new Request('https://polymadlabs.com/focus/', {
+      headers: { 'CF-Connecting-IP': '203.0.113.7', 'X-Visitor-IP': '198.51.100.1', 'X-Router-Key': 'guess' },
+    });
+    const sent = forwardedRequest(request, new URL('https://focus.example/'), undefined);
+    expect(sent.headers.get('X-Visitor-IP')).toBeNull();
+    expect(sent.headers.get('X-Router-Key')).toBeNull();
   });
 });

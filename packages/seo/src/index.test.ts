@@ -69,6 +69,7 @@ describe('seoProblems', () => {
     const problems = seoProblems([
       { path: '', title: 'x'.repeat(61), description: 'y'.repeat(156) },
       { path: 'a/', title: 'Same', description: 'Clinically proven calm' },
+      { path: 'd/', title: 'Sleep', description: 'Treats insomnia' },
       { path: 'b/', title: 'Same', description: 'Free MBTI test!' },
       { path: 'c/', title: 'Box breathing — fast', description: 'ok' },
     ]);
@@ -76,6 +77,7 @@ describe('seoProblems', () => {
       '(home): title is 61 characters, over 60',
       '(home): description is 156 characters, over 155',
       'a/: says "clinically proven"',
+      'd/: says "treats"',
       'b/: same title as a/',
       'b/: says "mbti"',
       'b/: has an em dash, en dash or exclamation mark',
@@ -86,8 +88,8 @@ describe('seoProblems', () => {
 
 describe('sitemapXml', () => {
   it('lists each URL with its date', () => {
-    expect(sitemapXml([{ loc: 'https://polymadlabs.com/breathwork/', lastmod: '2026-10-16' }])).toContain(
-      '<url><loc>https://polymadlabs.com/breathwork/</loc><lastmod>2026-10-16</lastmod></url>',
+    expect(sitemapXml([{ loc: 'https://polymadlabs.com/breathwork/' }])).toContain(
+      '<url><loc>https://polymadlabs.com/breathwork/</loc></url>',
     );
   });
 });

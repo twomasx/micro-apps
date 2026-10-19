@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { httpsRedirect, isPrivate, robotsTxt, sitemapIndex, withRobots } from './seo.ts';
+import { canonicalRedirect, isPrivate, robotsTxt, sitemapIndex, withRobots } from './seo.ts';
 
 const url = (path: string) => new URL(`https://polymadlabs.com${path}`);
 
@@ -71,22 +71,39 @@ describe('robots.txt and the sitemap index', () => {
 
   it('the sitemap index lists the landing page and every live app', async () => {
     const xml = await sitemapIndex('https://polymadlabs.com', ['breathwork', 'focus']).text();
-    expect(xml).toContain('<loc>https://polymadlabs.com/_landing/sitemap.xml</loc>');
+    // Served from the root: it lists `/`, and a sitemap may only list addresses under its own folder.
+    expect(xml).toContain('<loc>https://polymadlabs.com/sitemap-landing.xml</loc>');
     expect(xml).toContain('<loc>https://polymadlabs.com/breathwork/sitemap.xml</loc>');
     expect(xml).toContain('<loc>https://polymadlabs.com/focus/sitemap.xml</loc>');
     expect(xml).not.toContain('personality');
   });
 });
 
-describe('httpsRedirect', () => {
+describe('canonicalRedirect', () => {
+  const location = (address: string, addSlash = false) =>
+    canonicalRedirect(new URL(address), 'polymadlabs.com', addSlash)?.headers.get('location') ?? null;
+
   it('sends plain HTTP to HTTPS with a 301, keeping the path and query', () => {
-    const response = httpsRedirect(new URL('http://polymadlabs.com/focus/unlock?session_id=cs_1'));
+    const response = canonicalRedirect(new URL('http://polymadlabs.com/focus/unlock?session_id=cs_1'), 'polymadlabs.com', false);
     expect(response?.status).toBe(301);
     expect(response?.headers.get('location')).toBe('https://polymadlabs.com/focus/unlock?session_id=cs_1');
   });
 
-  it('leaves HTTPS and local dev alone', () => {
-    expect(httpsRedirect(new URL('https://polymadlabs.com/'))).toBeNull();
-    expect(httpsRedirect(new URL('http://localhost:3000/'))).toBeNull();
+  it('sends www and a bare app path to the right address with a 308', () => {
+    expect(canonicalRedirect(new URL('https://www.polymadlabs.com/focus/'), 'polymadlabs.com', false)?.status).toBe(308);
+    expect(location('https://www.polymadlabs.com/focus/?t=1')).toBe('https://polymadlabs.com/focus/?t=1');
+    expect(location('https://polymadlabs.com/focus?t=1', true)).toBe('https://polymadlabs.com/focus/?t=1');
+  });
+
+  it('never chains: HTTP, www and the missing slash are fixed in one redirect', () => {
+    expect(location('http://www.polymadlabs.com/focus?t=1', true)).toBe('https://polymadlabs.com/focus/?t=1');
+    expect(location('http://www.polymadlabs.com/')).toBe('https://polymadlabs.com/');
+  });
+
+  it('leaves the right address, other hosts and local dev alone', () => {
+    expect(location('https://polymadlabs.com/')).toBeNull();
+    expect(location('https://micro-router-preview.micro-router.workers.dev/')).toBeNull();
+    expect(location('http://localhost:3000/')).toBeNull();
+    expect(location('http://localhost:3000/focus', true)).toBe('http://localhost:3000/focus/');
   });
 });

@@ -41,7 +41,7 @@ Why the empty shell matters: Google can run JavaScript, but pages that need it w
 
 **Share images.** One 1200×630 PNG per app in the app's own style, plus one for each new content page (step 2) that names the technique. Generate them at build time from an HTML or SVG template so they stay in sync. Keep each under 300 KB.
 
-**Sitemaps.** Each app serves `/<app>/sitemap.xml` listing its indexable URLs with `lastmod` from the build. The router serves `/sitemap.xml` as a sitemap index pointing to the landing page sitemap and each live app's sitemap (from `LIVE_APPS`), and adds `Sitemap: https://polymadlabs.com/sitemap.xml` to robots.txt. If Cloudflare's managed robots.txt can't take an extra line, have the router serve robots.txt with the same rules as the managed file plus the Sitemap line, and tell Roger to turn off the managed file. Ask before touching that setting.
+**Sitemaps.** Each app serves `/<app>/sitemap.xml` listing its indexable URLs, without `lastmod` (a build date on every page would say every page changed on every deploy). The router serves `/sitemap.xml` as a sitemap index pointing to the landing page sitemap and each live app's sitemap (from `LIVE_APPS`), and adds `Sitemap: https://polymadlabs.com/sitemap.xml` to robots.txt. If Cloudflare's managed robots.txt can't take an extra line, have the router serve robots.txt with the same rules as the managed file plus the Sitemap line, and tell Roger to turn off the managed file. Ask before touching that setting.
 
 **Structured data (JSON-LD).**
 

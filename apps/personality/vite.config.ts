@@ -69,6 +69,8 @@ export default defineConfig({
         // Returning visitors get the plain app shell for every page, so the app draws once with what is saved on
         // the device. The prerendered pages are for first visits and search engines (SEO.md).
         globPatterns: ['**/*.{js,css,woff2,png,svg,webmanifest}', 'app.html'],
+        // Share images are for link previews, never shown in the app.
+        globIgnores: ['**/og.png'],
         navigateFallback: 'app.html',
         navigateFallbackDenylist: [/\/api\//],
       },

@@ -160,8 +160,7 @@ export function seoPrerender(options: PrerenderOptions): Plugin {
         const notFoundHead = `<title>${options.notFoundTitle}</title>\n    <meta name="robots" content="noindex" />`;
         write('404.html', withRoot(withHead(template, notFoundHead), render(`${site.base}__not-found__/`)));
 
-        const lastmod = new Date().toISOString().slice(0, 10);
-        write('sitemap.xml', sitemapXml(options.pages.map((page) => ({ loc: pageUrl(site, page.path), lastmod }))));
+        write('sitemap.xml', sitemapXml(options.pages.map((page) => ({ loc: pageUrl(site, page.path) }))));
 
         for (const image of options.images) write(image.file, await renderPng(image));
       } finally {

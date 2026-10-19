@@ -1,7 +1,7 @@
 import { appConfig } from '../app.config.ts';
 import { experiments, passLine, protocol, studySheet, type Experiment } from './content.ts';
 import { refunds, terms, type LegalPage } from './legal.ts';
-import { jsonLdScript, organization, website } from '@micro/seo';
+import { headTags, organization, website } from '@micro/seo';
 import { specimens } from './specimens/index.ts';
 
 /**
@@ -31,28 +31,21 @@ function row(e: Experiment): string {
 export const TITLE = 'PolymadLabs: Five Free Experiments on Your Mind';
 export const DESCRIPTION = 'Five small apps that measure, train or test one part of your mind. Free to start, no account, no ads.';
 
-/** Link preview tags. Previews need absolute URLs, so these use the published origin. */
+/** Title, description, canonical, link preview tags and structured data. Previews need absolute URLs. */
 function meta(): string {
-  const page = `${appConfig.origin}/`;
-  const image = `${appConfig.origin}${appConfig.base}og.png`;
-  return [
-    `<link rel="canonical" href="${page}" />`,
-    `<meta property="og:type" content="website" />`,
-    `<meta property="og:site_name" content="PolymadLabs" />`,
-    `<meta property="og:url" content="${page}" />`,
-    `<meta property="og:title" content="${TITLE}" />`,
-    `<meta property="og:description" content="${DESCRIPTION}" />`,
-    `<meta property="og:image" content="${image}" />`,
-    `<meta property="og:image:width" content="1200" />`,
-    `<meta property="og:image:height" content="630" />`,
-    `<meta property="og:image:alt" content="PolymadLabs. You Are The Experiment. An index of five experiments." />`,
-    `<meta name="twitter:card" content="summary_large_image" />`,
-    `<meta name="twitter:title" content="${TITLE}" />`,
-    `<meta name="twitter:description" content="${DESCRIPTION}" />`,
-    `<meta name="twitter:image" content="${image}" />`,
-    jsonLdScript(website(appConfig.origin, 'PolymadLabs')),
-    jsonLdScript(organization(appConfig.origin, 'PolymadLabs', `${appConfig.origin}${appConfig.base}logo-512.png`)),
-  ].join('\n    ');
+  const { origin, base } = appConfig;
+  return headTags(
+    { origin, base: '/', siteName: 'PolymadLabs' },
+    {
+      path: '',
+      title: TITLE,
+      description: DESCRIPTION,
+      // The page is served at `/`, its files under `base`.
+      image: `${base.slice(1)}og.png`,
+      imageAlt: 'PolymadLabs. You Are The Experiment. An index of five experiments.',
+      jsonLd: [website(origin, 'PolymadLabs'), organization(origin, 'PolymadLabs', `${origin}${base}logo-512.png`)],
+    },
+  );
 }
 
 /** A terms or refund page, from src/legal.ts. */

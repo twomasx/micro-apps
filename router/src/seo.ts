@@ -75,9 +75,15 @@ export function robotsTxt(origin: string): Response {
   });
 }
 
+/**
+ * Where the landing page's sitemap is served. It lists `/`, and a sitemap may only list addresses under its own
+ * folder, so it is served from the root, not from /_landing/ where the landing app builds it.
+ */
+export const LANDING_SITEMAP = '/sitemap-landing.xml';
+
 /** /sitemap.xml: points to the landing page's sitemap and the sitemap of every live app. */
 export function sitemapIndex(origin: string, liveApps: readonly App[]): Response {
-  const maps = [`${origin}/_landing/sitemap.xml`, ...liveApps.map((app) => `${origin}/${app}/sitemap.xml`)];
+  const maps = [`${origin}${LANDING_SITEMAP}`, ...liveApps.map((app) => `${origin}/${app}/sitemap.xml`)];
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${maps.map((loc) => `  <sitemap><loc>${loc}</loc></sitemap>`).join('\n')}
@@ -88,8 +94,18 @@ ${maps.map((loc) => `  <sitemap><loc>${loc}</loc></sitemap>`).join('\n')}
   });
 }
 
-/** Plain HTTP goes to HTTPS with a 301. Local dev stays on HTTP. */
-export function httpsRedirect(url: URL): Response | null {
-  if (url.protocol !== 'http:' || url.hostname === 'localhost' || url.hostname === '127.0.0.1') return null;
-  return new Response(null, { status: 301, headers: { location: `https://${url.host}${url.pathname}${url.search}` } });
+/**
+ * One redirect to the address a page is really served at, so nothing is redirected twice: plain HTTP to HTTPS,
+ * a subdomain like www to `canonicalHost`, and a bare app path (`/focus`) to its slash (`/focus/`).
+ * A change of scheme is a 301, the rest 308. Local dev stays on HTTP.
+ */
+export function canonicalRedirect(url: URL, canonicalHost: string | undefined, addSlash: boolean): Response | null {
+  const local = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  const toHttps = url.protocol === 'http:' && !local;
+  const toHost =
+    canonicalHost !== undefined && url.hostname !== canonicalHost && url.hostname.endsWith(`.${canonicalHost}`);
+  if (!toHttps && !toHost && !addSlash) return null;
+  const origin = `${local ? url.protocol : 'https:'}//${toHost ? canonicalHost : url.host}`;
+  const location = `${origin}${url.pathname}${addSlash ? '/' : ''}${url.search}`;
+  return new Response(null, { status: toHttps ? 301 : 308, headers: { location } });
 }

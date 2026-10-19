@@ -164,11 +164,14 @@ export function breadcrumbList(items: readonly { name: string; url: string }[]):
   };
 }
 
-/** A sitemap for one app or the landing page. */
-export function sitemapXml(urls: readonly { loc: string; lastmod: string }[]): string {
+/**
+ * A sitemap for one app or the landing page. No lastmod: a build date on every page says each one changed on
+ * every deploy, and search engines learn to ignore a lastmod that is always new.
+ */
+export function sitemapXml(urls: readonly { loc: string }[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((url) => `  <url><loc>${escape(url.loc)}</loc><lastmod>${url.lastmod}</lastmod></url>`).join('\n')}
+${urls.map((url) => `  <url><loc>${escape(url.loc)}</loc></url>`).join('\n')}
 </urlset>
 `;
 }
@@ -186,6 +189,7 @@ export const BANNED = [
   'boosts iq',
   'psychic powers',
   'cures',
+  'treats',
   'quantum',
 ];
 
