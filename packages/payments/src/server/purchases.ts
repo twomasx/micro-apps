@@ -111,6 +111,17 @@ export async function handleStripeWebhook(request: Request, ctx: PaymentsContext
         await ctx.store.log({ action: 'dispute', sessionId: event.sessionId, result: 'revoked' });
       }
       break;
+    case 'dispute.closed':
+      if (event.sessionId && (await ctx.store.find(event.sessionId))) {
+        // A won dispute gives the unlock back, unless the purchase was also refunded.
+        const restored = event.won && (await ctx.store.restoreAfterDispute(event.sessionId));
+        await ctx.store.log({
+          action: 'dispute_closed',
+          sessionId: event.sessionId,
+          result: event.won ? (restored ? 'won_restored' : 'won_kept_revoked') : 'lost',
+        });
+      }
+      break;
     case 'wrong_mode':
       await ctx.store.log({ action: 'webhook', result: 'wrong_mode', detail: event.eventId });
       break;

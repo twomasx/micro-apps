@@ -82,7 +82,7 @@ Codes work like keys: anyone holding one gets in. These rules keep that safe eno
   - Verify the signature. Reject anything unsigned or signed with the wrong secret.
   - Store every Stripe event ID in a `stripe_events` table. Seeing the same event twice does nothing the second time.
   - Events in the wrong order must still end in the right state.
-  - Handle: `checkout.session.completed` (unlock), `charge.refunded` (revoke), `charge.dispute.created` (revoke and mark disputed).
+  - Handle: `checkout.session.completed` (unlock), `charge.refunded` (revoke), `charge.dispute.created` (revoke and mark disputed), `charge.dispute.closed` (a won dispute, or an inquiry closed with no chargeback, unlocks again unless the payment was also refunded).
 - Refunds and disputes revoke the unlock or pass on the next check, on every device.
 - Statement descriptor: `POLYMADLABS`, so buyers recognise the charge.
 - Receipts: Stripe's emailed receipts are turned on (dashboard setting, Roger does this).

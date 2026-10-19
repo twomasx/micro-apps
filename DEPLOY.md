@@ -327,9 +327,9 @@ curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"
 ## Stripe
 
 - **Live in production since Oct 19, 2026; staging stays in test mode.** The code refuses a key that does not match `PAYMENTS_MODE` (see the kill switch above), a plain variable in each `wrangler.jsonc`: `live` in the production `vars`, `test` under `env.preview`.
-- Production's live webhooks (created by `stripe-sync --live --webhooks https://polymadlabs.com`) are `https://polymadlabs.com/<app>/api/stripe/webhook` for the five apps and the pass, with the same three events. Their signing secrets are at `~/.config/polymadlabs/live/<app>-stripe-webhook-secret`. The scripts use the restricted admin keys: `~/.config/polymadlabs/stripe-live-admin-key` and `stripe-test-admin-key`.
+- Production's live webhooks (created by `stripe-sync --live --webhooks https://polymadlabs.com`) are `https://polymadlabs.com/<app>/api/stripe/webhook` for the five apps and the pass, with the same four events. Their signing secrets are at `~/.config/polymadlabs/live/<app>-stripe-webhook-secret`. The scripts use the restricted admin keys: `~/.config/polymadlabs/stripe-live-admin-key` and `stripe-test-admin-key`.
 - Before going live, every test purchase in production was exported to `~/polymadlabs-backups/production-2026-10-19/` and deleted.
-- Since Oct 16, 2026 the five test-mode webhooks point at **staging**, not production, and receive `checkout.session.completed`, `charge.refunded` and `charge.dispute.created`. Moving them kept their signing secrets.
+- Since Oct 16, 2026 the five test-mode webhooks point at **staging**, not production, and receive `checkout.session.completed`, `charge.refunded`, `charge.dispute.created` and (since Oct 19) `charge.dispute.closed`. Moving them kept their signing secrets.
 - Personality: `https://staging.polymadlabs.com/personality/api/stripe/webhook`, endpoint id `we_1UPxeIIbd3re6uBdIm3vv1hN`. Signing secret at `~/.config/polymadlabs/stripe-webhook-secret`.
 - Focus: `https://staging.polymadlabs.com/focus/api/stripe/webhook`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.
 - Breathwork: `https://staging.polymadlabs.com/breathwork/api/stripe/webhook`, endpoint id `we_1UQVAQIbd3re6uBdkogYUm05`. Signing secret at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`.
@@ -496,8 +496,5 @@ The test purchase from that check was deleted at go-live (Oct 19, 2026).
 ## Known gaps
 
 - Nothing has been checked on a real Android phone or in iPhone Safari. For focus this matters most: playing with the screen off and the lock screen controls (see `apps/focus/DESIGN-TODO.md`). For breathwork: tones, vibration and the screen staying awake (see `apps/breathwork/DESIGN-TODO.md`). For attention: the three sounds, vibration, the screen staying awake, and the test's timing on a 90 Hz or 120 Hz screen (see `apps/attention/DESIGN-TODO.md`). For intention: the full-screen canvas at 60 fps, the color fan and Android's color picker, Back closing sheets, and the calendar file (see `apps/intention/DESIGN-TODO.md`).
-- Every file in `apps/personality/content/` still says `status: draft`.
 - Cloudflare's Web Analytics is blocked by the router's header, but it is still switched on for the domain. Switch it off in the dashboard (Analytics & Logs, Web Analytics) so the block is not the only thing in the way.
-- Unpaid checkouts leave `pending` rows in `purchases`, in every app. Nothing clears them yet.
-- Nothing deletes old rows from `code_devices`, `code_addresses` or `payment_log`, although the pass privacy note says device ids and log entries are kept for up to 1 year. Needs a cleanup job, or the note changed.
 - Personality's PWA manifest still has white placeholder colors and the lower-case name "personality" (see `apps/personality/DESIGN-TODO.md`).

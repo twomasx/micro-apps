@@ -9,6 +9,7 @@ export type LogAction =
   | 'unlock'
   | 'refund'
   | 'dispute'
+  | 'dispute_closed'
   | 'code_check'
   | 'pass_check'
   | 'reissue'

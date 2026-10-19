@@ -10,6 +10,16 @@ import { writeLog, type LogEntry } from './log';
  * pending: checkout started, not paid. paid: unlocks. refunded and disputed: unlocked once, revoked now.
  * Only `paid` unlocks anything.
  */
+/** A checkout left unpaid this long is deleted (see insertPending). */
+export const UNPAID_KEPT_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** Deletes pending purchases older than UNPAID_KEPT_MS. Paid, refunded and disputed rows are never touched. */
+export function forgetUnpaidCheckouts(db: D1Database, now = Date.now()): D1PreparedStatement {
+  return db
+    .prepare("DELETE FROM purchases WHERE status = 'pending' AND created_at < ?")
+    .bind(new Date(now - UNPAID_KEPT_MS).toISOString());
+}
+
 export type PurchaseStatus = 'pending' | 'paid' | 'refunded' | 'disputed';
 
 export interface PurchaseRow {
@@ -93,24 +103,31 @@ export function purchaseStore(options: StoreOptions) {
       return writeLog(db, app, mode, entry);
     },
 
-    /** The row starts as pending. Only the webhook or a session confirmed with Stripe turns it into paid. */
-    async insertPending(sessionId: string, product: Product, extra: Record<string, string | number | null> = {}) {
+    /**
+     * The row starts as pending. Only the webhook or a session confirmed with Stripe turns it into paid.
+     * Now and then this also deletes checkouts left unpaid for a week: Stripe expires a checkout after 24 hours
+     * and stops sending its webhook after 3 days, so such a row can never be paid.
+     */
+    async insertPending(sessionId: string, product: Product, extra: Record<string, string | number | null> = {}, now = Date.now()) {
       const columns = Object.keys(extra);
       if (!columns.every((column) => COLUMN.test(column))) throw new Error('Bad column name');
       const names = ['id', 'stripe_session_id', 'amount_cents', 'currency', 'status', 'mode', 'created_at', ...columns];
-      await db
-        .prepare(`INSERT INTO purchases (${names.join(', ')}) VALUES (${names.map(() => '?').join(', ')})`)
-        .bind(
-          randomId(),
-          sessionId,
-          product.amount,
-          product.currency,
-          'pending',
-          mode,
-          new Date().toISOString(),
-          ...columns.map((column) => extra[column] ?? null),
-        )
-        .run();
+      const statements = [
+        db
+          .prepare(`INSERT INTO purchases (${names.join(', ')}) VALUES (${names.map(() => '?').join(', ')})`)
+          .bind(
+            randomId(),
+            sessionId,
+            product.amount,
+            product.currency,
+            'pending',
+            mode,
+            new Date(now).toISOString(),
+            ...columns.map((column) => extra[column] ?? null),
+          ),
+      ];
+      if (Math.random() < 0.02) statements.push(forgetUnpaidCheckouts(db, now));
+      await db.batch(statements);
     },
 
     /**
@@ -145,6 +162,22 @@ export function purchaseStore(options: StoreOptions) {
            WHERE stripe_session_id = ? AND mode = ? AND status IN ('pending', 'paid', 'refunded')`,
         )
         .bind(status, new Date().toISOString(), sessionId, mode)
+        .run();
+      return result.meta.changes > 0;
+    },
+
+    /**
+     * Back to paid after a dispute closed in our favor. Not when the payment was also fully refunded:
+     * the refund log says so (disputes close within months, long before the log is cleared after a year).
+     */
+    async restoreAfterDispute(sessionId: string): Promise<boolean> {
+      const result = await db
+        .prepare(
+          `UPDATE purchases SET status = 'paid', updated_at = ?
+           WHERE stripe_session_id = ? AND mode = ? AND status = 'disputed'
+             AND NOT EXISTS (SELECT 1 FROM payment_log WHERE session_id = ? AND action = 'refund' AND result IN ('revoked', 'already_revoked'))`,
+        )
+        .bind(new Date().toISOString(), sessionId, mode, sessionId)
         .run();
       return result.meta.changes > 0;
     },

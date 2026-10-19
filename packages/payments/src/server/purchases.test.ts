@@ -6,7 +6,7 @@ import type { PaymentsMode, PaymentsSettings } from '../settings';
 import { PriceMismatchError, type PaymentEvent, type Product } from '../types';
 import { formatCode, hashCode, unlockCodeFor } from '../unlock-codes';
 import type { PaymentsContext } from './purchases';
-import { purchaseStore, type PurchaseRow } from './store';
+import { forgetUnpaidCheckouts, purchaseStore, UNPAID_KEPT_MS, type PurchaseRow } from './store';
 import { unlockRoutes } from './unlock-routes';
 
 const SECRET = 'test-secret-that-is-long-enough-0123456789';
@@ -65,6 +65,13 @@ const refunded = (sessionId: string, full = true): PaymentEvent => ({
   sessionId,
   paymentIntentId: null,
   full,
+});
+const disputeClosed = (sessionId: string, won: boolean): PaymentEvent => ({
+  type: 'dispute.closed',
+  eventId: eventId(),
+  sessionId,
+  paymentIntentId: null,
+  won,
 });
 const disputed = (sessionId: string): PaymentEvent => ({
   type: 'charge.disputed',
@@ -259,6 +266,32 @@ describe('webhook', () => {
     expect(await logFor(sessionId)).toContain('dispute:revoked');
   });
 
+  it('a won dispute gives the unlock back; a lost one does not', async () => {
+    const won = await paidPurchase();
+    await webhook(disputed(won.sessionId));
+    await webhook(disputeClosed(won.sessionId, true));
+    expect((await row(won.sessionId))?.status).toBe('paid');
+    expect(await check(won.code)).toBe(true);
+    expect(await logFor(won.sessionId)).toContain('dispute_closed:won_restored');
+
+    const lost = await paidPurchase();
+    await webhook(disputed(lost.sessionId));
+    await webhook(disputeClosed(lost.sessionId, false));
+    expect((await row(lost.sessionId))?.status).toBe('disputed');
+    expect(await check(lost.code)).toBe(false);
+    expect(await logFor(lost.sessionId)).toContain('dispute_closed:lost');
+  });
+
+  it('a won dispute on a refunded purchase keeps it locked', async () => {
+    const { sessionId, code } = await paidPurchase();
+    await webhook(refunded(sessionId));
+    await webhook(disputed(sessionId));
+    await webhook(disputeClosed(sessionId, true));
+    expect((await row(sessionId))?.status).toBe('disputed');
+    expect(await check(code)).toBe(false);
+    expect(await logFor(sessionId)).toContain('dispute_closed:won_kept_revoked');
+  });
+
   it('a dispute after a refund still ends disputed', async () => {
     const { sessionId } = await paidPurchase();
     await webhook(refunded(sessionId));
@@ -298,6 +331,21 @@ describe('purchase, for the page Stripe sends the buyer back to', () => {
   it('is 404 for an unknown or malformed session', async () => {
     expect((await purchase('cs_test_unknown00000001')).status).toBe(404);
     expect((await purchase('nope')).status).toBe(404);
+  });
+});
+
+describe('unpaid checkouts', () => {
+  it('are deleted after a week; paid, refunded and newer pending rows stay', async () => {
+    const now = Date.now();
+    const aged = new Date(now - UNPAID_KEPT_MS - 60_000).toISOString();
+    const oldPending = await startCheckout();
+    const newPending = await startCheckout();
+    const { sessionId: oldPaid } = await paidPurchase();
+    await db.prepare('UPDATE purchases SET created_at = ? WHERE stripe_session_id IN (?, ?)').bind(aged, oldPending, oldPaid).run();
+    await forgetUnpaidCheckouts(db, now).run();
+    expect(await row(oldPending)).toBeNull();
+    expect((await row(newPending))?.status).toBe('pending');
+    expect((await row(oldPaid))?.status).toBe('paid');
   });
 });
 

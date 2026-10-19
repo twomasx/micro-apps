@@ -23,6 +23,7 @@ const WEBHOOK_EVENTS: Stripe.WebhookEndpointCreateParams.EnabledEvent[] = [
   'checkout.session.completed',
   'charge.refunded',
   'charge.dispute.created',
+  'charge.dispute.closed',
 ];
 
 interface Wanted {

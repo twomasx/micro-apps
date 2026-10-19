@@ -34,6 +34,8 @@ export type PaymentEvent =
   /** `full` is false for a partial refund, which keeps the unlock. */
   | { type: 'charge.refunded'; eventId: string; sessionId: string | null; paymentIntentId: string | null; full: boolean }
   | { type: 'charge.disputed'; eventId: string; sessionId: string | null; paymentIntentId: string | null }
+  /** `won` is true when the dispute closed in our favor (won, or an inquiry closed with no chargeback). */
+  | { type: 'dispute.closed'; eventId: string; sessionId: string | null; paymentIntentId: string | null; won: boolean }
   /** An event made in the other mode. Never acted on. */
   | { type: 'wrong_mode'; eventId: string }
   | { type: 'ignored'; eventId: string; stripeType: string };

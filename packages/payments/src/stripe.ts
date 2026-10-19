@@ -125,6 +125,12 @@ export async function readEvent(
       const paymentIntentId = idOf(event.data.object.payment_intent);
       return { type: 'charge.disputed', eventId, sessionId: await sessionFor(paymentIntentId), paymentIntentId };
     }
+    case 'charge.dispute.closed': {
+      const dispute = event.data.object;
+      const paymentIntentId = idOf(dispute.payment_intent);
+      const won = dispute.status === 'won' || dispute.status === 'warning_closed';
+      return { type: 'dispute.closed', eventId, sessionId: await sessionFor(paymentIntentId), paymentIntentId, won };
+    }
     default:
       return { type: 'ignored', eventId, stripeType: event.type };
   }

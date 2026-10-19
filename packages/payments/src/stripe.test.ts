@@ -163,6 +163,20 @@ describe('readEvent', () => {
     });
   });
 
+  it('reads a closed dispute as won (won, or an inquiry closed) or not', async () => {
+    const closed = (status: string) =>
+      ({ id: 'evt_c', livemode: false, type: 'charge.dispute.closed', data: { object: { id: 'dp_1', payment_intent: 'pi_1', status } } }) as unknown as Stripe.Event;
+    for (const [status, won] of [['won', true], ['warning_closed', true], ['lost', false]] as const) {
+      expect(await readEvent(closed(status), false, sessionFor)).toEqual({
+        type: 'dispute.closed',
+        eventId: 'evt_c',
+        sessionId: 'cs_test_session0001',
+        paymentIntentId: 'pi_1',
+        won,
+      });
+    }
+  });
+
   it('ignores every other event type', async () => {
     const other = { id: 'evt_o', livemode: false, type: 'customer.created', data: { object: {} } } as unknown as Stripe.Event;
     expect(await readEvent(other, false, noSession)).toEqual({ type: 'ignored', eventId: 'evt_o', stripeType: 'customer.created' });
