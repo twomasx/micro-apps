@@ -13,7 +13,7 @@ export interface LegalPage {
 export const CONTACT = 'help@polymadlabs.com';
 
 /** Who sells the unlocks. An individual for now (see above). */
-export const OWNER = 'Roger L. Tafoya III';
+export const OWNER = 'Roger Tafoya';
 export const PLACE = 'Hillsboro, Oregon, USA';
 const UPDATED = 'Last updated October 19, 2026.';
 
