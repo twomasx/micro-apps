@@ -127,6 +127,20 @@ describe('checkout', () => {
     expect(await logFor(sessionId)).toEqual(['checkout:started']);
   });
 
+  it('sends the buyer back to PUBLIC_ORIGIN, and refuses to guess it outside local dev', async () => {
+    const request = () => new Request('https://micro-focus.pages.dev/api/checkout', { method: 'POST', body: '{"product":"lifetime"}' });
+    expect((await routes.checkout(request(), context(), 'https://polymadlabs.com/')).status).toBe(201);
+    expect(fake.checkouts.at(-1)?.cancelUrl).toBe('https://polymadlabs.com/focus/unlock');
+    // Local dev may use the address the request came to.
+    expect((await routes.checkout(request(), context())).status).toBe(201);
+    expect(fake.checkouts.at(-1)?.cancelUrl).toBe('https://micro-focus.pages.dev/focus/unlock');
+    // Behind the router that address is the pages.dev one, so staging and production must have PUBLIC_ORIGIN.
+    const before = fake.checkouts.length;
+    expect((await routes.checkout(request(), context({ environment: 'production' }))).status).toBe(500);
+    expect((await routes.checkout(request(), context({ environment: 'staging' }), '')).status).toBe(500);
+    expect(fake.checkouts).toHaveLength(before);
+  });
+
   it('refuses other products and bad bodies', async () => {
     expect((await checkout({ product: 'report' })).status).toBe(400);
     expect((await checkout({})).status).toBe(400);
@@ -363,6 +377,10 @@ describe('code security', () => {
     expect(refused.body).toMatchObject({ error: 'too_many_tries' });
     // Another address is not affected.
     expect((await ask(code, { address: '203.0.113.78' })).body.valid).toBe(true);
+    // The counters are kept under the scrambled address, never the address itself.
+    const keys = JSON.stringify((await db.prepare('SELECT key FROM rate_limits').all()).results);
+    expect(keys).not.toContain('203.0.113');
+    expect(keys).toMatch(/"m:[0-9a-f]{16}:\d+"/);
   });
 
   it('remembers a scrambled form of each address a code was checked from, never the address itself', async () => {

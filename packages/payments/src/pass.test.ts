@@ -60,6 +60,10 @@ describe('pass rules', () => {
     expect(needsCheck(saved({ checkedAt: 0 }), RECHECK_AFTER_MS)).toBe(true);
   });
 
+  it('asks again when the last answer is dated in the future, after the clock was set back', () => {
+    expect(needsCheck(saved({ checkedAt: 400 * DAY }), 10 * DAY)).toBe(true);
+  });
+
   it('reads only well-formed saved passes', () => {
     expect(sanitizePass({ code: 'k7qm-xrp2-9vtd-4hnc', status: 'active', checkedAt: 5, lastGoodAt: 5 })).toEqual(
       saved({ checkedAt: 5, lastGoodAt: 5 }),

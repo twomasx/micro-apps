@@ -18,4 +18,6 @@ interface Env {
   ALLOWED_ORIGINS?: string;
   /** Staging only: JSON list of extra app links ({ app, name, url }) for testing a pass on another address. */
   EXTRA_APP_LINKS?: string;
+  /** Shared with the router of this environment, so the visitor address it passes on can be trusted. */
+  ROUTER_KEY?: string;
 }

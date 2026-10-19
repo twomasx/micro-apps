@@ -17,7 +17,7 @@ import { join } from 'node:path';
 import { priceLookupKey, type PaymentsMode } from '@micro/payments';
 import type Stripe from 'stripe';
 import { money, productsOf, SELLERS } from './lib/catalog.ts';
-import { flag, modeFromArgs, stripeFor } from './lib/stripe.ts';
+import { flag, modeFromArgs, stripeFor, webhookEnvironment } from './lib/stripe.ts';
 
 const WEBHOOK_EVENTS: Stripe.WebhookEndpointCreateParams.EnabledEvent[] = [
   'checkout.session.completed',
@@ -145,10 +145,7 @@ async function main() {
 
   const origin = flag(args, '--webhooks');
   if (origin && !checkOnly) {
-    const environment = origin.includes('staging.') ? 'staging' : 'production';
-    if (mode === 'test' && environment === 'production') {
-      throw new Error('Test-mode webhooks point at staging only. Production gets live-mode webhooks at go-live.');
-    }
+    const environment = webhookEnvironment(origin, mode);
     await syncWebhooks(stripe, origin.replace(/\/$/, ''), flag(args, '--secrets-dir'), environment);
   }
 }

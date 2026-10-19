@@ -249,6 +249,19 @@ describe('pass code security', () => {
     expect((await askAs(code, 'focus', device(1), from)).status).toBe(429);
   });
 
+  it('keeps no network address as it is, in the counters or the per-day list', async () => {
+    const { code } = await buyPass();
+    const from = { 'CF-Connecting-IP': '203.0.113.66' };
+    await askAs(code, 'focus', device(1), from);
+    await createToken(post('token', { code }, from), context(), db);
+    const stored = JSON.stringify([
+      (await db.prepare('SELECT key FROM rate_limits').all()).results,
+      (await db.prepare('SELECT address_hash FROM code_addresses').all()).results,
+    ]);
+    expect(stored).not.toContain('203.0.113');
+    expect(stored).not.toContain('198.51.100');
+  });
+
   it("counts an app server's checks against the buyer's address only with the right service key", async () => {
     const { code } = await buyPass();
     const viaServer = (key: string) => ({ 'CF-Connecting-IP': '192.0.2.1', 'X-Client-IP': '203.0.113.200', 'X-Pass-Service-Key': key });

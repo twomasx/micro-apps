@@ -28,7 +28,11 @@ export function unlockRoutes(config: UnlockAppConfig) {
   return {
     product,
 
-    /** POST /api/checkout with `{ product }`. Returns `{ url }`, the Stripe Checkout page. */
+    /**
+     * POST /api/checkout with `{ product }`. Returns `{ url }`, the Stripe Checkout page.
+     * `publicOrigin` is PUBLIC_ORIGIN, where Stripe sends the buyer back. Behind the router the request's own
+     * origin is the app's pages.dev address, so only local dev may fall back to it.
+     */
     async checkout(request: Request, ctx: PaymentsContext, publicOrigin?: string): Promise<Response> {
       // Closed means closed, whatever the request says.
       if (!ctx.settings.enabled) return paymentsClosed();
@@ -37,7 +41,12 @@ export function unlockRoutes(config: UnlockAppConfig) {
       if (!isRecord(body) || body.product !== product.id) {
         return error(400, 'unknown_product', `Send { product: "${product.id}" }.`);
       }
-      const page = `${publicOrigin ?? new URL(request.url).origin}${config.base}${config.returnPage ?? 'unlock'}`;
+      const origin = (publicOrigin || (ctx.settings.environment === 'local' ? new URL(request.url).origin : '')).replace(/\/$/, '');
+      if (!origin) {
+        await ctx.store.log({ action: 'checkout', product: product.id, result: 'failed', detail: 'PUBLIC_ORIGIN is not set' });
+        return error(500, 'checkout_failed', 'The checkout could not be started.');
+      }
+      const page = `${origin}${config.base}${config.returnPage ?? 'unlock'}`;
       return startCheckout(ctx, product, { successUrl: `${page}?session_id={CHECKOUT_SESSION_ID}`, cancelUrl: page });
     },
 
@@ -66,7 +75,7 @@ export function unlockRoutes(config: UnlockAppConfig) {
       const { store } = ctx;
       const deviceId = deviceIdOf(request);
       if (!deviceId) return error(400, 'device_required', 'Send the device id in X-Device-Id.');
-      const address = clientAddress(request, undefined);
+      const address = await store.hashAddress(clientAddress(request, undefined, ctx.settings.routerKey));
       const rate = await countTry(store.db, address);
       if (!rate.ok) {
         await store.log({ action: 'code_check', result: 'rate_limited' });
@@ -89,7 +98,7 @@ export function unlockRoutes(config: UnlockAppConfig) {
         await store.log({ action: 'code_check', sessionId: row.stripe_session_id, result: 'device_limit' });
         return json({ valid: false, status: 'device_limit' });
       }
-      await noteAddress(store.db, codeHash, await store.hashAddress(address));
+      await noteAddress(store.db, codeHash, address);
       return json({ valid: true, status: 'active' });
     },
   };

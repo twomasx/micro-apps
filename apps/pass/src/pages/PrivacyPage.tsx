@@ -21,8 +21,12 @@ export function PrivacyPage() {
         </p>
         <p>
           When an app checks your pass, it sends the code and a random device id that the app made on your device. We
-          keep the device ids that used each code, with the day each was first seen, to stop one code being shared
-          widely. A device id says nothing about who you are.
+          keep the device ids that used each code, with the day each was first and last seen, to stop one code being
+          shared widely. A device id says nothing about who you are.
+        </p>
+        <p>
+          For each day a code is checked, we keep a scrambled form of the network addresses it was checked from, to
+          spot a code used from many places. The addresses themselves are not kept.
         </p>
         <p>
           We keep a log of payments and pass checks: what happened, when, and Stripe's payment id. It has no names,

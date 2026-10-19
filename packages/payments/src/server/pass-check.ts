@@ -1,4 +1,5 @@
 import { DEVICE_HEADER, normalizePassCode, PASS_HEADER } from '../pass-codes';
+import { clientAddress } from './guard';
 
 /** Sent by app servers, so the pass service counts its rate limit against the buyer's address, not ours. */
 export const SERVICE_KEY_HEADER = 'X-Pass-Service-Key';
@@ -11,6 +12,8 @@ export interface ServerPassOptions {
   serviceKey: string | undefined;
   /** The app asking, like "personality". */
   app: string;
+  /** ROUTER_KEY, so the buyer's address the router passed on reaches the pass service. */
+  routerKey?: string;
   fetcher?: typeof fetch;
   now?: () => number;
 }
@@ -42,7 +45,7 @@ export async function requestHasPass(request: Request, options: ServerPassOption
       headers: {
         'Content-Type': 'application/json',
         [SERVICE_KEY_HEADER]: options.serviceKey ?? '',
-        [CLIENT_IP_HEADER]: request.headers.get('CF-Connecting-IP') ?? '',
+        [CLIENT_IP_HEADER]: clientAddress(request, undefined, options.routerKey),
       },
       body: JSON.stringify({ code, deviceId, app: options.app }),
     });

@@ -11,13 +11,9 @@ import type Stripe from 'stripe';
 import { SELLERS, type Seller } from './lib/catalog.ts';
 import { d1, DAY, environmentFromArgs, quote } from './lib/d1.ts';
 import { differences, madeOn, type SaleRow, type StripeSale } from './lib/reconcile.ts';
-import { flag, stripeFor } from './lib/stripe.ts';
+import { flag, modeFromKey, stripeFor } from './lib/stripe.ts';
 
 const ADDRESSES_A_DAY = 10;
-
-function modeFromKey(): 'test' | 'live' {
-  return process.env.STRIPE_SECRET_KEY?.startsWith('sk_live_') ? 'live' : 'test';
-}
 
 async function stripeSales(stripe: Stripe, from: Date, to: Date): Promise<StripeSale[]> {
   const sales: StripeSale[] = [];

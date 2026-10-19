@@ -21,7 +21,7 @@ One purchase ($19.99, in `config/products.json`) unlocks everything in every Pol
 | `POST /api/checkout` | Stripe Checkout for `pass`. Returns to `/pass/thanks` |
 | `POST /api/stripe/webhook` | Signed Stripe events: payment, refund, dispute |
 | `GET /api/purchase/:sessionId` | For the thanks page: confirms payment and returns the pass code |
-| `POST /api/verify` | `{ code, deviceId, app }` to `{ valid, status }`: `active`, `refunded`, `disputed`, `unknown` |
+| `POST /api/verify` | `{ code, deviceId, app }` to `{ valid, status }`: `active`, `refunded`, `disputed`, `unknown`, `device_limit` |
 | `POST /api/token` | `{ code }` to a one-time token |
 | `POST /api/redeem` | `{ token, deviceId, app }` to `{ code, valid, status }`, or 410 |
 | `GET /api/links` | The apps the thanks page opens |

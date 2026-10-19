@@ -11,14 +11,14 @@ import { SELLERS, type Seller } from './lib/catalog.ts';
 import { codeFor } from './lib/codes.ts';
 import { d1, environmentFromArgs, quote, SESSION_ID } from './lib/d1.ts';
 import { codeSecret } from './lib/secrets.ts';
-import { flag, stripeFor } from './lib/stripe.ts';
+import { flag, modeFromKey, stripeFor } from './lib/stripe.ts';
 
 async function main() {
   const args = process.argv.slice(2);
   const email = flag(args, '--email');
   if (!email || !email.includes('@')) throw new Error('Say whose purchases: --email buyer@example.com');
   const environment = environmentFromArgs(args);
-  const mode = process.env.STRIPE_SECRET_KEY?.startsWith('sk_live_') ? 'live' : 'test';
+  const mode = modeFromKey();
   const stripe = stripeFor(mode);
 
   const sessions = await stripe.checkout.sessions.list({ customer_details: { email }, status: 'complete', limit: 100 });

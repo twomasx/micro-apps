@@ -16,6 +16,8 @@ export interface PaymentsSettings {
   environment: DeployEnvironment;
   /** Where the all-app pass service runs, like https://polymadlabs.com. Empty means this same site. */
   passOrigin: string;
+  /** ROUTER_KEY, shared with the router of the same environment. Server only; never sent to the client. */
+  routerKey?: string;
 }
 
 export interface PaymentsEnv {
@@ -27,6 +29,8 @@ export interface PaymentsEnv {
   ENVIRONMENT?: string;
   /** The pass service's origin for this environment. Staging apps ask the staging pass service. */
   PASS_API_ORIGIN?: string;
+  /** A secret shared with the router, so the router can pass on the visitor's network address. */
+  ROUTER_KEY?: string;
 }
 
 /** What the client learns from GET api/payments. */
@@ -53,6 +57,7 @@ export function readSettings(env: PaymentsEnv): PaymentsSettings {
     mode: parseMode(env.PAYMENTS_MODE),
     environment: environment === 'staging' || environment === 'production' ? environment : 'local',
     passOrigin: (env.PASS_API_ORIGIN ?? '').replace(/\/$/, ''),
+    routerKey: env.ROUTER_KEY,
   };
 }
 

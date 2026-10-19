@@ -16,4 +16,6 @@ interface Env {
   PASS_API_ORIGIN?: string;
   /** Shared with the pass service. Lets this server check passes with the buyer's address for rate limits. */
   PASS_SERVICE_KEY?: string;
+  /** Shared with the router of this environment, so the visitor address it passes on can be trusted. */
+  ROUTER_KEY?: string;
 }

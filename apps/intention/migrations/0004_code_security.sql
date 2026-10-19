@@ -20,7 +20,7 @@ CREATE TABLE code_addresses (
   PRIMARY KEY (code_hash, day, address_hash)
 );
 
--- Tries per network address: 10 a minute and 100 a day. Keys hold the address only until they expire.
+-- Tries per network address: 10 a minute and 100 a day. Keys hold a scrambled form of the address (an HMAC), never the address, and expire.
 CREATE TABLE rate_limits (
   key TEXT PRIMARY KEY,
   count INTEGER NOT NULL,

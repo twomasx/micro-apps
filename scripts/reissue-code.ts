@@ -45,12 +45,15 @@ async function main() {
   const newHash = await hashCode(code.replace(/-/g, ''));
   const oldHash = quote(row.unlock_code_hash, HEX);
   const sid = quote(row.stripe_session_id, SESSION_ID);
+  // A pass's one-time tokens made with the old code would otherwise still hand out the new one.
+  const unusedTokens = app === 'pass' ? `DELETE FROM pass_tokens WHERE stripe_session_id = ${sid};` : '';
   d1(
     app,
     environment,
     `UPDATE purchases SET code_generation = ${generation}, unlock_code_hash = ${quote(newHash, HEX)}, updated_at = '${new Date().toISOString()}'
        WHERE stripe_session_id = ${sid} AND code_generation = ${row.code_generation};
      DELETE FROM code_devices WHERE code_hash = ${oldHash};
+     ${unusedTokens}
      INSERT INTO payment_log (at, app, mode, action, session_id, result, detail)
        SELECT '${new Date().toISOString()}', '${app}', mode, 'reissue', stripe_session_id, 'reissued', 'generation ${generation}'
        FROM purchases WHERE stripe_session_id = ${sid};`,

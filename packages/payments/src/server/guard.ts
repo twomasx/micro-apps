@@ -3,6 +3,7 @@
  * without accounts (PAYMENTS.md section 3b):
  * - a code works on up to 5 devices per app (each app sends its anonymous device id with every check),
  * - every check counts toward a limit per network address: 10 a minute and 100 a day, wrong codes included,
+ *   counted under the scrambled address (addressHash), so the rate_limits table never holds an address either,
  * - each code remembers, per day, a scrambled form of the addresses it was checked from, so the reconcile
  *   script can list codes used from many places.
  * Network addresses are never stored as they are: only an HMAC with a server secret, which cannot be read back.
@@ -24,13 +25,23 @@ export function deviceIdOf(request: Request): string | null {
   return id && DEVICE_ID.test(id) ? id : null;
 }
 
+/** Set by the router (router/src/index.ts) on every request it forwards: the visitor's address and ROUTER_KEY. */
+export const VISITOR_IP_HEADER = 'X-Visitor-IP';
+export const ROUTER_KEY_HEADER = 'X-Router-Key';
+
 /**
- * The buyer's network address. App servers that ask on the buyer's behalf (with the shared service key)
- * pass it on in X-Client-IP; for everyone else it is the address Cloudflare saw.
+ * The buyer's network address.
+ * - App servers that ask on the buyer's behalf (with the shared service key) pass it on in X-Client-IP.
+ * - The router passes it on in X-Visitor-IP with ROUTER_KEY. It has to: the router is on polymadlabs.com and the
+ *   apps on pages.dev, and in a request from a Worker to another zone Cloudflare sets CF-Connecting-IP to its own
+ *   address, the same for every visitor. Without this every visitor would share one rate limit.
+ * - Anyone else (a direct request to pages.dev, local dev): the address Cloudflare saw.
  */
-export function clientAddress(request: Request, serviceKey: string | undefined): string {
+export function clientAddress(request: Request, serviceKey: string | undefined, routerKey?: string): string {
   const forwarded = request.headers.get(CLIENT_IP_HEADER);
   if (forwarded && serviceKey && request.headers.get(SERVICE_KEY_HEADER) === serviceKey) return forwarded;
+  const visitor = request.headers.get(VISITOR_IP_HEADER);
+  if (visitor && routerKey && request.headers.get(ROUTER_KEY_HEADER) === routerKey) return visitor;
   return request.headers.get('CF-Connecting-IP') ?? 'unknown';
 }
 
@@ -46,15 +57,15 @@ export interface RateAnswer {
   retryAfter: number;
 }
 
-/** Counts one try from this address. Not ok after 10 in a minute or 100 in a day. */
-export async function countTry(db: D1Database, address: string, now = Date.now()): Promise<RateAnswer> {
+/** Counts one try from this address, scrambled with addressHash. Not ok after 10 in a minute or 100 in a day. */
+export async function countTry(db: D1Database, hashedAddress: string, now = Date.now()): Promise<RateAnswer> {
   const minute = Math.floor(now / MINUTE_MS);
   const day = Math.floor(now / DAY_MS);
   const upsert = `INSERT INTO rate_limits (key, count, expires_ms) VALUES (?, 1, ?)
     ON CONFLICT (key) DO UPDATE SET count = count + 1 RETURNING count`;
   const statements = [
-    db.prepare(upsert).bind(`m:${address}:${minute}`, (minute + 2) * MINUTE_MS),
-    db.prepare(upsert).bind(`d:${address}:${day}`, (day + 2) * DAY_MS),
+    db.prepare(upsert).bind(`m:${hashedAddress}:${minute}`, (minute + 2) * MINUTE_MS),
+    db.prepare(upsert).bind(`d:${hashedAddress}:${day}`, (day + 2) * DAY_MS),
   ];
   // Now and then, clear counters that no longer matter.
   if (Math.random() < 0.02) statements.push(db.prepare('DELETE FROM rate_limits WHERE expires_ms < ?').bind(now));

@@ -57,20 +57,20 @@ export function statusOf(row: PurchaseRow | null): PassStatus {
 }
 
 /**
- * For an active pass: lets this device use it in this app (up to 5 devices per app) and notes the address.
- * Returns the status to answer with.
+ * For an active pass: lets this device use it in this app (up to 5 devices per app) and notes the
+ * (scrambled) address. Returns the status to answer with.
  */
 export async function admit(
   ctx: PaymentsContext,
   row: PurchaseRow | null,
   asker: { deviceId: string; app: string },
-  address: string,
+  hashedAddress: string,
 ): Promise<PassStatus> {
   const status = statusOf(row);
   const codeHash = row?.unlock_code_hash;
   if (status !== 'active' || typeof codeHash !== 'string') return status;
   if ((await admitDevice(ctx.store.db, codeHash, asker.app, asker.deviceId)) === 'device_limit') return 'device_limit';
-  await noteAddress(ctx.store.db, codeHash, await ctx.store.hashAddress(address));
+  await noteAddress(ctx.store.db, codeHash, hashedAddress);
   return 'active';
 }
 
@@ -80,7 +80,7 @@ export async function admit(
  * `serviceKey` is PASS_SERVICE_KEY: app servers that send it may pass on the buyer's address.
  */
 export async function verify(request: Request, ctx: PaymentsContext, serviceKey?: string): Promise<Response> {
-  const address = clientAddress(request, serviceKey);
+  const address = await ctx.store.hashAddress(clientAddress(request, serviceKey, ctx.settings.routerKey));
   const rate = await countTry(ctx.store.db, address);
   if (!rate.ok) {
     await ctx.store.log({ action: 'pass_check', result: 'rate_limited' });

@@ -17,7 +17,7 @@ export function newToken(): string {
  * The pass pages make one when a person taps "Open <app>". Single use, gone after 10 minutes.
  */
 export async function createToken(request: Request, ctx: PaymentsContext, db: D1Database, now = Date.now()): Promise<Response> {
-  const rate = await countTry(db, clientAddress(request, undefined), now);
+  const rate = await countTry(db, await ctx.store.hashAddress(clientAddress(request, undefined, ctx.settings.routerKey)), now);
   if (!rate.ok) return tooManyTries(rate);
   const body = await readJson(request);
   if (body instanceof Response) return body;
@@ -42,7 +42,7 @@ export async function createToken(request: Request, ctx: PaymentsContext, db: D1
  * 410 when the token was used already, has expired, or never existed.
  */
 export async function redeemToken(request: Request, ctx: PaymentsContext, db: D1Database, now = Date.now()): Promise<Response> {
-  const address = clientAddress(request, undefined);
+  const address = await ctx.store.hashAddress(clientAddress(request, undefined, ctx.settings.routerKey));
   const rate = await countTry(db, address, now);
   if (!rate.ok) return tooManyTries(rate);
   const body = await readJson(request);

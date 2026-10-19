@@ -174,12 +174,6 @@ export function purchaseStore(options: StoreOptions) {
     },
 
     findAnyByCode,
-
-    /** The hash a code is stored and looked up by, or null when the code is malformed. */
-    async hashOf(input: string): Promise<string | null> {
-      const code = codes.normalize(input);
-      return code ? hashCode(code) : null;
-    },
   };
 }
 

@@ -33,7 +33,6 @@ export interface SavedPass {
 export const RECHECK_AFTER_MS = 24 * 60 * 60 * 1000;
 export const OFFLINE_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
 
-
 const STATUSES: readonly PassStatus[] = ['active', 'refunded', 'disputed', 'unknown', 'device_limit'];
 
 export function sanitizePass(raw: unknown): SavedPass | null {
@@ -55,9 +54,12 @@ export function isPassActive(saved: SavedPass | null, now: number): boolean {
   return saved !== null && saved.status === 'active' && now - saved.lastGoodAt <= OFFLINE_GRACE_MS;
 }
 
-/** True when the last answer is a day old or more. */
+/**
+ * True when the last answer is a day old or more, or dated in the future. A clock set forward for one check
+ * and then back would otherwise never ask again, and a refund would never reach this device.
+ */
 export function needsCheck(saved: SavedPass, now: number): boolean {
-  return now - saved.checkedAt >= RECHECK_AFTER_MS;
+  return now - saved.checkedAt >= RECHECK_AFTER_MS || saved.checkedAt > now;
 }
 
 /** The saved pass after an answer from the service. */

@@ -17,6 +17,8 @@ export { CLIENT_IP_HEADER, requestHasPass, SERVICE_KEY_HEADER, type ServerPassOp
 export {
   addressHash,
   clientAddress,
+  ROUTER_KEY_HEADER,
+  VISITOR_IP_HEADER,
   countTry,
   deviceIdOf,
   DEVICE_LIMIT,
