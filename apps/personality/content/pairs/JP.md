@@ -1,4 +1,4 @@
-status: draft
+status: approved
 
 # Judging and Perceiving, together
 

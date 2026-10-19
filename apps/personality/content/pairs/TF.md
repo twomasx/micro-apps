@@ -1,4 +1,4 @@
-status: draft
+status: approved
 
 # Thinking and Feeling, together
 

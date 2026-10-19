@@ -118,6 +118,13 @@ function ReportView({ report }: { report: Report }) {
 
           <section className="report-part report-axes" id={scales.id}>
             <PartHeading part={scales} />
+            <p className="report-part-lead">
+              Each scale has {itemCount} questions, half toward each side. Your percentage shows how far
+              your answers went toward one side, not how you compare with other people. The higher it is,
+              the more often the description will be true of you. Between 50% and 55% a scale counts as
+              balanced: one or two different answers on another day could flip its letter while the
+              percentage hardly moves, so read the percentage, not the letter.
+            </p>
             {report.axes.map((axis) => (
               <article
                 key={axis.axis}
