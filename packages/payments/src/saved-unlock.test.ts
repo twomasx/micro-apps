@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { CONFIRM_ATTEMPTS, confirmPurchase, refreshUnlock, sanitizeUnlock, type SavedUnlock } from './unlock';
+import { CONFIRM_ATTEMPTS, confirmPurchase, refreshUnlock, sanitizeUnlock, type SavedUnlock } from './saved-unlock';
 
 const CODE = '7K3M-Q9TD-2XWB-HC4R';
 

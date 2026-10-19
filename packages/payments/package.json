@@ -12,7 +12,8 @@
     "./testing": "./src/testing.ts",
     "./pass-codes": "./src/pass-codes.ts",
     "./pass": "./src/pass.ts",
-    "./contact": "./src/contact.ts"
+    "./contact": "./src/contact.ts",
+    "./saved-unlock": "./src/saved-unlock.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.browser.json",

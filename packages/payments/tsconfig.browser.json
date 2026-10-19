@@ -4,5 +4,5 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": []
   },
-  "include": ["src/client.ts", "src/client.test.ts", "src/pass.ts", "src/pass.test.ts"]
+  "include": ["src/client.ts", "src/client.test.ts", "src/pass.ts", "src/pass.test.ts", "src/saved-unlock.ts", "src/saved-unlock.test.ts"]
 }
