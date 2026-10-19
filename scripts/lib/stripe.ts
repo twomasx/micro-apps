@@ -1,4 +1,4 @@
-import { assertKeyMatchesMode, type PaymentsMode } from '@micro/payments/settings';
+import { assertKeyMatchesMode, keyMode, type PaymentsMode } from '@micro/payments/settings';
 import Stripe from 'stripe';
 
 /**
@@ -20,7 +20,7 @@ export function modeFromArgs(args: string[]): PaymentsMode {
 
 /** The mode of the key in STRIPE_SECRET_KEY, for scripts that read whichever mode the key belongs to. */
 export function modeFromKey(): PaymentsMode {
-  return process.env.STRIPE_SECRET_KEY?.startsWith('sk_live_') ? 'live' : 'test';
+  return keyMode(process.env.STRIPE_SECRET_KEY ?? '') === 'live' ? 'live' : 'test';
 }
 
 /**

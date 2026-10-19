@@ -66,7 +66,7 @@ Three secrets live in the Pages project, not in the repo:
 
 | Name | Value |
 | --- | --- |
-| `STRIPE_SECRET_KEY` | The Stripe secret key. Test mode (`sk_test_...`) until Roger says otherwise. |
+| `STRIPE_SECRET_KEY` | The Stripe key. Test mode (`sk_test_...`) until Roger says otherwise. Live uses a restricted key (`rk_live_...`), see PAYMENTS.md section 6. |
 | `STRIPE_WEBHOOK_SECRET` | The signing secret of the Stripe webhook below (`whsec_...`). |
 | `PUBLIC_ORIGIN` | `https://polymadlabs.com`. Stripe Checkout sends buyers back here. |
 
@@ -311,7 +311,7 @@ pnpm build && pnpm exec wrangler pages deploy dist --project-name micro-focus --
 curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"test","environment":"production"}
 ```
 
-`PAYMENTS_MODE` (`test` or `live`) and `ENVIRONMENT` are plain variables in each app's `wrangler.jsonc`. The Stripe key must match the mode (`sk_test_` or `sk_live_`), and every purchase row records the mode it was made in. An app only accepts purchases made in its own mode.
+`PAYMENTS_MODE` (`test` or `live`) and `ENVIRONMENT` are plain variables in each app's `wrangler.jsonc`. The Stripe key must match the mode (`sk_test_`/`rk_test_` or `sk_live_`/`rk_live_`), and every purchase row records the mode it was made in. An app only accepts purchases made in its own mode.
 
 ## Stripe
 

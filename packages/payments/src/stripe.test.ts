@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { keyMode } from './settings';
 import { createStripePayments, readEvent } from './stripe';
 import { PriceMismatchError } from './types';
 
@@ -67,6 +68,26 @@ describe('mode', () => {
     expect(() =>
       createStripePayments({ app: 'focus', mode: 'test', secretKey: 'sk_live_x', webhookSecret: '', products: [] }),
     ).toThrow(/sk_test_/);
+    expect(() =>
+      createStripePayments({ app: 'focus', mode: 'live', secretKey: 'rk_test_x', webhookSecret: '', products: [] }),
+    ).toThrow(/rk_live_/);
+  });
+
+  it('takes a restricted key of its own mode', () => {
+    expect(() =>
+      createStripePayments({ app: 'focus', mode: 'live', secretKey: 'rk_live_x', webhookSecret: '', products: [] }),
+    ).not.toThrow();
+    expect(() =>
+      createStripePayments({ app: 'focus', mode: 'test', secretKey: 'rk_test_x', webhookSecret: '', products: [] }),
+    ).not.toThrow();
+  });
+
+  it('reads the mode from either kind of key', () => {
+    expect(keyMode('sk_live_x')).toBe('live');
+    expect(keyMode('rk_live_x')).toBe('live');
+    expect(keyMode('rk_test_x')).toBe('test');
+    expect(keyMode('pk_live_x')).toBeNull();
+    expect(keyMode('live_x')).toBeNull();
   });
 });
 

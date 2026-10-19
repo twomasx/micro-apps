@@ -61,11 +61,16 @@ export function readSettings(env: PaymentsEnv): PaymentsSettings {
   };
 }
 
-/** The Stripe secret key must belong to the mode, so a test key can never run in live mode or the reverse. */
+/** The mode a Stripe secret key (sk_) or restricted key (rk_) belongs to, or null for anything else. */
+export function keyMode(secretKey: string): PaymentsMode | null {
+  const match = /^(?:sk|rk)_(live|test)_/.exec(secretKey);
+  return match ? (match[1] as PaymentsMode) : null;
+}
+
+/** The Stripe key must belong to the mode, so a test key can never run in live mode or the reverse. */
 export function assertKeyMatchesMode(secretKey: string, mode: PaymentsMode): void {
-  const prefix = mode === 'live' ? 'sk_live_' : 'sk_test_';
-  if (!secretKey.startsWith(prefix)) {
-    throw new Error(`PAYMENTS_MODE is ${mode}, so the Stripe secret key must start with ${prefix}`);
+  if (keyMode(secretKey) !== mode) {
+    throw new Error(`PAYMENTS_MODE is ${mode}, so the Stripe key must start with sk_${mode}_ or rk_${mode}_`);
   }
 }
 

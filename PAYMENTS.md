@@ -140,12 +140,17 @@ Confirm the test card numbers against Stripe's current testing docs before the s
 
 1. **Stripe activation (Roger):** business details, bank account, statement descriptor `POLYMADLABS`, receipts on. The site needs a contact email, a refund policy and terms of service first. Claude Code adds `/terms` and `/refunds` pages to the landing app with plain wording (Roger approves the refund policy, for example "Refunds within 14 days, just email us").
 2. **All of section 5 passes on staging,** with the checklist filled in and reconcile clean.
-3. **Create live products and prices** with a script from `products.json` (`scripts/stripe-sync.ts --live`), so live matches test exactly. The script refuses to run if any test or live price differs from config.
-4. **Live webhooks:** one endpoint per app plus the pass, created by the same script, with signing secrets printed as `wrangler pages secret put` commands for Roger to run. Keys never go in chat.
-5. **Set live secrets in Production only,** with `PAYMENTS_ENABLED=false` at first, and commit `PAYMENTS_MODE: "live"` in the production `vars` of every app's and the pass's `wrangler.jsonc`. Check that `ROUTER_KEY` is set on the production router and all six Pages projects (DEPLOY.md, Code security). Export, then delete, production's test-mode purchase and pass rows. Delete or disable any test-mode webhook that still points at production. Deploy every app.
-6. **Turn on one app** (focus first), buy it with Roger's own card, confirm the unlock, refund it, confirm the revoke. Then turn on the rest one by one, the same way, and the pass last.
-7. **First week:** run reconcile daily, check Stripe's webhook delivery page daily.
-8. **If anything looks wrong:** kill switch off for that app, fix on staging, test, switch back on.
+3. **Live keys are restricted keys (Roger creates them, Developers → API keys → Create restricted key), never the full secret key.** Two of them:
+   - `polymadlabs-apps`, set as `STRIPE_SECRET_KEY` on the six production Pages projects: Checkout Sessions **Write**, Prices **Read**, everything else None. That is all the apps call (create and read a Checkout session, look up a price). Webhook signatures are checked with the signing secret, not the key.
+   - `polymadlabs-admin`, kept only on Roger's machine for the scripts: Products **Write**, Prices **Write**, Webhook Endpoints **Write**, Checkout Sessions **Read**, everything else None.
+
+   Refunds are made in the dashboard, so no key can move money out. Check both keys' permissions on staging first with the same two keys made in test mode.
+4. **Create live products and prices** with a script from `products.json` (`scripts/stripe-sync.ts --live`), so live matches test exactly. The script refuses to run if any test or live price differs from config.
+5. **Live webhooks:** one endpoint per app plus the pass, created by the same script, with signing secrets printed as `wrangler pages secret put` commands for Roger to run. Keys never go in chat.
+6. **Set live secrets in Production only,** with `PAYMENTS_ENABLED=false` at first, and commit `PAYMENTS_MODE: "live"` in the production `vars` of every app's and the pass's `wrangler.jsonc`. Check that `ROUTER_KEY` is set on the production router and all six Pages projects (DEPLOY.md, Code security). Export, then delete, production's test-mode purchase and pass rows. Delete or disable any test-mode webhook that still points at production. Deploy every app.
+7. **Turn on one app** (focus first), buy it with Roger's own card, confirm the unlock, refund it, confirm the revoke. Then turn on the rest one by one, the same way, and the pass last.
+8. **First week:** run reconcile daily, check Stripe's webhook delivery page daily.
+9. **If anything looks wrong:** kill switch off for that app, fix on staging, test, switch back on.
 
 ## Build order
 

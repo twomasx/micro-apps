@@ -7,7 +7,7 @@ import { stripeFor } from './lib/stripe.ts';
 //   STRIPE_SECRET_KEY=$(grep '^STRIPE_SECRET_KEY=' apps/focus/.env | cut -d= -f2-) pnpm --filter @micro/scripts test
 const key = process.env.STRIPE_SECRET_KEY;
 
-describe.skipIf(!key?.startsWith('sk_test_'))('Stripe test prices', () => {
+describe.skipIf(!/^(sk|rk)_test_/.test(key ?? ''))('Stripe test prices', () => {
   for (const app of SELLERS) {
     for (const product of productsOf(app)) {
       it(`${app} ${product.id} costs the same in Stripe as in config/products.json`, async () => {
