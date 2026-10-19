@@ -8,8 +8,8 @@ export interface AppLink {
 }
 
 /**
- * The apps a pass opens, from config/apps.json. On staging, EXTRA_APP_LINKS adds the same apps at their
- * own pages.dev addresses, to test that a pass works on another domain with no shared storage.
+ * The apps a pass opens, from config/apps.json. On staging, EXTRA_APP_LINKS adds the same apps at the staging
+ * router's workers.dev address, to test that a pass works on another domain with no shared storage.
  */
 export function appLinks(extra: string | undefined): AppLink[] {
   const links = catalog.apps.map(({ app, name, path }) => ({ app, name, url: path }));
