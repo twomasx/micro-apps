@@ -9,9 +9,16 @@ export function unlockAudioOnTap(context: AudioContext, target: EventTarget = do
     for (const type of UNLOCK_EVENTS) target.removeEventListener(type, unlock);
   };
   const unlock = () => {
-    void context.resume().then(() => {
-      if (context.state === 'running') cleanup();
-    });
+    if (context.state === 'closed') {
+      cleanup();
+      return;
+    }
+    context.resume().then(
+      () => {
+        if (context.state === 'running') cleanup();
+      },
+      () => undefined,
+    );
   };
   for (const type of UNLOCK_EVENTS) target.addEventListener(type, unlock, { passive: true });
   return cleanup;

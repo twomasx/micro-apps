@@ -14,15 +14,30 @@ export function storageKey(appName: string, key: string): string {
   return `${appName}:${key}`;
 }
 
-/** Key-value store on IndexedDB. The database is named after the app. */
+/**
+ * Key-value store on IndexedDB. The database is named after the app.
+ * Calls reject where IndexedDB is missing or refuses (some private windows), so callers catch.
+ * A failed open, or a connection the browser closes, is not kept: the next call opens again.
+ */
 export function createStorage(appName: string): AppStorage {
   let db: Promise<IDBPDatabase> | undefined;
-  const open = () =>
-    (db ??= openDB(appName, 1, {
-      upgrade(database) {
-        database.createObjectStore(STORE);
-      },
-    }));
+  const open = () => {
+    if (!db) {
+      const opening = openDB(appName, 1, {
+        upgrade(database) {
+          database.createObjectStore(STORE);
+        },
+        terminated() {
+          if (db === opening) db = undefined;
+        },
+      });
+      db = opening;
+      opening.catch(() => {
+        if (db === opening) db = undefined;
+      });
+    }
+    return db;
+  };
 
   return {
     async get<T>(key: string) {

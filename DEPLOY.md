@@ -315,7 +315,7 @@ curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"
 
 ## Stripe
 
-- Test mode. The code refuses a key that does not match `PAYMENTS_MODE` (see the kill switch above). Going live is the procedure in PAYMENTS.md section 6, not a code change.
+- Test mode. The code refuses a key that does not match `PAYMENTS_MODE` (see the kill switch above). Going live is the procedure in PAYMENTS.md section 6. `PAYMENTS_MODE` is a plain variable in each `wrangler.jsonc`, so going live includes one commit that sets it to `live` in the production `vars` of the five apps and the pass.
 - Since Oct 16, 2026 the five test-mode webhooks point at **staging**, not production, and receive `checkout.session.completed`, `charge.refunded` and `charge.dispute.created`. Moving them kept their signing secrets. Production has no webhook until go-live.
 - Personality: `https://staging.polymadlabs.com/personality/api/stripe/webhook`, endpoint id `we_1UPxeIIbd3re6uBdIm3vv1hN`. Signing secret at `~/.config/polymadlabs/stripe-webhook-secret`.
 - Focus: `https://staging.polymadlabs.com/focus/api/stripe/webhook`, endpoint id `we_1UQKYbIbd3re6uBdDLYYIVQB`. Signing secret at `~/.config/polymadlabs/focus-stripe-webhook-secret`.
@@ -332,7 +332,22 @@ curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"
 Unlock codes and pass codes work like keys. The rules (PAYMENTS.md section 3b), all in `packages/payments/src/server/guard.ts`:
 
 - **Device cap:** a code works on up to 5 devices per app. Each app sends its anonymous device id (`X-Device-Id`) with every check. A 6th device gets "This code is already in use on 5 devices." The table is `code_devices`.
-- **Rate limit:** every code check, right or wrong, counts toward 10 a minute and 100 a day per network address (table `rate_limits`, keys expire). Personality's and intention's servers pass the buyer's address to the pass service only with the right `PASS_SERVICE_KEY`.
+- **Rate limit:** every code check, right or wrong, counts toward 10 a minute and 100 a day per network address (table `rate_limits`, keys hold only a scrambled form of the address and expire). Personality's and intention's servers pass the buyer's address to the pass service only with the right `PASS_SERVICE_KEY`.
+- **The visitor's address behind the router:** the router is on polymadlabs.com and the apps on pages.dev, and in a request from a Worker to another zone Cloudflare replaces `CF-Connecting-IP` with its own address (`2a06:98c0:3600::103`), the same for everyone. So the router sends the visitor's address in `X-Visitor-IP` with the secret `ROUTER_KEY`, and the apps trust that header only when the key matches. Without `ROUTER_KEY` set on both sides, every visitor shares one rate limit: 10 code checks a minute for the whole site.
+
+### ROUTER_KEY
+
+One secret per environment, the same value on the router and on the six Pages projects (the five apps and the pass; the landing page needs none). Set it once per environment from the repo root, then deploy the router and every app for it to take effect:
+
+```bash
+KEY=$(openssl rand -hex 32)   # staging; save it at ~/.config/polymadlabs/staging/router-key
+(cd router && printf '%s' "$KEY" | pnpm exec wrangler secret put ROUTER_KEY --env preview)
+for app in personality focus breathwork attention intention pass; do
+  (cd apps/$app && printf '%s' "$KEY" | pnpm exec wrangler pages secret put ROUTER_KEY --project-name micro-$app --env preview)
+done
+```
+
+For production, a new key (saved at `~/.config/polymadlabs/router-key`), `wrangler secret put ROUTER_KEY --env=""` for the router, and the Pages commands without `--env preview`. Check it worked: after a code check on the site, `SELECT key FROM rate_limits` in that app's database shows a different scrambled key per network, not one for everyone.
 - **Sharing alerts:** each check notes a scrambled (HMAC) form of the address per code and day (table `code_addresses`). `reconcile` lists codes at the device cap or checked from 10 or more addresses in a day.
 - **Page security:** every site's `public/_headers` allows scripts only from itself and sends no referrer. `pnpm --filter @micro/scripts test` checks the files.
 
@@ -468,8 +483,8 @@ One test purchase from that check is in the production database (`cs_test_a1e7dN
 ## Known gaps
 
 - Nothing has been checked on a real Android phone or in iPhone Safari. For focus this matters most: playing with the screen off and the lock screen controls (see `apps/focus/DESIGN-TODO.md`). For breathwork: tones, vibration and the screen staying awake (see `apps/breathwork/DESIGN-TODO.md`). For attention: the three sounds, vibration, the screen staying awake, and the test's timing on a 90 Hz or 120 Hz screen (see `apps/attention/DESIGN-TODO.md`). For intention: the full-screen canvas at 60 fps, the color fan and Android's color picker, Back closing sheets, and the calendar file (see `apps/intention/DESIGN-TODO.md`).
-- The home page at `/` links to the personality test, breathwork, attention and intention. Focus is live but not linked from it yet.
 - Every file in `apps/personality/content/` still says `status: draft`.
 - Cloudflare's Web Analytics is blocked by the router's header, but it is still switched on for the domain. Switch it off in the dashboard (Analytics & Logs, Web Analytics) so the block is not the only thing in the way.
-- Unpaid checkouts leave `pending` rows in `purchases`, in both apps. Nothing clears them yet.
-- The PWA has no icons or theme color yet (see `apps/personality/DESIGN-TODO.md`).
+- Unpaid checkouts leave `pending` rows in `purchases`, in every app. Nothing clears them yet.
+- Nothing deletes old rows from `code_devices`, `code_addresses` or `payment_log`, although the pass privacy note says device ids and log entries are kept for up to 1 year. Needs a cleanup job, or the note changed.
+- Personality's PWA manifest still has white placeholder colors and the lower-case name "personality" (see `apps/personality/DESIGN-TODO.md`).

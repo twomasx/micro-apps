@@ -1,6 +1,6 @@
 # Payments across the suite: build, test, go live
 
-Goal: every way a purchase can succeed or fail is tested in Stripe test mode on a full staging copy of the site before any live key exists. Going live is then a switch, not a change, and it can be switched back off in one step.
+Goal: every way a purchase can succeed or fail is tested in Stripe test mode on a full staging copy of the site before any live key exists. Going live is then a switch (new secrets, and `PAYMENTS_MODE` set to `live` in each `wrangler.jsonc`), not new code, and it can be switched back off in one step.
 
 Read the root CLAUDE.md first. All payment code goes through `packages/payments`. Never call Stripe directly from an app.
 
@@ -48,7 +48,7 @@ Read the root CLAUDE.md first. All payment code goes through `packages/payments`
 **Design rule: nothing depends on the apps sharing a domain.** Any app may move to its own domain later, or become a phone app. Browsers do not let different domains read each other's storage, and third-party cookies are being blocked. So the pass is a service that apps ask, never something they find in shared storage.
 
 - **The pass service lives at polymadlabs.com permanently** (the brand home, it never moves): a new small Pages project `pass`, served at `/pass/` through the router. It has the pass page, checkout, success screen, restore, the webhook, and a public verify API.
-- **Verify API:** `POST https://polymadlabs.com/pass/api/verify` with a pass code returns `{ valid, status }` (`active`, `refunded`, `disputed`, `unknown`). CORS allows each app's origin from a list in config, so apps on other domains can call it. Rate limited per IP.
+- **Verify API:** `POST https://polymadlabs.com/pass/api/verify` with a pass code returns `{ valid, status }` (`active`, `refunded`, `disputed`, `unknown`, `device_limit`). CORS allows each app's origin from a list in config, so apps on other domains can call it. Rate limited per IP.
 - **Apps never read the pass database directly.** Only the pass service touches its D1 database. Every app calls the verify API through one function in `packages/payments`: `checkPass(code)`. This keeps working wherever an app is hosted, including inside a future phone app.
 - **Each app keeps its own copy** of the pass code in its own storage (key `<app>:pass`). It trusts the last answer for up to 24 hours, then checks again, so refunds and disputes take effect within a day. If the service can't be reached, it trusts the last good answer for up to 7 days.
 - **Carrying the pass across domains with no typing:** links from the pass success screen, the pass page and the landing page add a one-time token (`?passToken=...`, valid for 10 minutes, single use). The app exchanges the token with the pass service for the code and stores it, then removes the token from the address bar. Typing the code on any app's restore screen always works as a backup.
@@ -66,7 +66,7 @@ Codes work like keys: anyone holding one gets in. These rules keep that safe eno
 
 1. **Code format and strength.** App unlock codes: at least 12 random characters. Pass codes: 16 random characters from an unambiguous alphabet (no 0/O, 1/I/L), shown in groups: `K7QM-2XRP-9VTD-4HNC`. Input accepts any case, with or without dashes.
 2. **Stored only as hashes.** The server stores a hash of each code, never the code itself. Checking a code means looking up its hash and confirming the row exists, matches the current mode and is `active`. A code that merely looks right is never enough, even if it was derived from a secret.
-3. **Device cap.** A code works on up to **5 devices**. Each app sends its anonymous device ID with every check. The service records distinct device IDs per code. A 6th device gets: "This code is already in use on 5 devices. Contact us if that's wrong." Roger can reset a code's devices with the admin script.
+3. **Device cap.** A code works on up to **5 devices per app** (a pass code: 5 in each app). Each app sends its anonymous device ID with every check. The service records distinct device IDs per code. A 6th device gets: "This code is already in use on 5 devices. Contact us if that's wrong." Roger can reset a code's devices with the admin script.
 4. **Sharing alerts.** The reconcile script lists any code that hit the device cap or was checked from many IP addresses in a day.
 5. **Revoke and reissue.** `scripts/reissue-code.ts`: revokes a leaked code and creates a new one for the same purchase, printed for Roger to send the buyer. Revoked codes stop working on the next check.
 6. **Rate limits.** Verify and restore: 10 attempts a minute per IP and 100 a day per IP. Wrong codes count toward the limit. Use a Cloudflare rate-limiting rule if available on the plan, otherwise a counter in D1.
@@ -142,7 +142,7 @@ Confirm the test card numbers against Stripe's current testing docs before the s
 2. **All of section 5 passes on staging,** with the checklist filled in and reconcile clean.
 3. **Create live products and prices** with a script from `products.json` (`scripts/stripe-sync.ts --live`), so live matches test exactly. The script refuses to run if any test or live price differs from config.
 4. **Live webhooks:** one endpoint per app plus the pass, created by the same script, with signing secrets printed as `wrangler pages secret put` commands for Roger to run. Keys never go in chat.
-5. **Set live secrets in Production only,** with `PAYMENTS_MODE=live` and `PAYMENTS_ENABLED=false` at first. Export, then delete, production's test-mode purchase and pass rows. Delete or disable any test-mode webhook that still points at production. Deploy every app.
+5. **Set live secrets in Production only,** with `PAYMENTS_ENABLED=false` at first, and commit `PAYMENTS_MODE: "live"` in the production `vars` of every app's and the pass's `wrangler.jsonc`. Check that `ROUTER_KEY` is set on the production router and all six Pages projects (DEPLOY.md, Code security). Export, then delete, production's test-mode purchase and pass rows. Delete or disable any test-mode webhook that still points at production. Deploy every app.
 6. **Turn on one app** (focus first), buy it with Roger's own card, confirm the unlock, refund it, confirm the revoke. Then turn on the rest one by one, the same way, and the pass last.
 7. **First week:** run reconcile daily, check Stripe's webhook delivery page daily.
 8. **If anything looks wrong:** kill switch off for that app, fix on staging, test, switch back on.
