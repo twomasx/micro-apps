@@ -317,6 +317,23 @@ describe('unlock code check', () => {
     expect(await check('%E0%A4%A')).toBe(false);
   });
 
+  it("one app's code unlocks nothing in another app, which has its own database", async () => {
+    const { code } = await paidPurchase();
+    const breathworkDb = await createTestDb(schema);
+    try {
+      const breathwork = unlockRoutes({ app: 'breathwork', base: '/breathwork/', productId: 'lifetime', products: PRODUCTS });
+      const response = await breathwork.unlock(unlockRequest(), code, {
+        store: purchaseStore({ db: breathworkDb.db, app: 'breathwork', mode: 'test', codeSecret: 'breathwork-secret-that-is-long-enough-0123' }),
+        settings: { enabled: true, mode: 'test', environment: 'local', passOrigin: '' },
+        provider: () => fake,
+      });
+      expect(((await response.json()) as { valid?: boolean }).valid).toBe(false);
+      expect(await check(code)).toBe(true);
+    } finally {
+      await breathworkDb.dispose();
+    }
+  });
+
   it('a test purchase is refused by an app in live mode, and the reverse', async () => {
     const { code } = await paidPurchase();
     expect(await check(code, 'live')).toBe(false);
