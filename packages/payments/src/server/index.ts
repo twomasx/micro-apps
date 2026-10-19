@@ -17,6 +17,9 @@ export { CLIENT_IP_HEADER, requestHasPass, SERVICE_KEY_HEADER, type ServerPassOp
 export {
   addressHash,
   clientAddress,
+  CODE_CHECKS,
+  forgetOldRecords,
+  refuseOverLimit,
   ROUTER_KEY_HEADER,
   VISITOR_IP_HEADER,
   countTry,
@@ -27,5 +30,7 @@ export {
   PER_MINUTE,
   tooManyTries,
   admitDevice,
+  type AddressLimit,
   type RateAnswer,
+  type RateLimits,
 } from './guard';

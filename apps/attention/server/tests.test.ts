@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { scoreSart, type SartTrial } from '../src/lib/sart-score.ts';
-import { buildNorms, getNorms, MIN_NORM_COUNT, parseSummary, recordTest, type TestSummary } from './tests.ts';
+import { buildNorms, getNorms, MIN_NORM_COUNT, parseSummary, recordTest, TEST_SUBMISSIONS, type TestSummary } from './tests.ts';
 import { createTestDb, type TestDb } from './testing.ts';
 
 let testDb: TestDb;
@@ -75,6 +75,23 @@ describe('POST /api/tests', () => {
     expect(broken.status).toBe(400);
     const big = await recordTest(new Request('https://example.test/api/tests', { method: 'POST', body: 'x'.repeat(3000) }), db);
     expect(big.status).toBe(413);
+  });
+
+  it('takes 10 results a minute from one network, then refuses, and other networks are counted on their own', async () => {
+    const limit = { secret: 'test-secret-that-is-long-enough-0123456789', limits: TEST_SUBMISSIONS };
+    const from = (address: string) =>
+      recordTest(
+        new Request('https://example.test/api/tests', { method: 'POST', body: JSON.stringify(summary()), headers: { 'CF-Connecting-IP': address } }),
+        db,
+        new Date('2026-10-15T09:30:00Z'),
+        limit,
+      );
+    for (let i = 0; i < 10; i++) expect((await from('203.0.113.9')).status).toBe(201);
+    expect((await from('203.0.113.9')).status).toBe(429);
+    expect((await from('198.51.100.4')).status).toBe(201);
+    expect(await db.prepare('SELECT COUNT(*) AS n FROM test_results').first('n')).toBe(11);
+    const keys = (await db.prepare('SELECT key FROM rate_limits').all<{ key: string }>()).results.map((row) => row.key);
+    expect(keys.every((key) => key.startsWith('tests:') && !key.includes('203.0.113.9'))).toBe(true);
   });
 
   it('matches the score the app shows, worked out again on the server', () => {

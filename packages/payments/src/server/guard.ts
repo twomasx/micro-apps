@@ -57,24 +57,69 @@ export interface RateAnswer {
   retryAfter: number;
 }
 
-/** Counts one try from this address, scrambled with addressHash. Not ok after 10 in a minute or 100 in a day. */
-export async function countTry(db: D1Database, hashedAddress: string, now = Date.now()): Promise<RateAnswer> {
+/** Device ids, scrambled addresses and log entries are kept for up to this long (the pass privacy page says 1 year). */
+export const RECORDS_KEPT_MS = 365 * DAY_MS;
+
+/** Deletes device ids not seen, addresses not checked and log entries not written in the last year. */
+export function forgetOldRecords(db: D1Database, now = Date.now()): D1PreparedStatement[] {
+  const cutoff = new Date(now - RECORDS_KEPT_MS).toISOString();
+  return [
+    db.prepare('DELETE FROM code_devices WHERE last_seen < ?').bind(cutoff),
+    db.prepare('DELETE FROM code_addresses WHERE day < ?').bind(cutoff.slice(0, 10)),
+    db.prepare('DELETE FROM payment_log WHERE at < ?').bind(cutoff),
+  ];
+}
+
+/** How many tries one address gets. Each kind of try has its own name, so its counters are separate. */
+export interface RateLimits {
+  name: string;
+  perMinute: number;
+  perDay: number;
+}
+
+/** Code checks: 10 a minute and 100 a day from one address. */
+export const CODE_CHECKS: RateLimits = { name: '', perMinute: PER_MINUTE, perDay: PER_DAY };
+
+/** Counts one try from this address, scrambled with addressHash. Not ok past the limits (code checks by default). */
+export async function countTry(
+  db: D1Database,
+  hashedAddress: string,
+  now = Date.now(),
+  limits: RateLimits = CODE_CHECKS,
+): Promise<RateAnswer> {
   const minute = Math.floor(now / MINUTE_MS);
   const day = Math.floor(now / DAY_MS);
+  const prefix = limits.name ? `${limits.name}:` : '';
   const upsert = `INSERT INTO rate_limits (key, count, expires_ms) VALUES (?, 1, ?)
     ON CONFLICT (key) DO UPDATE SET count = count + 1 RETURNING count`;
   const statements = [
-    db.prepare(upsert).bind(`m:${hashedAddress}:${minute}`, (minute + 2) * MINUTE_MS),
-    db.prepare(upsert).bind(`d:${hashedAddress}:${day}`, (day + 2) * DAY_MS),
+    db.prepare(upsert).bind(`${prefix}m:${hashedAddress}:${minute}`, (minute + 2) * MINUTE_MS),
+    db.prepare(upsert).bind(`${prefix}d:${hashedAddress}:${day}`, (day + 2) * DAY_MS),
   ];
-  // Now and then, clear counters that no longer matter.
-  if (Math.random() < 0.02) statements.push(db.prepare('DELETE FROM rate_limits WHERE expires_ms < ?').bind(now));
+  // Now and then, clear counters that no longer matter, and records past the year the privacy pages promise.
+  if (Math.random() < 0.02) {
+    statements.push(db.prepare('DELETE FROM rate_limits WHERE expires_ms < ?').bind(now), ...forgetOldRecords(db, now));
+  }
   const [perMinute, perDay] = await db.batch<{ count: number }>(statements);
   const minuteCount = perMinute?.results[0]?.count ?? 0;
   const dayCount = perDay?.results[0]?.count ?? 0;
-  if (dayCount > PER_DAY) return { ok: false, retryAfter: Math.ceil(((day + 1) * DAY_MS - now) / 1000) };
-  if (minuteCount > PER_MINUTE) return { ok: false, retryAfter: Math.ceil(((minute + 1) * MINUTE_MS - now) / 1000) };
+  if (dayCount > limits.perDay) return { ok: false, retryAfter: Math.ceil(((day + 1) * DAY_MS - now) / 1000) };
+  if (minuteCount > limits.perMinute) return { ok: false, retryAfter: Math.ceil(((minute + 1) * MINUTE_MS - now) / 1000) };
   return { ok: true, retryAfter: 0 };
+}
+
+/** What an endpoint needs to count tries per address: the secret the address is scrambled with, and the router key. */
+export interface AddressLimit {
+  secret: string;
+  routerKey?: string;
+  limits: RateLimits;
+}
+
+/** Counts this request against its address. Returns the 429 to send when it is over the limits, or null. */
+export async function refuseOverLimit(request: Request, db: D1Database, limit: AddressLimit, now = Date.now()): Promise<Response | null> {
+  const address = await addressHash(limit.secret, clientAddress(request, undefined, limit.routerKey));
+  const answer = await countTry(db, address, now, limit.limits);
+  return answer.ok ? null : tooManyTries(answer);
 }
 
 /** What a rate-limited request gets. */

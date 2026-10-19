@@ -25,6 +25,7 @@ const ERROR_LINES: Record<string, string> = {
   network: 'The run could not start. Check your connection and try again.',
   daily_limit: `You have used your ${FREE_RUNS_PER_DAY} free runs for today. Lab Pass gives unlimited runs: ${priceLine()}`,
   lab_pass_required: `Longer runs come with Lab Pass: ${priceLine()}`,
+  too_many_tries: 'Too many runs from this network right now. Wait a minute and try again.',
 };
 
 /** Errors that Lab Pass answers. The button goes to the Lab Pass page instead of trying again. */

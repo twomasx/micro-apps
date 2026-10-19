@@ -55,6 +55,10 @@ export function PrivacyPage() {
           with them. They are kept for as long as Attention is online. Your sessions, your answers and the individual
           numbers of each test never leave this device.
         </p>
+        <p>
+          To stop floods of made-up results, we count how many results each network sends, under a scrambled form of
+          its address that cannot be turned back into it. The counts are deleted within 2 days.
+        </p>
         <p>Only if you buy the lifetime unlock, we also keep one record of the purchase:</p>
         <ul className="page-list">
           <li>The Stripe payment ID.</li>

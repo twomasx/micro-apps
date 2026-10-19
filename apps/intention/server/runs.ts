@@ -1,4 +1,4 @@
-import type { ServerPassOptions } from '@micro/payments/server';
+import { refuseOverLimit, type AddressLimit, type RateLimits, type ServerPassOptions } from '@micro/payments/server';
 import type { PaymentsMode } from '@micro/payments/settings';
 import {
   BATCH_MS,
@@ -41,6 +41,12 @@ export const realClock: Clock = {
   sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
 
+/**
+ * Runs one network may start. A run lasts at least 20 seconds, so one person starts at most 3 a minute. Bits come
+ * from the server, so a flood cannot move any result; this keeps it from filling the database.
+ */
+export const RUN_STARTS: RateLimits = { name: 'runs', perMinute: 12, perDay: 600 };
+
 export interface RunDeps {
   db: D1Database;
   /** PAYMENTS_MODE. Only a Lab Pass bought in this mode counts. */
@@ -49,6 +55,8 @@ export interface RunDeps {
   pass?: ServerPassOptions;
   /** Keeps the final database write alive after the browser has gone. */
   waitUntil: (promise: Promise<unknown>) => void;
+  /** Runs one network may start (RUN_STARTS). Missing in tests that do not check it. */
+  limit?: AddressLimit;
   clock?: Clock;
   randomBytes?: RandomBytes;
 }
@@ -101,6 +109,10 @@ export async function startRun(request: Request, deps: RunDeps): Promise<Respons
   if (input instanceof Response) return input;
 
   const clock = deps.clock ?? realClock;
+  if (deps.limit) {
+    const refused = await refuseOverLimit(request, deps.db, deps.limit, clock.now());
+    if (refused) return refused;
+  }
   const randomBytes = deps.randomBytes ?? cryptoBytes;
   const { db } = deps;
 

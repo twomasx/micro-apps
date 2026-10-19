@@ -5,7 +5,7 @@ import { runZ } from '../src/lib/scoring.ts';
 import { SseParser, type SseEvent } from '../src/lib/sse.ts';
 import { bitString, packBits, randomBits, unpackBits } from './bits.ts';
 import { UNLOCK_HEADER } from './labpass.ts';
-import { effectiveStatus, getRun, STALE_AFTER_MS, startRun, type Clock, type RunDeps } from './runs.ts';
+import { effectiveStatus, getRun, RUN_STARTS, STALE_AFTER_MS, startRun, type Clock, type RunDeps } from './runs.ts';
 import { createTestDb, type TestDb } from './testing.ts';
 
 let testDb: TestDb;
@@ -467,5 +467,33 @@ describe('the event stream format', () => {
         { event: 'bits', data: '{"b":2}' },
       ]);
     }
+  });
+});
+
+describe('runs from one network', () => {
+  it('are refused past the limit before a run is made, with too_many_tries', async () => {
+    const limit = { secret: 'test-secret-that-is-long-enough-0123456789', limits: { ...RUN_STARTS, perMinute: 2 } };
+    // Each run that starts is read to its end, so nothing is still streaming when the test finishes.
+    const start = async (address: string, device: string) => {
+      const { deps: d, settled } = deps(jumpingClock(), { limit });
+      const request = new Request('https://example.test/api/runs', {
+        method: 'POST',
+        headers: { 'CF-Connecting-IP': address },
+        body: JSON.stringify({ deviceId: device, kind: 'tug' }),
+      });
+      const response = await startRun(request, d);
+      if (response.status !== 201) return response;
+      await readEvents(response);
+      await settled();
+      return new Response(null, { status: 201 });
+    };
+    // Different devices on one network share its limit, so new device ids do not get around it.
+    expect((await start('203.0.113.9', 'deviceaaaaaaaa01')).status).toBe(201);
+    expect((await start('203.0.113.9', 'deviceaaaaaaaa02')).status).toBe(201);
+    const refused = await start('203.0.113.9', 'deviceaaaaaaaa03');
+    expect(refused.status).toBe(429);
+    expect(((await refused.json()) as { error: string }).error).toBe('too_many_tries');
+    expect(await db.prepare("SELECT COUNT(*) AS n FROM runs WHERE device_id = 'deviceaaaaaaaa03'").first('n')).toBe(0);
+    expect((await start('198.51.100.4', 'deviceaaaaaaaa04')).status).toBe(201);
   });
 });

@@ -1,5 +1,6 @@
 import { SART_VERSION, SCORE_WEIGHTS, steadiness } from '../src/lib/sart-score.ts';
 import { REPEATS } from '../src/lib/sart-sequence.ts';
+import { refuseOverLimit, type AddressLimit, type RateLimits } from '@micro/payments/server';
 import { error, json, randomId } from './http.ts';
 
 /** First results needed before any comparison is shown. Fewer would give a misleading number. */
@@ -64,8 +65,18 @@ export function parseSummary(raw: unknown): TestSummary | null {
   return { ...summary, score: r.score };
 }
 
+/**
+ * Results one network may send: a Quick test takes about 2 minutes, so people never come close. It keeps a flood of
+ * made-up summaries from skewing the comparison. Counted under a scrambled address that expires within 2 days.
+ */
+export const TEST_SUBMISSIONS: RateLimits = { name: 'tests', perMinute: 10, perDay: 50 };
+
 /** POST /api/tests. Stores one anonymous summary. Nothing that identifies the person or device. */
-export async function recordTest(request: Request, db: D1Database, now = new Date()): Promise<Response> {
+export async function recordTest(request: Request, db: D1Database, now = new Date(), limit?: AddressLimit): Promise<Response> {
+  if (limit) {
+    const refused = await refuseOverLimit(request, db, limit, now.getTime());
+    if (refused) return refused;
+  }
   const text = await request.text();
   if (text.length > MAX_BODY_CHARS) return error(413, 'too_large', 'The request body is too large.');
   let body: unknown;

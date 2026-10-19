@@ -38,6 +38,10 @@ export function PrivacyPage() {
           honest.
         </p>
         <p>
+          To stop one network from flooding the server, we count how many runs each network starts, under a scrambled
+          form of its address that cannot be turned back into it. The counts are deleted within 2 days.
+        </p>
+        <p>
           The global page shows only totals, never device ids. Anyone with the link to one run's bits can see that run,
           but not who made it. Your runs page is found by this device's id, so another device does not see your runs.
         </p>
