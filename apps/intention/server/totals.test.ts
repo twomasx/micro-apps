@@ -3,7 +3,7 @@ import type { GlobalAnswer, HourAnswer } from '../src/lib/totals-types.ts';
 import { runZ, stouffer, type Aim } from '../src/lib/scoring.ts';
 import { STALE_AFTER_MS } from './runs.ts';
 import { createTestDb, type TestDb } from './testing.ts';
-import { CHART_POINTS, getGlobal, getHour, thin } from './totals.ts';
+import { CHART_POINTS, edgeCached, getGlobal, getHour, thin } from './totals.ts';
 
 let testDb: TestDb;
 let db: D1Database;
@@ -144,3 +144,39 @@ describe('thinning the chart', () => {
     expect(thin([0, 1], [0, 1])).toEqual({ bits: [0, 1], deviation: [0, 1] });
   });
 });
+
+describe('edgeCached', () => {
+  /** A Cache that keeps responses in a map, keyed by URL. */
+  function memoryCache() {
+    const store = new Map<string, Response>();
+    return {
+      store,
+      cache: {
+        match: async (key: Request) => store.get(key.url)?.clone(),
+        put: async (key: Request, response: Response) => void store.set(key.url, response),
+      } as unknown as Cache,
+    };
+  }
+
+  it('builds once, then answers from the cache, whatever extra query a visitor adds', async () => {
+    const { cache, store } = memoryCache();
+    let builds = 0;
+    const build = async () => {
+      builds++;
+      return Response.json({ n: builds });
+    };
+    const first = await edgeCached(new Request('https://x.test/api/global?kind=all'), cache, '/api/global?kind=all', build);
+    const second = await edgeCached(new Request('https://x.test/api/global?kind=all&bust=1'), cache, '/api/global?kind=all', build);
+    expect(await first.json()).toEqual({ n: 1 });
+    expect(await second.json()).toEqual({ n: 1 });
+    expect(builds).toBe(1);
+    expect([...store.keys()]).toEqual(['https://x.test/api/global?kind=all']);
+  });
+
+  it('does not cache an error', async () => {
+    const { cache, store } = memoryCache();
+    await edgeCached(new Request('https://x.test/api/global?kind=dice'), cache, '/api/global?kind=dice', async () => new Response(null, { status: 400 }));
+    expect(store.size).toBe(0);
+  });
+});
+

@@ -130,6 +130,25 @@ export function thin(bits: number[], deviation: number[]): { bits: number[]; dev
   return out;
 }
 
+/**
+ * Serves a totals answer from Cloudflare's edge cache, building it at most once per cache period in each data
+ * center, so a busy page does not read every run for every visitor. The key is a fixed path (plus the kind), so
+ * extra query parameters cannot skip the cache.
+ */
+export async function edgeCached(
+  request: Request,
+  cache: Cache | undefined,
+  keyPath: string,
+  build: () => Promise<Response>,
+): Promise<Response> {
+  const key = new Request(new URL(keyPath, request.url).toString());
+  const hit = await cache?.match(key);
+  if (hit) return hit;
+  const response = await build();
+  if (response.ok) await cache?.put(key, response.clone());
+  return response;
+}
+
 const cached = (data: unknown, maxAge: number) =>
   Response.json(data, { headers: { 'Cache-Control': `public, max-age=${maxAge}` } });
 
