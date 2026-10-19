@@ -3,7 +3,7 @@ import { Link } from '../components/Link.tsx';
 import { PassOffer } from '../components/PassOffer.tsx';
 import { useSavedUnlock } from '../hooks/useSavedUnlock.ts';
 import { useUnlocked } from '../hooks/useUnlocked.ts';
-import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { CLOSED_LABEL, forgetCheckoutInAddress, isClosedResponse } from '@micro/payments/client';
 import { CONTACT_EMAIL } from '@micro/payments/contact';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
 import { ApiError, fetchPurchase, startCheckout } from '../lib/api.ts';
@@ -108,7 +108,10 @@ function Returned({ sessionId }: { sessionId: string }) {
       cancelled: () => cancelled,
     }).then(async (result) => {
       if (cancelled) return;
-      if (result.kind === 'paid') await unlockWithCode(result.code);
+      if (result.kind === 'paid') {
+        await unlockWithCode(result.code);
+        forgetCheckoutInAddress();
+      }
       setState(result);
     });
     return () => {

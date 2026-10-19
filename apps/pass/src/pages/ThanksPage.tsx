@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { forgetCheckoutInAddress } from '@micro/payments/client';
 import { AppLinks } from '../components/AppLinks';
 import { CodeCard } from '../components/CodeCard';
 import { Link } from '../components/Link';
@@ -43,7 +44,11 @@ export function ThanksPage({ sessionId }: { sessionId: string | null }) {
     void confirm(sessionId, () => cancelled).then(async (result) => {
       if (cancelled) return;
       // Keep the pass on this device too, so the pass page and the home page can open apps with it.
-      if (result.kind === 'paid') await pass.useCode(result.code);
+      if (result.kind === 'paid') {
+        await pass.useCode(result.code);
+        // A reload opens the pass's home page, which shows the saved pass, instead of this checkout.
+        forgetCheckoutInAddress(import.meta.env.BASE_URL);
+      }
       setState(result);
     });
     return () => {

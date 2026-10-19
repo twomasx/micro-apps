@@ -4,7 +4,7 @@ import { Link } from '../components/Link';
 import { PassOffer } from '../components/PassOffer';
 import { useSavedUnlock } from '../hooks/useSavedUnlock';
 import { useUnlocked } from '../hooks/useUnlocked';
-import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
+import { CLOSED_LABEL, forgetCheckoutInAddress, isClosedResponse } from '@micro/payments/client';
 import { CONTACT_EMAIL } from '@micro/payments/contact';
 import { usePaymentsStatus } from '../hooks/usePaymentsStatus';
 import { ApiError, fetchPurchase, startCheckout } from '../lib/api';
@@ -113,7 +113,10 @@ function Returned({ sessionId }: { sessionId: string }) {
       cancelled: () => cancelled,
     }).then(async (result) => {
       if (cancelled) return;
-      if (result.kind === 'paid') await unlockWithCode(result.code);
+      if (result.kind === 'paid') {
+        await unlockWithCode(result.code);
+        forgetCheckoutInAddress();
+      }
       setState(result);
     });
     return () => {

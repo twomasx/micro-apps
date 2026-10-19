@@ -36,3 +36,15 @@ export function isClosedResponse(status: number): boolean {
 export function isStagingHost(hostname: string): boolean {
   return hostname.startsWith('staging.');
 }
+
+/**
+ * Once the code from a checkout is saved on this device, the checkout id leaves the address bar, so a shared or
+ * bookmarked link cannot show the code to anyone else. The page on screen stays as it is. `path` also changes the
+ * page a reload opens (the pass's thanks page becomes its home page, which shows the saved pass).
+ */
+export function forgetCheckoutInAddress(path?: string, win: Pick<Window, 'location' | 'history'> = window): void {
+  const url = new URL(win.location.href);
+  if (!url.searchParams.has('session_id')) return;
+  url.searchParams.delete('session_id');
+  win.history.replaceState(win.history.state, '', `${path ?? url.pathname}${url.search}${url.hash}`);
+}
