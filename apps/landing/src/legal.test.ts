@@ -40,7 +40,10 @@ describe('terms and refund pages', () => {
     for (const { page, html } of pages) {
       expect(page.updated).toMatch(/^Last updated /);
       expect(words(html)).not.toMatch(/\[Roger|FULL-NAME|Draft/);
-      expect(html).toContain('<meta name="robots" content="noindex" />');
+      expect(html).not.toContain('noindex');
+      expect(html).not.toContain('data-status="draft"');
+      expect(html).toContain(`<link rel="canonical" href="https://polymadlabs.com${page.path}" />`);
+      expect(html).toContain(`<title>${page.title} | PolymadLabs</title>`);
     }
     const all = pages.map(({ html }) => words(html)).join(' ');
     expect(all).toContain(`made and sold by ${OWNER}, an individual in ${PLACE}`);

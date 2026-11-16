@@ -48,6 +48,21 @@ function meta(): string {
   );
 }
 
+/** Title, description and canonical for a terms or refund page. */
+function legalMeta(page: LegalPage): string {
+  const { origin, base } = appConfig;
+  return headTags(
+    { origin, base: '/', siteName: 'PolymadLabs' },
+    {
+      path: page.path.slice(1),
+      title: `${page.title} | PolymadLabs`,
+      description: page.intro,
+      image: `${base.slice(1)}og.png`,
+      imageAlt: 'PolymadLabs. You Are The Experiment. An index of five experiments.',
+    },
+  );
+}
+
 /** A terms or refund page, from src/legal.ts. */
 function legal(page: LegalPage): string {
   const sections = page.sections
@@ -79,6 +94,8 @@ const parts: Record<string, () => string> = {
 </div>`,
   terms: () => legal(terms),
   refunds: () => legal(refunds),
+  'terms-meta': () => legalMeta(terms),
+  'refunds-meta': () => legalMeta(refunds),
   'legal-links': () => '<li><a href="/terms">Terms of use</a></li>\n<li><a href="/refunds">Refund policy</a></li>',
   'footer-links': () => experiments.map((e) => `<li><a href="${e.path}">${escape(e.name)}</a></li>`).join('\n'),
 };

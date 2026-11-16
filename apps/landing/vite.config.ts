@@ -6,10 +6,7 @@ import { defineConfig, type Plugin } from 'vite';
 import { appConfig } from './app.config.ts';
 import { renderPage } from './src/render.ts';
 
-/**
- * The landing page's sitemap and the 512 px logo that its Organization markup names. The terms and refund
- * pages join the sitemap once Roger approves them (they are noindex drafts until then).
- */
+/** The landing page's sitemap (home, terms, refunds) and the 512 px logo that its Organization markup names. */
 function searchFiles(): Plugin {
   let outDir = '';
   return {
@@ -19,7 +16,7 @@ function searchFiles(): Plugin {
       outDir = join(config.root, config.build.outDir);
     },
     async closeBundle() {
-      writeFileSync(join(outDir, 'sitemap.xml'), sitemapXml([{ loc: `${appConfig.origin}/` }]));
+      writeFileSync(join(outDir, 'sitemap.xml'), sitemapXml(['/', '/terms', '/refunds'].map((path) => ({ loc: `${appConfig.origin}${path}` }))));
       const icon = readFileSync(new URL('./public/favicon.svg', import.meta.url), 'utf8');
       // The icon has only a viewBox. Give it a size so it is drawn at 512 px, not 32.
       const sized = icon.replace('<svg ', '<svg width="512" height="512" ');
