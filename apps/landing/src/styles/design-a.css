@@ -1,0 +1,753 @@
+/*
+ * Design A: Spectrum. A light, bright poster. Warm white page, near-black ink, one big
+ * Inter Tight headline, and color only from the five apps: each entry is a card that opens
+ * on its app's own ground, with an Open button in the app's own color. The five colors
+ * together, as a band, are the suite's mark. IBM Plex Mono for small labels.
+ */
+
+html[data-design='a'] {
+  --ground: #f3f1ec;
+  --surface: #ffffff;
+  --ink: #0d0d0c;
+  --muted: #55534d;
+  --line: rgb(13 13 12 / 14%);
+  --line-strong: rgb(13 13 12 / 30%);
+  --sans: 'Inter Tight Variable', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --spectrum: linear-gradient(90deg, #1f3bff 0 20%, #080a1c 20% 40%, #ffd45c 40% 60%, #191919 60% 80%, #f2683c 80%);
+  --sw-bg: #0d0d0c;
+  --sw-ink: #ffffff;
+  --sw-line: #0d0d0c;
+  color-scheme: light;
+}
+
+html[data-design='a'] body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+html[data-design='a'] :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+html[data-design='a'] .skip-link {
+  background: var(--ink);
+  color: var(--ground);
+  border-radius: 999px;
+}
+
+/* Small mono labels */
+html[data-design='a'] .eyebrow,
+html[data-design='a'] .masthead-label,
+html[data-design='a'] .section-count,
+html[data-design='a'] .sheet-title,
+html[data-design='a'] .sheet-row dt,
+html[data-design='a'] .entry-number,
+html[data-design='a'] .entry-path,
+html[data-design='a'] .field dt,
+html[data-design='a'] .step-number,
+html[data-design='a'] .protocol-pass-label,
+html[data-design='a'] .legal-updated {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Header */
+
+html[data-design='a'] .masthead {
+  padding-top: calc(env(safe-area-inset-top) + var(--switcher-space));
+  border-bottom: 1px solid var(--line);
+}
+
+html[data-design='a'] .masthead-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'mark nav'
+    'label label';
+  align-items: center;
+  column-gap: 12px;
+  padding-top: 8px;
+  padding-bottom: 10px;
+}
+
+html[data-design='a'] .wordmark {
+  grid-area: mark;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+/* The mark: the five app colors in a square. */
+html[data-design='a'] .wordmark::before {
+  content: '';
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--spectrum);
+}
+
+html[data-design='a'] .masthead-label {
+  grid-area: label;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+html[data-design='a'] .masthead-nav {
+  grid-area: nav;
+  display: flex;
+}
+
+html[data-design='a'] .masthead-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
+}
+
+html[data-design='a'] .masthead-nav a:last-child {
+  margin-right: -8px;
+}
+
+/* Hero */
+
+html[data-design='a'] .hero {
+  display: grid;
+  gap: 32px;
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+html[data-design='a'] .eyebrow {
+  color: var(--muted);
+}
+
+html[data-design='a'] h1 {
+  margin-top: 14px;
+  font-size: clamp(3rem, 15.5vw, 9rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+}
+
+html[data-design='a'] .hero-key {
+  display: block;
+}
+
+html[data-design='a'] .lede {
+  max-width: 34rem;
+  margin-top: 22px;
+  color: var(--muted);
+  font-size: 1.1875rem;
+  line-height: 1.45;
+}
+
+/* The five apps as one band, each segment its app's ground with its accent as a dot. */
+html[data-design='a'] .suite-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: 56px;
+  margin-top: 28px;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+}
+
+html[data-design='a'] .suite-chip {
+  position: relative;
+  background: var(--app-ground);
+}
+
+html[data-design='a'] .suite-chip::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--app-accent);
+}
+
+html[data-design='a'] .suite-chip + .suite-chip {
+  border-left: 1px solid var(--line);
+}
+
+html[data-design='a'] .sheet {
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+html[data-design='a'] .sheet-title {
+  padding: 14px 18px 10px;
+  color: var(--muted);
+}
+
+html[data-design='a'] .sheet-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+}
+
+html[data-design='a'] .sheet-row dt {
+  color: var(--muted);
+}
+
+html[data-design='a'] .sheet-row dd {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: right;
+}
+
+/* Section heads */
+
+html[data-design='a'] .section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 20px;
+}
+
+html[data-design='a'] .section-head h2 {
+  font-size: clamp(2rem, 9vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+html[data-design='a'] .section-count {
+  color: var(--muted);
+}
+
+/* The index: one card per app */
+
+html[data-design='a'] .index {
+  padding-top: 24px;
+  padding-bottom: 72px;
+}
+
+html[data-design='a'] .entries {
+  display: grid;
+  gap: 16px;
+}
+
+html[data-design='a'] .entry {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas:
+    'spec'
+    'name'
+    'fields'
+    'open';
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+}
+
+html[data-design='a'] .specimen {
+  grid-area: spec;
+  background: var(--app-ground);
+  border-bottom: 1px solid var(--line);
+}
+
+html[data-design='a'] .entry-number {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--app-strong);
+  color: var(--app-on-strong);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+html[data-design='a'] .entry-name {
+  grid-area: name;
+  padding: 20px 20px 0;
+}
+
+html[data-design='a'] .entry-name h3 {
+  font-size: 1.875rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+html[data-design='a'] .entry-path {
+  margin-top: 4px;
+  color: var(--muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html[data-design='a'] .entry-fields {
+  grid-area: fields;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 18px 20px 0;
+}
+
+html[data-design='a'] .field dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+html[data-design='a'] .field dd {
+  margin-top: 3px;
+}
+
+html[data-design='a'] .entry-open {
+  grid-area: open;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  margin: 22px 20px 20px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: var(--app-strong);
+  color: var(--app-on-strong);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Personality's ground is close to the page; give its button the same outline as the rest. */
+html[data-design='a'] .entry-open {
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 12%);
+}
+
+html[data-design='a'] .entry-open:active {
+  filter: brightness(1.2);
+}
+
+/* Protocol: a dark band */
+
+html[data-design='a'] .protocol {
+  background: var(--ink);
+  color: #f3f1ec;
+}
+
+html[data-design='a'] .protocol-inner {
+  padding-top: 56px;
+  padding-bottom: 64px;
+}
+
+html[data-design='a'] .protocol .section-count {
+  color: #b9b6ad;
+}
+
+html[data-design='a'] .protocol :focus-visible {
+  outline-color: #f3f1ec;
+}
+
+html[data-design='a'] .steps {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+html[data-design='a'] .step {
+  padding: 22px 20px 24px;
+  border: 1px solid rgb(243 241 236 / 18%);
+  border-radius: 20px;
+}
+
+html[data-design='a'] .step-number {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f3f1ec;
+  color: var(--ink);
+}
+
+html[data-design='a'] .step h3 {
+  margin-top: 14px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+html[data-design='a'] .step p:last-child {
+  margin-top: 6px;
+  color: #c9c6bd;
+}
+
+/* The pass: a white card with the five colors along its top. */
+html[data-design='a'] .protocol-pass {
+  display: grid;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 30px 20px 20px;
+  border-radius: 22px;
+  background: var(--surface) var(--spectrum) top / 100% 8px no-repeat;
+  color: var(--ink);
+}
+
+html[data-design='a'] .protocol-pass :focus-visible {
+  outline-color: var(--ink);
+}
+
+html[data-design='a'] .protocol-pass-label {
+  color: var(--muted);
+}
+
+html[data-design='a'] .protocol-pass-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+html[data-design='a'] .protocol-pass-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  margin-top: 6px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Footer */
+
+html[data-design='a'] .colophon {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+html[data-design='a'] .colophon-inner {
+  display: grid;
+  gap: 20px;
+  padding-top: 36px;
+  padding-bottom: 40px;
+}
+
+html[data-design='a'] .colophon .wordmark {
+  min-height: 0;
+}
+
+html[data-design='a'] .motto {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+html[data-design='a'] .colophon-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 20px;
+}
+
+html[data-design='a'] .colophon-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  text-underline-offset: 5px;
+}
+
+html[data-design='a'] .colophon-note {
+  max-width: 40rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+/* Motion: off unless the visitor allows it. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-design='a'] .entry,
+  html[data-design='a'] .entry-arrow {
+    transition:
+      transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 180ms ease;
+  }
+}
+
+@media (hover: hover) {
+  html[data-design='a'] .masthead-nav a:hover,
+  html[data-design='a'] .colophon-links a:hover {
+    text-decoration: underline;
+  }
+
+  html[data-design='a'] .entry-open:hover,
+  html[data-design='a'] .protocol-pass-link:hover {
+    filter: brightness(1.2);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html[data-design='a'] .entry:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px -18px rgb(13 13 12 / 45%);
+  }
+
+  html[data-design='a'] .entry-open:hover .entry-arrow,
+  html[data-design='a'] .protocol-pass-link:hover .entry-arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* Terms and refund pages */
+
+html[data-design='a'] .legal {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 36px var(--pad-right) 72px var(--pad-left);
+}
+
+html[data-design='a'] .legal h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2.5rem, 11vw, 4rem);
+  line-height: 1;
+}
+
+html[data-design='a'] .legal-updated {
+  margin-bottom: 20px;
+  color: var(--muted);
+}
+
+html[data-design='a'] .legal-intro {
+  font-size: 1.1875rem;
+}
+
+html[data-design='a'] .legal-section {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+html[data-design='a'] .legal-section h2 {
+  margin-bottom: 8px;
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+html[data-design='a'] .legal p {
+  line-height: 1.6;
+}
+
+html[data-design='a'] .legal p + p {
+  margin-top: 10px;
+}
+
+/* Tablet */
+
+@media (min-width: 640px) {
+  html[data-design='a'] {
+    --gutter: 32px;
+  }
+
+  html[data-design='a'] .masthead-inner {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'mark label nav';
+    column-gap: 20px;
+  }
+
+  html[data-design='a'] .masthead-nav a {
+    padding: 0 12px;
+  }
+
+  html[data-design='a'] .masthead-nav a:last-child {
+    margin-right: -12px;
+  }
+
+  html[data-design='a'] .hero {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+
+  html[data-design='a'] .suite-strip {
+    height: 72px;
+  }
+
+  html[data-design='a'] .sheet {
+    max-width: 30rem;
+  }
+
+  html[data-design='a'] .entries {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  html[data-design='a'] .entry:last-child {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      'spec name'
+      'spec fields'
+      'spec open';
+  }
+
+  html[data-design='a'] .entry:last-child .specimen {
+    border-bottom: 0;
+    border-right: 1px solid var(--line);
+  }
+
+  html[data-design='a'] .entry:last-child .specimen-art {
+    height: 100%;
+  }
+
+  html[data-design='a'] .steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  html[data-design='a'] .protocol-pass {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 32px;
+    padding: 36px 28px 28px;
+  }
+
+  html[data-design='a'] .protocol-pass-label {
+    grid-column: 1 / -1;
+  }
+
+  html[data-design='a'] .protocol-pass-link {
+    margin-top: 0;
+  }
+
+  html[data-design='a'] .colophon-inner {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+
+  html[data-design='a'] .colophon-links {
+    justify-content: flex-end;
+  }
+
+  html[data-design='a'] .colophon-note {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  html[data-design='a'] {
+    --gutter: 48px;
+  }
+
+  html[data-design='a'] .hero {
+    padding-top: 88px;
+    padding-bottom: 80px;
+  }
+
+  html[data-design='a'] .lede {
+    font-size: 1.375rem;
+  }
+
+  /* The study sheet becomes one row of five facts. */
+  html[data-design='a'] .sheet {
+    max-width: none;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: stretch;
+  }
+
+  html[data-design='a'] .sheet-title {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    border-right: 1px solid var(--line);
+  }
+
+  html[data-design='a'] .sheet-rows {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  html[data-design='a'] .sheet-row {
+    display: grid;
+    align-content: center;
+    gap: 2px;
+    padding: 14px 16px;
+    border-top: 0;
+  }
+
+  html[data-design='a'] .sheet-row + .sheet-row {
+    border-left: 1px solid var(--line);
+  }
+
+  html[data-design='a'] .sheet-row dt {
+    font-size: 0.75rem;
+  }
+
+  html[data-design='a'] .sheet-row dd {
+    text-align: left;
+    font-size: 1.0625rem;
+  }
+
+  /* Three cards, then two wider ones. */
+  html[data-design='a'] .entries {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 24px;
+  }
+
+  html[data-design='a'] .entry {
+    grid-column: span 2;
+  }
+
+  html[data-design='a'] .entry:nth-child(n + 4) {
+    grid-column: span 3;
+  }
+
+  html[data-design='a'] .entry:last-child {
+    grid-column: span 3;
+    grid-template-columns: none;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      'spec'
+      'name'
+      'fields'
+      'open';
+  }
+
+  html[data-design='a'] .entry:last-child .specimen {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  html[data-design='a'] .entry:nth-child(n + 4) .specimen-art {
+    aspect-ratio: 2 / 1;
+    height: auto;
+  }
+
+  html[data-design='a'] .entry-open {
+    justify-self: start;
+  }
+}

@@ -1,0 +1,209 @@
+/*
+ * Shared by all three designs: a small reset, helpers, each app's own colors, and the
+ * temporary design switcher. Everything visual lives in design-a.css, design-b.css and
+ * design-c.css, each scoped by data-design on <html>. Phone layout first; min-width
+ * queries at 640px and 1024px only.
+ */
+
+:root {
+  --gutter: 16px;
+  --pad-left: max(var(--gutter), env(safe-area-inset-left));
+  --pad-right: max(var(--gutter), env(safe-area-inset-right));
+  --measure: 1200px;
+  /* Room at the top for the switcher button, so it never covers the header links. */
+  --switcher-space: 0px;
+}
+
+:root[data-switcher] {
+  --switcher-space: 60px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ol,
+ul,
+figure {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  top: calc(8px + env(safe-area-inset-top));
+  left: var(--pad-left);
+  z-index: 30;
+  padding: 12px 16px;
+  font-size: 1rem;
+  transform: translateY(-300%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.specimen-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+}
+
+/* Each design centers its sections in the same measure. */
+.masthead-inner,
+.hero,
+.index,
+.protocol-inner,
+.colophon-inner {
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-left: var(--pad-left);
+  padding-right: var(--pad-right);
+}
+
+.index,
+.protocol {
+  scroll-margin-top: 8px;
+}
+
+/*
+ * Each app's own colors, from its own stylesheet. Every design uses them for that app's entry.
+ * ground: the app's background. strong / on-strong: a button in the app's color on a light page.
+ * glow: the app's accent where it must read on a dark page (4.5:1 or more on #07091a).
+ */
+[data-app='personality'] {
+  --app-ground: #f5f4f0;
+  --app-ink: #0d0d0c;
+  --app-accent: #1f3bff;
+  --app-strong: #1f3bff;
+  --app-on-strong: #ffffff;
+  --app-glow: #8c9cff;
+}
+
+[data-app='focus'] {
+  --app-ground: #080a1c;
+  --app-ink: #f1ede6;
+  --app-accent: #e6c88f;
+  --app-strong: #080a1c;
+  --app-on-strong: #f1ede6;
+  --app-glow: #e6c88f;
+}
+
+[data-app='breathwork'] {
+  --app-ground: #2341d6;
+  --app-ink: #f6f7fb;
+  --app-accent: #ffd45c;
+  --app-strong: #2341d6;
+  --app-on-strong: #ffffff;
+  --app-glow: #ffd45c;
+}
+
+[data-app='attention'] {
+  --app-ground: #f3f3ef;
+  --app-ink: #191919;
+  --app-accent: #191919;
+  --app-strong: #191919;
+  --app-on-strong: #f3f3ef;
+  --app-glow: #f3f3ef;
+}
+
+[data-app='intention'] {
+  --app-ground: #141416;
+  --app-ink: #ffffff;
+  --app-accent: #f2683c;
+  --app-strong: #f2683c;
+  --app-on-strong: #141416;
+  --app-glow: #f37a54;
+}
+
+/*
+ * The design switcher (src/design.ts). Temporary, for Roger to compare the three designs.
+ * Each design sets --sw-bg, --sw-ink and --sw-line.
+ */
+.design-switcher {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top));
+  right: max(8px, env(safe-area-inset-right));
+  z-index: 20;
+  display: grid;
+  justify-items: end;
+  align-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 14px;
+  border: 1px solid var(--sw-line, currentColor);
+  border-radius: 999px;
+  background: var(--sw-bg, #ffffff);
+  color: var(--sw-ink, #111111);
+  font-family: system-ui, sans-serif;
+  line-height: 1.15;
+  text-align: right;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.design-switcher-count {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.design-switcher-name {
+  font-size: 0.8125rem;
+  opacity: 0.85;
+}
+
+.design-switcher:focus-visible {
+  outline: 2px solid var(--sw-ink, #111111);
+  outline-offset: 3px;
+}

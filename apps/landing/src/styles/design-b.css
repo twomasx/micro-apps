@@ -1,0 +1,839 @@
+/*
+ * Design B: Observatory. The five apps as lights in one night sky. Deep blue-black page with a
+ * still starfield and soft glows, Unbounded (from Intention) for headings, Manrope (from Focus)
+ * for reading. Each app is a glowing window in its own colors; its accent is its star. Focus's
+ * gold is the page's one accent.
+ */
+
+html[data-design='b'] {
+  --ground: #07091a;
+  --panel: #0e1230;
+  --ink: #eef0f8;
+  --soft: #d3d7ea;
+  --muted: #a7add0;
+  --line: rgb(238 240 248 / 14%);
+  --line-strong: rgb(238 240 248 / 28%);
+  --gold: #e6c88f;
+  --display: Unbounded, system-ui, sans-serif;
+  --sans: 'Manrope Variable', system-ui, sans-serif;
+  --sw-bg: #161b42;
+  --sw-ink: #eef0f8;
+  --sw-line: #e6c88f;
+  color-scheme: dark;
+}
+
+html[data-design='b'] body {
+  position: relative;
+  background:
+    radial-gradient(48rem 30rem at 85% -6rem, rgb(52 70 190 / 38%), transparent 70%),
+    radial-gradient(36rem 26rem at -8rem 22rem, rgb(242 104 60 / 13%), transparent 70%),
+    var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+/* A still starfield across the top of the page. Decorative. */
+html[data-design='b'] body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  height: 1100px;
+  pointer-events: none;
+  opacity: 0.75;
+  background-image:
+    radial-gradient(1.4px 1.4px at 8% 14%, #fff 50%, transparent 52%),
+    radial-gradient(1px 1px at 18% 38%, #fff 50%, transparent 52%),
+    radial-gradient(1.2px 1.2px at 27% 9%, #f3ebdd 50%, transparent 52%),
+    radial-gradient(1px 1px at 36% 27%, #fff 50%, transparent 52%),
+    radial-gradient(1.6px 1.6px at 47% 6%, #fff 50%, transparent 52%),
+    radial-gradient(1px 1px at 55% 33%, #b4c2ff 50%, transparent 52%),
+    radial-gradient(1.2px 1.2px at 63% 18%, #fff 50%, transparent 52%),
+    radial-gradient(1px 1px at 72% 41%, #fff 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 81% 12%, #f3ebdd 50%, transparent 52%),
+    radial-gradient(1px 1px at 90% 29%, #fff 50%, transparent 52%),
+    radial-gradient(1.2px 1.2px at 95% 52%, #fff 50%, transparent 52%),
+    radial-gradient(1px 1px at 4% 61%, #fff 50%, transparent 52%),
+    radial-gradient(1.3px 1.3px at 40% 66%, #b4c2ff 50%, transparent 52%),
+    radial-gradient(1px 1px at 68% 73%, #fff 50%, transparent 52%),
+    radial-gradient(1.2px 1.2px at 15% 86%, #fff 50%, transparent 52%),
+    radial-gradient(1px 1px at 86% 90%, #f3ebdd 50%, transparent 52%);
+  -webkit-mask-image: linear-gradient(#000 40%, transparent);
+  mask-image: linear-gradient(#000 40%, transparent);
+}
+
+html[data-design='b'] :focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+html[data-design='b'] .skip-link {
+  background: var(--gold);
+  color: var(--ground);
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+/* Small spaced capitals */
+html[data-design='b'] .eyebrow,
+html[data-design='b'] .masthead-label,
+html[data-design='b'] .section-count,
+html[data-design='b'] .sheet-title,
+html[data-design='b'] .sheet-row dt,
+html[data-design='b'] .field dt,
+html[data-design='b'] .step-number,
+html[data-design='b'] .protocol-pass-label,
+html[data-design='b'] .legal-updated {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Header */
+
+html[data-design='b'] .masthead {
+  padding-top: calc(env(safe-area-inset-top) + var(--switcher-space));
+}
+
+html[data-design='b'] .masthead-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'mark nav'
+    'label label';
+  align-items: center;
+  column-gap: 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+html[data-design='b'] .wordmark {
+  grid-area: mark;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-family: var(--display);
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-decoration: none;
+}
+
+/* The mark: a ring with one gold star on it. */
+html[data-design='b'] .wordmark::before {
+  content: '';
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--muted);
+  border-radius: 50%;
+  background: radial-gradient(circle at 85% 20%, var(--gold) 0 2.6px, transparent 3.2px);
+}
+
+html[data-design='b'] .masthead-label {
+  grid-area: label;
+  color: var(--muted);
+  font-size: 0.6875rem;
+}
+
+html[data-design='b'] .masthead-nav {
+  grid-area: nav;
+  display: flex;
+}
+
+html[data-design='b'] .masthead-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 7px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-underline-offset: 6px;
+}
+
+html[data-design='b'] .masthead-nav a:last-child {
+  margin-right: -7px;
+}
+
+/* Hero: centered, like a view through a telescope. */
+
+html[data-design='b'] .hero {
+  display: grid;
+  gap: 40px;
+  padding-top: 48px;
+  padding-bottom: 56px;
+  text-align: center;
+}
+
+html[data-design='b'] .eyebrow {
+  color: var(--gold);
+}
+
+html[data-design='b'] h1 {
+  margin-top: 18px;
+  font-family: var(--display);
+  font-size: clamp(2.125rem, 9.6vw, 5.75rem);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+html[data-design='b'] .hero-key {
+  display: block;
+  background: linear-gradient(90deg, #8c9cff, #e6c88f 45%, #ffd45c 60%, #f37a54);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html[data-design='b'] .lede {
+  max-width: 32rem;
+  margin: 22px auto 0;
+  color: var(--soft);
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+/* The five apps as five stars on one orbit line. */
+html[data-design='b'] .suite-strip {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 18rem;
+  height: 40px;
+  margin: 30px auto 0;
+}
+
+html[data-design='b'] .suite-strip::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -12px;
+  right: -12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-strong) 15%, var(--line-strong) 85%, transparent);
+}
+
+html[data-design='b'] .suite-chip {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--app-glow);
+  box-shadow:
+    0 0 0 4px var(--ground),
+    0 0 18px 2px var(--app-glow);
+}
+
+html[data-design='b'] .sheet {
+  justify-self: center;
+  width: 100%;
+  max-width: 30rem;
+  padding: 8px 20px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgb(14 18 48 / 70%);
+  text-align: left;
+}
+
+html[data-design='b'] .sheet-title {
+  padding: 12px 0 8px;
+  color: var(--gold);
+}
+
+html[data-design='b'] .sheet-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px dashed var(--line);
+}
+
+html[data-design='b'] .sheet-row dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+html[data-design='b'] .sheet-row dd {
+  font-family: var(--display);
+  font-size: 1rem;
+  font-weight: 300;
+  text-align: right;
+}
+
+/* Section heads */
+
+html[data-design='b'] .section-head {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding-bottom: 32px;
+  text-align: center;
+}
+
+html[data-design='b'] .section-head h2 {
+  font-family: var(--display);
+  font-size: clamp(1.625rem, 6.5vw, 2.5rem);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+html[data-design='b'] .section-count {
+  color: var(--gold);
+}
+
+/* The index: each app a glowing window */
+
+html[data-design='b'] .index {
+  padding-top: 32px;
+  padding-bottom: 72px;
+}
+
+html[data-design='b'] .entries {
+  display: grid;
+  gap: 20px;
+}
+
+html[data-design='b'] .entry {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'spec spec'
+    'num name'
+    'fields fields'
+    'open open';
+  column-gap: 14px;
+  padding: 14px 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  background: linear-gradient(180deg, rgb(14 18 48 / 85%), rgb(10 13 36 / 85%));
+}
+
+html[data-design='b'] .specimen {
+  grid-area: spec;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border-radius: 20px;
+  background: var(--app-ground);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--app-glow) 45%, transparent),
+    0 18px 48px -18px color-mix(in srgb, var(--app-glow) 55%, transparent);
+}
+
+html[data-design='b'] .entry-number {
+  grid-area: num;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-left: 4px;
+  border: 1px solid var(--app-glow);
+  border-radius: 50%;
+  color: var(--app-glow);
+  font-family: var(--display);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+html[data-design='b'] .entry-name {
+  grid-area: name;
+  align-self: center;
+}
+
+html[data-design='b'] .entry-name h3 {
+  font-family: var(--display);
+  font-size: 1.375rem;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+html[data-design='b'] .entry-path {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+html[data-design='b'] .entry-fields {
+  grid-area: fields;
+  display: grid;
+  gap: 14px;
+  padding: 18px 4px 0;
+}
+
+html[data-design='b'] .field dt {
+  color: var(--app-glow);
+  font-size: 0.75rem;
+}
+
+html[data-design='b'] .field dd {
+  margin-top: 4px;
+  color: var(--soft);
+}
+
+html[data-design='b'] .entry-open {
+  grid-area: open;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  margin-top: 20px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--ground);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+html[data-design='b'] .entry-open:active {
+  background: var(--app-glow);
+}
+
+/* Protocol: three stops on one orbit line */
+
+html[data-design='b'] .protocol-inner {
+  padding-top: 32px;
+  padding-bottom: 72px;
+}
+
+html[data-design='b'] .steps {
+  display: grid;
+  gap: 4px;
+  margin: 0 auto;
+  max-width: 36rem;
+}
+
+html[data-design='b'] .step {
+  position: relative;
+  padding: 0 0 28px 36px;
+}
+
+/* The line */
+html[data-design='b'] .step::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: -6px;
+  left: 6px;
+  width: 1px;
+  background: var(--line-strong);
+}
+
+html[data-design='b'] .step:last-child::before {
+  display: none;
+}
+
+/* The stop */
+html[data-design='b'] .step::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 14px 1px rgb(230 200 143 / 55%);
+}
+
+html[data-design='b'] .step-number {
+  color: var(--gold);
+}
+
+html[data-design='b'] .step h3 {
+  margin-top: 6px;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+html[data-design='b'] .step p:last-child {
+  margin-top: 6px;
+  color: var(--soft);
+}
+
+/* The pass: a gold-ringed panel */
+html[data-design='b'] .protocol-pass {
+  display: grid;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 28px 22px 22px;
+  border: 1px solid rgb(230 200 143 / 55%);
+  border-radius: 30px;
+  background:
+    radial-gradient(30rem 14rem at 50% 0%, rgb(230 200 143 / 16%), transparent 70%),
+    var(--panel);
+  text-align: center;
+}
+
+html[data-design='b'] .protocol-pass-label {
+  color: var(--gold);
+}
+
+html[data-design='b'] .protocol-pass-text {
+  font-family: var(--display);
+  font-size: 1.375rem;
+  font-weight: 300;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+html[data-design='b'] .protocol-pass-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  margin-top: 8px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--ground);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Footer */
+
+html[data-design='b'] .colophon {
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+html[data-design='b'] .colophon-inner {
+  display: grid;
+  gap: 20px;
+  padding-top: 36px;
+  padding-bottom: 40px;
+}
+
+html[data-design='b'] .colophon .wordmark {
+  min-height: 0;
+}
+
+html[data-design='b'] .motto {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+html[data-design='b'] .colophon-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 20px;
+}
+
+html[data-design='b'] .colophon-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  text-underline-offset: 6px;
+}
+
+html[data-design='b'] .colophon-note {
+  max-width: 40rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-design='b'] .entry-open,
+  html[data-design='b'] .protocol-pass-link,
+  html[data-design='b'] .entry-arrow,
+  html[data-design='b'] .specimen {
+    transition:
+      background-color 180ms ease,
+      transform 180ms ease,
+      box-shadow 240ms ease;
+  }
+}
+
+@media (hover: hover) {
+  html[data-design='b'] .masthead-nav a:hover,
+  html[data-design='b'] .colophon-links a:hover {
+    text-decoration: underline;
+  }
+
+  html[data-design='b'] .entry-open:hover {
+    background: var(--app-glow);
+  }
+
+  html[data-design='b'] .protocol-pass-link:hover {
+    background: var(--ink);
+  }
+
+  html[data-design='b'] .entry:hover .specimen {
+    box-shadow:
+      0 0 0 1px var(--app-glow),
+      0 22px 60px -14px color-mix(in srgb, var(--app-glow) 75%, transparent);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html[data-design='b'] .entry-open:hover .entry-arrow,
+  html[data-design='b'] .protocol-pass-link:hover .entry-arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* Terms and refund pages */
+
+html[data-design='b'] .legal {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 36px var(--pad-right) 72px var(--pad-left);
+}
+
+html[data-design='b'] .legal h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 8.5vw, 3.25rem);
+}
+
+html[data-design='b'] .legal-updated {
+  margin-bottom: 20px;
+  color: var(--gold);
+}
+
+html[data-design='b'] .legal-intro {
+  color: var(--soft);
+  font-size: 1.125rem;
+}
+
+html[data-design='b'] .legal-section {
+  margin-top: 28px;
+  padding: 22px 20px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgb(14 18 48 / 70%);
+}
+
+html[data-design='b'] .legal-section h2 {
+  margin-bottom: 10px;
+  font-family: var(--display);
+  font-size: 1.125rem;
+  font-weight: 400;
+}
+
+html[data-design='b'] .legal p {
+  line-height: 1.65;
+}
+
+html[data-design='b'] .legal-section p {
+  color: var(--soft);
+}
+
+html[data-design='b'] .legal p + p {
+  margin-top: 10px;
+}
+
+/* Tablet */
+
+@media (min-width: 640px) {
+  html[data-design='b'] {
+    --gutter: 32px;
+  }
+
+  html[data-design='b'] .wordmark {
+    font-size: 1rem;
+  }
+
+  html[data-design='b'] .masthead-inner {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'mark label nav';
+    column-gap: 20px;
+  }
+
+  html[data-design='b'] .masthead-nav a {
+    padding: 0 12px;
+  }
+
+  html[data-design='b'] .masthead-nav a:last-child {
+    margin-right: -12px;
+  }
+
+  html[data-design='b'] .hero {
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  html[data-design='b'] .suite-strip {
+    max-width: 24rem;
+  }
+
+  html[data-design='b'] .entry {
+    grid-template-columns: 15rem auto 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      'spec num name'
+      'spec fields fields'
+      'spec open open';
+    column-gap: 16px;
+    padding: 16px 24px 16px 16px;
+  }
+
+  html[data-design='b'] .specimen {
+    align-self: start;
+    margin-bottom: 0;
+    margin-right: 8px;
+  }
+
+  html[data-design='b'] .entry-number {
+    margin-left: 0;
+    margin-top: 6px;
+  }
+
+  html[data-design='b'] .entry-name {
+    margin-top: 6px;
+  }
+
+  html[data-design='b'] .entry-fields {
+    padding: 16px 0 0;
+  }
+
+  html[data-design='b'] .entry-open {
+    justify-self: start;
+  }
+
+  html[data-design='b'] .protocol-pass {
+    padding: 40px 32px 32px;
+  }
+
+  html[data-design='b'] .protocol-pass-link {
+    justify-self: center;
+  }
+
+  html[data-design='b'] .colophon-inner {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+
+  html[data-design='b'] .colophon-links {
+    justify-content: flex-end;
+  }
+
+  html[data-design='b'] .colophon-note {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  html[data-design='b'] {
+    --gutter: 48px;
+  }
+
+  html[data-design='b'] .hero {
+    padding-top: 104px;
+    padding-bottom: 96px;
+  }
+
+  html[data-design='b'] .lede {
+    font-size: 1.25rem;
+  }
+
+  html[data-design='b'] .sheet {
+    max-width: 60rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 24px;
+    padding: 6px 24px;
+  }
+
+  html[data-design='b'] .sheet-title {
+    padding: 0;
+  }
+
+  html[data-design='b'] .sheet-rows {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    justify-content: space-between;
+  }
+
+  html[data-design='b'] .sheet-row {
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
+    border-top: 0;
+    border-left: 1px dashed var(--line);
+  }
+
+  html[data-design='b'] .sheet-row dd {
+    text-align: left;
+  }
+
+  /* Windows alternate sides, like stops along a path. */
+  html[data-design='b'] .entries {
+    gap: 28px;
+  }
+
+  html[data-design='b'] .entry {
+    grid-template-columns: 26rem auto 1fr;
+    column-gap: 20px;
+    padding: 20px 32px 20px 20px;
+  }
+
+  html[data-design='b'] .entry:nth-child(even) {
+    grid-template-columns: auto 1fr 26rem;
+    grid-template-areas:
+      'num name spec'
+      'fields fields spec'
+      'open open spec';
+    padding: 20px 20px 20px 32px;
+  }
+
+  html[data-design='b'] .entry:nth-child(even) .specimen {
+    margin-right: 0;
+    margin-left: 12px;
+  }
+
+  html[data-design='b'] .entry-fields {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 28px;
+  }
+
+  html[data-design='b'] .steps {
+    max-width: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  html[data-design='b'] .step {
+    padding: 36px 0 0;
+  }
+
+  html[data-design='b'] .step::before {
+    top: 6px;
+    bottom: auto;
+    left: 14px;
+    right: -32px;
+    width: auto;
+    height: 1px;
+  }
+
+  html[data-design='b'] .step:last-child::before {
+    display: block;
+    right: 0;
+    background: linear-gradient(90deg, var(--line-strong), transparent);
+  }
+
+  html[data-design='b'] .step::after {
+    top: 0;
+  }
+
+  html[data-design='b'] .protocol-pass {
+    margin-top: 48px;
+  }
+}

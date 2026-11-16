@@ -1,0 +1,101 @@
+/*
+ * Self-hosted fonts (Fontsource), Latin subset only. A browser downloads a face only when text on
+ * the page uses it, so each design fetches its own fonts and nothing else.
+ * IBM Plex Sans 700 is also used by the Personality specimen's type code, in every design.
+ */
+
+@font-face {
+  font-family: 'Inter Tight Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('../../node_modules/@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Manrope Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('../../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: Unbounded;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url('../../node_modules/@fontsource/unbounded/files/unbounded-latin-300-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Unbounded;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/unbounded/files/unbounded-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Cormorant;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../../node_modules/@fontsource/cormorant/files/cormorant-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Cormorant;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../../node_modules/@fontsource/cormorant/files/cormorant-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Cormorant;
+  font-style: italic;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../../node_modules/@fontsource/cormorant/files/cormorant-latin-500-italic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2') format('woff2');
+}

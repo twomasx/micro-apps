@@ -11,6 +11,13 @@ In this order: Android Chrome, iPhone Safari, tablet, desktop.
 - [ ] The Android Back button behaves normally after tapping Index or Protocol in the header.
 - [ ] The link preview looks right when you paste polymadlabs.com into a message (after deploy).
 
+## Pick a design
+
+- [ ] **Pick one of the three designs**: A Spectrum, B Observatory or C Field Journal (see `DESIGN-NOTES.md`). Use the button in the top right corner, or open `/?design=a`, `/?design=b` or `/?design=c`. Check each on your phone first, then tablet and desktop.
+- [ ] **The switcher is temporary.** Once you pick, it comes out (steps in `DESIGN-NOTES.md`, "The switcher"), with the other two designs and their fonts.
+- [ ] **Before the switcher goes live:** while it is on the page, the footer line "stores nothing on your device" is not quite true, because the page saves your design choice under `landing:design`. Either remove the switcher before the next deploy, or say if the footer line should change while it is there.
+- [ ] The link preview image (`public/og.png`) still shows Lab Index. Redraw it in the chosen design.
+
 ## Open questions
 
 - [ ] Personality's specimen shows ENFP as the example type. Any type works; say if you want a different one.

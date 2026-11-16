@@ -1,9 +1,8 @@
-import '@fontsource/ibm-plex-sans/latin-400.css';
-import '@fontsource/ibm-plex-sans/latin-600.css';
-import '@fontsource/ibm-plex-sans/latin-700.css';
-import '@fontsource/ibm-plex-mono/latin-400.css';
-import '@fontsource/ibm-plex-mono/latin-500.css';
-import './styles.css';
+import './styles/fonts.css';
+import './styles/base.css';
+import './styles/design-a.css';
+import './styles/design-b.css';
+import './styles/design-c.css';
 import { experiments } from './content.ts';
 import { watchSpecimens } from './motion.ts';
 import { openAppsWithPass } from './pass-links.ts';

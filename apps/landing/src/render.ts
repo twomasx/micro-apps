@@ -13,7 +13,7 @@ const escape = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 function row(e: Experiment): string {
-  return `<li class="entry" id="${e.id}">
+  return `<li class="entry" id="${e.id}" data-app="${e.id}">
   <p class="entry-number" aria-hidden="true">${e.number}</p>
   <figure class="specimen" data-app="${e.id}" aria-hidden="true">${specimens[e.id]()}</figure>
   <div class="entry-name">
@@ -79,6 +79,9 @@ const parts: Record<string, () => string> = {
   sheet: () =>
     studySheet.map(([label, value]) => `<div class="sheet-row"><dt>${escape(label)}</dt><dd>${escape(value)}</dd></div>`).join('\n'),
   index: () => experiments.map(row).join('\n'),
+  // Five color chips, one per app in its own colors. Decorative: each design draws them its own way.
+  strip: () =>
+    `<div class="suite-strip" aria-hidden="true">${experiments.map((e) => `<span class="suite-chip" data-app="${e.id}"></span>`).join('')}</div>`,
   protocol: () =>
     protocol
       .map(
