@@ -37,6 +37,32 @@ Everything is on one Cloudflare account, ID `34c19fb036b065cce151f13f34ff8137`. 
 
 The router also adds `no-transform` to the `Cache-Control` header of every HTML page. Without it Cloudflare adds its Web Analytics script to our pages, and we allow no outside analytics.
 
+## Secrets on the Pages projects
+
+Checked with `wrangler pages secret list` on Nov 15, 2026. Secrets live in each Pages project, never in the repo. Production and staging (`--env preview`) have the same names with different values. Every value is saved in `~/.config/polymadlabs/` (mode 600).
+
+| Secret | Projects | Production | Staging |
+| --- | --- | --- | --- |
+| `STRIPE_SECRET_KEY` | all six | The live restricted key `polymadlabs-apps` (`rk_live_...`): `stripe-live-apps-key` | Its test-mode twin: `stripe-test-apps-key` |
+| `STRIPE_WEBHOOK_SECRET` | all six | `live/<app>-stripe-webhook-secret` | `<app>-stripe-webhook-secret` (personality: `stripe-webhook-secret`; pass: `staging/pass-stripe-webhook-secret`) |
+| `UNLOCK_CODE_SECRET` | focus, breathwork, attention, intention | `<app>-unlock-code-secret` | `<app>-staging-unlock-code-secret` |
+| `PASS_CODE_SECRET` | pass | `pass-code-secret` | `pass-staging-code-secret` |
+| `PASS_SERVICE_KEY` | pass, personality, intention | `pass-service-key` | `pass-staging-service-key` |
+| `ROUTER_KEY` | all six, and the router Worker | `router-key` | `staging/router-key` |
+| `PUBLIC_ORIGIN` | all six | `https://polymadlabs.com` | `https://staging.polymadlabs.com` |
+| `PAYMENTS_ENABLED` | all six | `true` (since Oct 19, 2026) | `true` |
+
+"All six" means the five apps and the pass. The landing page has no secrets.
+
+**Never change `UNLOCK_CODE_SECRET` or `PASS_CODE_SECRET`.** Codes are made from them, so every code already sold would stop working.
+
+Set one, then deploy that app again (a changed secret only takes effect after the next deploy, and the first few requests after it can still reach the deployment from before):
+
+```bash
+printf '%s' "$VALUE" | pnpm exec wrangler pages secret put <NAME> --project-name micro-<app>                 # production
+printf '%s' "$VALUE" | pnpm exec wrangler pages secret put <NAME> --project-name micro-<app> --env preview   # staging
+```
+
 ## Deploy the personality app
 
 From `apps/personality`:
@@ -62,21 +88,7 @@ Local development uses its own SQLite file and is not touched by this.
 
 ### Secrets
 
-Three secrets live in the Pages project, not in the repo:
-
-| Name | Value |
-| --- | --- |
-| `STRIPE_SECRET_KEY` | The Stripe key, a restricted key with only the permissions the apps use (PAYMENTS.md section 6). Production: the live key `polymadlabs-apps` (`rk_live_...`, saved at `~/.config/polymadlabs/stripe-live-apps-key`). Staging: its test-mode twin (`stripe-test-apps-key`). |
-| `STRIPE_WEBHOOK_SECRET` | The signing secret of the Stripe webhook below (`whsec_...`). |
-| `PUBLIC_ORIGIN` | `https://polymadlabs.com`. Stripe Checkout sends buyers back here. |
-
-Set one with:
-
-```bash
-pnpm exec wrangler pages secret put <NAME> --project-name micro-personality
-```
-
-A changed secret only takes effect after the next deploy.
+See "Secrets on the Pages projects" above for the names, values and the command.
 
 ## Deploy the focus app
 
@@ -91,16 +103,7 @@ Run the four checks from the repo root first. Database changes work as for perso
 
 ### Secrets
 
-Four secrets live in the `micro-focus` Pages project:
-
-| Name | Value |
-| --- | --- |
-| `STRIPE_SECRET_KEY` | The same test mode key as personality. |
-| `STRIPE_WEBHOOK_SECRET` | The signing secret of the focus webhook (see Stripe below). Saved at `~/.config/polymadlabs/focus-stripe-webhook-secret`. |
-| `UNLOCK_CODE_SECRET` | 64 hex characters. Unlock codes are made from it. **Never change it**, or every code already sold stops working. Saved at `~/.config/polymadlabs/focus-unlock-code-secret`. |
-| `PUBLIC_ORIGIN` | `https://polymadlabs.com` |
-
-Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-focus`, then deploy again.
+See "Secrets on the Pages projects" above for the names, values and the command.
 
 ## Deploy the breathwork app
 
@@ -115,16 +118,7 @@ Run the four checks from the repo root first. Database changes work as for the o
 
 ### Secrets
 
-Four secrets live in the `micro-breathwork` Pages project:
-
-| Name | Value |
-| --- | --- |
-| `STRIPE_SECRET_KEY` | The same test mode key as personality and focus. |
-| `STRIPE_WEBHOOK_SECRET` | The signing secret of the breathwork webhook (see Stripe below). Saved at `~/.config/polymadlabs/breathwork-stripe-webhook-secret`. |
-| `UNLOCK_CODE_SECRET` | 64 hex characters, its own, not focus's. **Never change it**, or every code already sold stops working. Saved at `~/.config/polymadlabs/breathwork-unlock-code-secret`. |
-| `PUBLIC_ORIGIN` | `https://polymadlabs.com` |
-
-Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-breathwork`, then deploy again.
+See "Secrets on the Pages projects" above for the names, values and the command.
 
 ## Deploy the attention app
 
@@ -139,16 +133,7 @@ Run the four checks from the repo root first. D1 database `micro-attention` (id 
 
 ### Secrets
 
-Four secrets live in the `micro-attention` Pages project:
-
-| Name | Value |
-| --- | --- |
-| `STRIPE_SECRET_KEY` | The same test mode key as the other apps. |
-| `STRIPE_WEBHOOK_SECRET` | The signing secret of the attention webhook (see Stripe below). Saved at `~/.config/polymadlabs/attention-stripe-webhook-secret`. |
-| `UNLOCK_CODE_SECRET` | 64 hex characters, its own. **Never change it**, or every code already sold stops working. Saved at `~/.config/polymadlabs/attention-unlock-code-secret`. |
-| `PUBLIC_ORIGIN` | `https://polymadlabs.com` |
-
-Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-attention`, then deploy again. Right after secrets change, the first few requests can still reach the deployment from before.
+See "Secrets on the Pages projects" above for the names, values and the command.
 
 ### Test results
 
@@ -169,16 +154,7 @@ Run the four checks from the repo root first. D1 database `micro-intention` (id 
 
 ### Secrets
 
-Four secrets live in the `micro-intention` Pages project:
-
-| Name | Value |
-| --- | --- |
-| `STRIPE_SECRET_KEY` | The same test mode key as the other apps. |
-| `STRIPE_WEBHOOK_SECRET` | The signing secret of the intention webhook (see Stripe below). Saved at `~/.config/polymadlabs/intention-stripe-webhook-secret`. |
-| `UNLOCK_CODE_SECRET` | 64 hex characters, its own. **Never change it**, or every code already sold stops working. Saved at `~/.config/polymadlabs/intention-unlock-code-secret`. |
-| `PUBLIC_ORIGIN` | `https://polymadlabs.com` |
-
-Set one with `pnpm exec wrangler pages secret put <NAME> --project-name micro-intention`, then deploy again.
+See "Secrets on the Pages projects" above for the names, values and the command.
 
 ### Runs are the public record
 
@@ -206,14 +182,7 @@ The project was created with `wrangler pages project create micro-pass --product
 
 ### Secrets
 
-| Name | Value |
-| --- | --- |
-| `STRIPE_SECRET_KEY` | The test key, in both environments, until go-live. |
-| `STRIPE_WEBHOOK_SECRET` | Staging only for now: the pass webhook below. Saved at `~/.config/polymadlabs/staging/pass-stripe-webhook-secret`. |
-| `PASS_CODE_SECRET` | 64 hex characters. Pass codes are made from it. **Never change it.** Production: `~/.config/polymadlabs/pass-code-secret`; staging: `pass-staging-code-secret`. |
-| `PASS_SERVICE_KEY` | 64 hex characters, also set on personality and intention, so their servers can ask about passes with the buyer's address for rate limits. Production: `~/.config/polymadlabs/pass-service-key`; staging: `pass-staging-service-key`. |
-| `PUBLIC_ORIGIN` | `https://polymadlabs.com` (production), `https://staging.polymadlabs.com` (staging). |
-| `PAYMENTS_ENABLED` | `false` in production, `true` on staging. |
+See "Secrets on the Pages projects" above for the names, values and the command.
 
 `ALLOWED_ORIGINS` (who may call the pass API from a browser) and, on staging, `EXTRA_APP_LINKS` are plain variables in `apps/pass/wrangler.jsonc`. When an app moves to its own domain, add that domain to `ALLOWED_ORIGINS` for its environment.
 
@@ -311,15 +280,15 @@ The catch-all rule is off, so mail to any other address at the domain is dropped
 
 Every app reads `PAYMENTS_ENABLED`, a Pages secret. Only the exact value `true` opens checkout. Anything else, or no value, keeps it closed: buy buttons say "Unlocks open soon" and `POST <app>/api/checkout` answers 503. Unlocks already bought keep working.
 
-Since Oct 16, 2026 it is `false` in production for all five apps, because production still runs on Stripe test keys. See PAYMENTS.md.
+It was `false` in production from Oct 16, 2026 until go-live on Oct 19, 2026. Since then it is `true` for the five apps and the pass, in production and on staging. Turn it off for an app only if something goes wrong with its payments (PAYMENTS.md section 6, step 9).
 
 Flip it for one app (here focus), then deploy that app again so the new value takes effect:
 
 ```bash
 cd apps/focus
-printf 'false' | pnpm exec wrangler pages secret put PAYMENTS_ENABLED --project-name micro-focus   # or 'true'
+printf 'false' | pnpm exec wrangler pages secret put PAYMENTS_ENABLED --project-name micro-focus   # 'true' to open it again
 pnpm build && pnpm exec wrangler pages deploy dist --project-name micro-focus --branch main
-curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"test","environment":"production"}
+curl -s https://polymadlabs.com/focus/api/payments   # {"enabled":false,"mode":"live","environment":"production",...}
 ```
 
 `PAYMENTS_MODE` (`test` or `live`) and `ENVIRONMENT` are plain variables in each app's `wrangler.jsonc`. The Stripe key must match the mode (`sk_test_`/`rk_test_` or `sk_live_`/`rk_live_`), and every purchase row records the mode it was made in. An app only accepts purchases made in its own mode.
@@ -366,10 +335,10 @@ For production, a new key (saved at `~/.config/polymadlabs/router-key`), `wrangl
 
 ### Admin scripts
 
-Run from the repo root. They use wrangler (logged in as Roger) and, for codes, the secrets in `~/.config/polymadlabs`. Add `--staging` for staging.
+Run from the repo root. They use wrangler (logged in as Roger), the restricted admin key of the mode you check, and, for codes, the secrets in `~/.config/polymadlabs`. Add `--staging` (with the test admin key) for staging.
 
 ```bash
-export STRIPE_SECRET_KEY=$(grep '^STRIPE_SECRET_KEY=' apps/focus/.env | cut -d= -f2-)   # the live key after go-live
+export STRIPE_SECRET_KEY=$(cat ~/.config/polymadlabs/stripe-live-admin-key)   # production; stripe-test-admin-key with --staging
 pnpm --filter @micro/scripts reconcile --from 2026-10-16 [--to 2026-10-23]   # Stripe sales against every purchases table, plus sharing alerts
 pnpm --filter @micro/scripts find-purchase --email buyer@example.com         # a buyer's purchases and current codes
 pnpm --filter @micro/scripts reissue-code --app focus --session cs_...       # or --code ...; the old code stops working
@@ -378,16 +347,22 @@ pnpm --filter @micro/scripts reset-devices --app pass --code XXXX-XXXX-XXXX-XXXX
 
 ## Stripe prices
 
-Checkout charges the Stripe price whose lookup key is `<app>:<product id>` (for example `focus:lifetime`), and refuses to start if that price differs from the app's `config/products.json`. The test-mode prices were created on Oct 16, 2026 with:
+Checkout charges the Stripe price whose lookup key is `<app>:<product id>` (for example `focus:lifetime`), and refuses to start if that price differs from the app's `config/products.json`. The test-mode prices were created on Oct 16, 2026 and the live ones on Oct 19, 2026, both with stripe-sync:
 
 ```bash
-export STRIPE_SECRET_KEY=$(grep '^STRIPE_SECRET_KEY=' apps/focus/.env | cut -d= -f2-)
+# Test mode (staging)
+export STRIPE_SECRET_KEY=$(cat ~/.config/polymadlabs/stripe-test-admin-key)
 pnpm --filter @micro/scripts stripe-sync            # creates missing prices, stops if any differs from config
 pnpm --filter @micro/scripts stripe-sync --check    # only checks
 pnpm --filter @micro/scripts test                   # the same check as a test (skipped when the key is not set)
+
+# Live mode (production): needs both admin keys, because it compares live with test
+export STRIPE_SECRET_KEY=$(cat ~/.config/polymadlabs/stripe-live-admin-key)
+export STRIPE_TEST_SECRET_KEY=$(cat ~/.config/polymadlabs/stripe-test-admin-key)
+pnpm --filter @micro/scripts stripe-sync --live --check
 ```
 
-Stripe prices cannot be edited. To change a price: change `products.json`, archive the old Stripe price (Dashboard, Product catalog), run stripe-sync, deploy.
+Stripe prices cannot be edited. To change a price: change `products.json`, archive the old Stripe price in both modes (Dashboard, Product catalog), run stripe-sync in test mode, check on staging, then run it with `--live`, and deploy the app to both.
 
 ## Payment tables
 

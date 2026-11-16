@@ -22,7 +22,7 @@ Read the root CLAUDE.md first. All payment code goes through `packages/payments`
 
 ## 1. Two environments: staging (test mode) and production (live mode)
 
-**Where things stand today:** production runs with Stripe **test** keys, and its test webhooks point at production addresses. Anyone can "buy" there with a test card and get a real unlock. Fix that first (step 1 of the build order).
+**Where things stand (Nov 15, 2026):** everything in this file is built. Production has been live since Oct 19, 2026: live restricted keys, live webhooks, `PAYMENTS_MODE=live` and `PAYMENTS_ENABLED=true` for the five apps and the pass. Staging stays in test mode. The build order and go-live checklist below are kept as the record of how it was done. DEPLOY.md has the current secrets and commands.
 
 **Staging is the same code deployed a second time with its own settings.** It is not a separate codebase.
 
@@ -136,7 +136,7 @@ Codes work like keys: anyone holding one gets in. These rules keep that safe eno
 
 Confirm the test card numbers against Stripe's current testing docs before the session.
 
-## 6. Go-live checklist (Roger and Claude Code together, in order)
+## 6. Go-live checklist (done Oct 19, 2026; steps 8 and 9 still apply)
 
 1. **Stripe activation (Roger):** business details, bank account, statement descriptor `POLYMADLABS`, receipts on. The site needs a contact email, a refund policy and terms of service first. Claude Code adds `/terms` and `/refunds` pages to the landing app with plain wording (Roger approves the refund policy, for example "Refunds within 14 days, just email us").
 2. **All of section 5 passes on staging,** with the checklist filled in and reconcile clean.
@@ -152,7 +152,7 @@ Confirm the test card numbers against Stripe's current testing docs before the s
 8. **First week:** run reconcile daily, check Stripe's webhook delivery page daily.
 9. **If anything looks wrong:** kill switch off for that app, fix on staging, test, switch back on.
 
-## Build order
+## Build order (done)
 
 1. **Close production first:** add the kill switch from section 2 to every app and set `PAYMENTS_ENABLED=false` in production, so nobody can unlock with a test card on the public site. Add the `mode` column to every purchases table (existing rows are `test`) and the mode check to every unlock. Deploy, and confirm on polymadlabs.com that buy buttons say "Unlocks open soon".
 2. Staging: the `staging` branch deployed as each app's preview, separate staging D1 databases and secrets, `PUBLIC_ORIGIN` and `PASS_API_ORIGIN` per environment, staging.polymadlabs.com through the router's preview Worker, the TEST MODE label, and test webhooks moved from production to staging. **Stop: Roger opens staging on his phone.**

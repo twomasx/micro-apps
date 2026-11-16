@@ -1,5 +1,7 @@
 # Payments phone checklist (staging)
 
+Written before go-live. Production has been live since Oct 19, 2026, so test 18 ("Production is closed") no longer applies: production buy buttons are open and take real cards. Everything else here still runs on staging, in test mode, and is still worth a phone run.
+
 Run this on your Android phone first, then iPhone Safari, at **https://staging.polymadlabs.com**. Every page there shows a small TEST MODE label. Nothing here charges a real card. Fill in the last column (pass, fail, or what you saw), and I'll update this file with your results.
 
 Test cards were checked against Stripe's testing docs (docs.stripe.com/testing) on Oct 16, 2026. For every card: any future expiry date, any 3-digit CVC, any name and postcode. On Stripe's page, untick "Save my information" (Link), or it asks for a phone number.
@@ -45,10 +47,10 @@ printf 'true' | pnpm exec wrangler pages secret put PAYMENTS_ENABLED --project-n
 pnpm build && pnpm exec wrangler pages deploy dist --project-name micro-focus --branch staging
 ```
 
-Scripts (tests 15 and 17) need the test key first, from the repo root:
+Scripts (tests 15 and 17) need the test admin key first, from the repo root:
 
 ```bash
-export STRIPE_SECRET_KEY=$(grep '^STRIPE_SECRET_KEY=' apps/focus/.env | cut -d= -f2-)
+export STRIPE_SECRET_KEY=$(cat ~/.config/polymadlabs/stripe-test-admin-key)
 ```
 
 ## Already run by Claude (headless Chromium and the API, Oct 16, 2026)

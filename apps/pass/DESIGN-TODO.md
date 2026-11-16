@@ -23,5 +23,5 @@ Change anything you like.
 ## Words to confirm
 
 - [ ] Title "Every PolymadLabs app", button "Buy the pass", "Open <app>", "Apps we add later: Included".
-- [ ] Contact address `help@polymadlabs.com` (in `packages/payments/src/contact.ts`). The mailbox must exist before go-live.
-- [ ] The footer links to `/terms` and `/refunds`. Those pages are drafts, served on staging only until you approve them.
+- [x] Contact address `help@polymadlabs.com` (in `packages/payments/src/contact.ts`). It forwards to Roger's Gmail since Oct 19, 2026 (DEPLOY.md, Email).
+- [x] The footer links to `/terms` and `/refunds`. Both were approved on Oct 19, 2026 and are live.
