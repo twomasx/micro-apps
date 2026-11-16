@@ -2,25 +2,17 @@
 
 What was decided, and why. Open questions and device checks are in `DESIGN-TODO.md`.
 
-## Redesign in three versions (Nov 15, 2026)
+## Observatory (Nov 15, 2026)
 
-Roger asked for a redesign that fits the look of all five apps, in three versions he can cycle through with a button in the top right corner, phone, tablet and desktop alike. The three below replace Lab Index on the page. Lab Index stays documented further down, because its specimens, copy and budget notes still apply.
+Roger asked for a redesign that fits the look of all five apps, in three versions he could cycle through with a button in the top right corner: A Spectrum (a bright poster where all color comes from the apps), B Observatory and C Field Journal (a notebook of experiments). He picked Observatory the same day. The switcher and the other two designs were removed; they are in git history (commit e530846) if ever wanted.
 
-All three share the same content and markup (rendered from `src/content.ts`). They differ through CSS scoped by `data-design` on `<html>`: `src/styles/design-a.css`, `design-b.css` and `design-c.css`. `src/styles/base.css` holds the reset, each app's own colors (`[data-app]` tokens) and the switcher. Markup added for the designs, used by all three: `data-app` on each entry, a decorative `.suite-strip` of five chips under the lede (`<!-- render:strip -->`), and `<span class="hero-key">` around "Experiment." in the headline. No copy changed.
+The page's look is `src/styles/observatory.css`. `src/styles/base.css` holds the reset, helpers and each app's own colors (`[data-app]` tokens). Markup added for the redesign: `data-app` on each entry, a decorative `.suite-strip` of five stars under the lede (`<!-- render:strip -->`), and `<span class="hero-key">` around "Experiment." in the headline. No copy changed.
 
 ### What ties the five apps together
 
-Each app keeps its own look inside its entry: the specimen shows its real visual, and every design reads each app's own ground and accent from `base.css` (Personality paper and cobalt, Focus navy and gold, Breathwork cobalt and sun yellow, Attention paper and ink, Intention night and Ember). Each design is a different answer to "what kind of place holds five experiments".
+Each app keeps its own look inside its entry: the specimen shows its real visual, and the page reads each app's own ground and accent from `base.css` (Personality paper and cobalt, Focus navy and gold, Breathwork cobalt and sun yellow, Attention paper and ink, Intention night and Ember). Observatory's answer to "what kind of place holds five experiments" is a night sky with five lights in it.
 
-### A. Spectrum
-
-- **Idea:** a bright poster. The page itself has no color; all color comes from the five apps. Together, their colors make the brand mark: a band of five (the wordmark square, the strip under the lede, the top edge of the pass card).
-- **Type:** Inter Tight (Personality and Intention use it) at 800 for headings, set tight; IBM Plex Mono for small labels, kept from Lab Index.
-- **Color:** warm white `#f3f1ec`, ink `#0d0d0c`, muted `#55534d` (6.8:1). The protocol is a dark band.
-- **Entries:** cards. Each opens on its app's ground with the specimen full width, a number pill and an Open button in the app's own color (white on cobalt 6.7:1, night on Ember 6.0:1). Phone: one column. Tablet: two columns, Intention spans both, side by side. Desktop: three cards, then two wider ones.
-- **Study sheet:** a stacked list on phone and tablet, one row of five facts on desktop.
-
-### B. Observatory
+### The design
 
 - **Idea:** the five apps as lights in one night sky. Dark page with a still starfield and two soft glows (cobalt top right, Ember left). Each app is a glowing window; its accent is its star. The strip is five stars on one orbit line. Focus's gold is the page's one accent.
 - **Type:** Unbounded 300 and 400 (from Intention) for headings, Manrope (from Focus) for reading. "Experiment." is filled with a gradient through the apps' accents.
@@ -28,38 +20,16 @@ Each app keeps its own look inside its entry: the specimen shows its real visual
 - **Entries:** rounded panels. Phone: window on top, number ring and name, fields, white pill button. Tablet: window on the left. Desktop: the window alternates sides, like stops along a path.
 - **Protocol:** three stops on one line (vertical on phone and tablet, horizontal on desktop). The pass is a gold-ringed panel with a gold button.
 - **Motion:** only a hover glow on each window and the arrow nudge. The starfield never moves.
-
-### C. Field Journal
-
-- **Idea:** a notebook of experiments on yourself. Warm paper, brown-black ink and one red, like a seal stamp (a nod to Attention's ink and paper). Each specimen is a plate pasted into the journal, tilted a little, with a strip of tape. Entries are numbered "No. 01".
-- **Type:** Cormorant (from Focus) for headings and numbers, large, with italics; IBM Plex Sans for reading (17 px body); IBM Plex Mono for paths.
-- **Color:** paper `#f1ece2`, sheet `#faf7f0`, ink `#1d1b17`, muted `#5c564b` (6.2:1), red `#a3321f` (5.9:1 on paper; paper on red 6.8:1).
-- **Layout:** a centered title page; the study sheet is a library card with dotted leaders. Phone: one column. Tablet: plate on the left. Desktop: plates alternate sides, like facing pages. The protocol is a lighter page between double rules, three columns from tablet up. The pass is a dashed note with a red seal.
+- **Mark:** the ring with one gold star, the same in the header, the favicon and the home screen icon (`public/favicon.svg`; `public/apple-touch-icon.png` is it rendered at 180 px). Browser top bar color `#07091a`.
+- **Link preview** (`public/og.png`): the wordmark, the headline with the gradient "Experiment.", and the five windows at their still frames over the night sky. Made the same way as before (see "Link preview image" under Lab Index).
 
 ### Fonts
 
-Self-hosted from Fontsource, Latin files only (`src/styles/fonts.css`). A browser downloads a face only when text uses it, so each design fetches its own: Spectrum about 83 KB (Inter Tight variable, Plex Mono 500, Plex Sans 700), Observatory about 88 KB (Manrope variable, Unbounded 300 and 400, Plex Sans 700), Field Journal about 154 KB (Cormorant 500, 600 and 500 italic, Plex Sans 400, 600 and 700, Plex Mono 400). Plex Sans 700 is in every design because the Personality specimen draws its type code in it. When Roger picks a design, drop the other designs' faces and packages.
-
-### The switcher (temporary)
-
-- A fixed button in the top right corner (inside the safe area), 44 px tall: "Design 1 of 3" over the design's name. Each tap goes a, b, c, then a again. A hidden status line announces the change ("Showing design 2 of 3, Observatory."). It comes right after the skip link in tab order.
-- The header moves down 60 px while the switcher is on the page (`--switcher-space`), so the button never covers the header links.
-- The choice is saved in `localStorage` under `landing:design`. Every read and write is in try/catch; without storage the page shows design A. `?design=a`, `b` or `c` in the address picks a design and saves it. When the address has `?design=`, the button keeps it in step, so a reload shows what you see.
-- **No flash:** the design is set before the page is drawn, by a plain script in `<head>`. The page's Content-Security-Policy allows scripts from this site only (no inline scripts), so `src/design.ts` is compiled at build time into its own file, `assets/design-boot-<hash>.js` (1.9 KB, about 0.9 KB gzipped), by the `design-boot` plugin in `src/design-boot.ts`. The dev server serves it at `/_landing/design-boot.js`. `<html>` carries `data-design="a"`, so without JavaScript the page shows Spectrum.
-- The browser's top bar color (`theme-color`) follows the design.
-- **To remove once Roger picks:** delete `src/design.ts`, `src/design-boot.ts`, `src/design.test.ts`, the `designBoot` line in `vite.config.ts`, the switcher block in `base.css` and `--switcher-space`, and the two unused design files and their font imports. Unscope the kept design's selectors if wanted.
-
-### Budget (Nov 15, 2026)
-
-- JavaScript: 2.8 KB gzipped in all (page script 1.9 KB, design boot script 0.9 KB). CSS for all three designs: 7.6 KB gzipped. HTML: 22.7 KB gzipped.
-
-### Checked
-
-Headless Chromium through `vite preview` with the production Content-Security-Policy added to every page, at 375, 768 and 1280 px, plus the terms page at 375 and 1280 px, for each design: no sideways scroll, no console errors or CSP reports, every link and button at least 44 px tall, body text 16 px or more. The switcher cycles, persists over reload, follows `?design=`, and works by keyboard (Enter and Space). Reduced motion: no errors.
+Self-hosted from Fontsource, Latin files only (`src/styles/fonts.css`): Manrope variable, Unbounded 300 and 400, and IBM Plex Sans 700, which the Personality specimen draws its type code in. About 88 KB of woff2 in all.
 
 ---
 
-# Lab Index (Oct 15, 2026, replaced by the three versions above)
+# Lab Index (Oct 15, 2026, replaced by Observatory above)
 
 Roger chose the direction ("Lab Index") from three mockups; the execution here is Claude's.
 

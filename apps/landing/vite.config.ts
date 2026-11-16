@@ -4,7 +4,6 @@ import { sitemapXml } from '@micro/seo';
 import { svgToPng } from '@micro/seo/build';
 import { defineConfig, type Plugin } from 'vite';
 import { appConfig } from './app.config.ts';
-import { designBoot } from './src/design-boot.ts';
 import { renderPage } from './src/render.ts';
 
 /** The landing page's sitemap (home, terms, refunds) and the 512 px logo that its Organization markup names. */
@@ -38,8 +37,6 @@ export default defineConfig({
       // The rows, specimens and footer links come from src/content.ts and src/specimens/.
       transformIndexHtml: { order: 'pre', handler: renderPage },
     },
-    // Temporary: the design switcher (src/design.ts). Remove once Roger picks a design.
-    designBoot(base),
     searchFiles(),
   ],
   build: {

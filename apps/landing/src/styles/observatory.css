@@ -1,11 +1,11 @@
 /*
- * Design B: Observatory. The five apps as lights in one night sky. Deep blue-black page with a
+ * Observatory. The five apps as lights in one night sky. Deep blue-black page with a
  * still starfield and soft glows, Unbounded (from Intention) for headings, Manrope (from Focus)
  * for reading. Each app is a glowing window in its own colors; its accent is its star. Focus's
  * gold is the page's one accent.
  */
 
-html[data-design='b'] {
+:root {
   --ground: #07091a;
   --panel: #0e1230;
   --ink: #eef0f8;
@@ -16,13 +16,10 @@ html[data-design='b'] {
   --gold: #e6c88f;
   --display: Unbounded, system-ui, sans-serif;
   --sans: 'Manrope Variable', system-ui, sans-serif;
-  --sw-bg: #161b42;
-  --sw-ink: #eef0f8;
-  --sw-line: #e6c88f;
   color-scheme: dark;
 }
 
-html[data-design='b'] body {
+body {
   position: relative;
   background:
     radial-gradient(48rem 30rem at 85% -6rem, rgb(52 70 190 / 38%), transparent 70%),
@@ -33,7 +30,7 @@ html[data-design='b'] body {
 }
 
 /* A still starfield across the top of the page. Decorative. */
-html[data-design='b'] body::before {
+body::before {
   content: '';
   position: absolute;
   top: 0;
@@ -64,12 +61,12 @@ html[data-design='b'] body::before {
   mask-image: linear-gradient(#000 40%, transparent);
 }
 
-html[data-design='b'] :focus-visible {
+:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
 }
 
-html[data-design='b'] .skip-link {
+.skip-link {
   background: var(--gold);
   color: var(--ground);
   border-radius: 999px;
@@ -77,15 +74,15 @@ html[data-design='b'] .skip-link {
 }
 
 /* Small spaced capitals */
-html[data-design='b'] .eyebrow,
-html[data-design='b'] .masthead-label,
-html[data-design='b'] .section-count,
-html[data-design='b'] .sheet-title,
-html[data-design='b'] .sheet-row dt,
-html[data-design='b'] .field dt,
-html[data-design='b'] .step-number,
-html[data-design='b'] .protocol-pass-label,
-html[data-design='b'] .legal-updated {
+.eyebrow,
+.masthead-label,
+.section-count,
+.sheet-title,
+.sheet-row dt,
+.field dt,
+.step-number,
+.protocol-pass-label,
+.legal-updated {
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -94,11 +91,11 @@ html[data-design='b'] .legal-updated {
 
 /* Header */
 
-html[data-design='b'] .masthead {
-  padding-top: calc(env(safe-area-inset-top) + var(--switcher-space));
+.masthead {
+  padding-top: env(safe-area-inset-top);
 }
 
-html[data-design='b'] .masthead-inner {
+.masthead-inner {
   display: grid;
   grid-template-columns: 1fr auto;
   grid-template-areas:
@@ -110,7 +107,7 @@ html[data-design='b'] .masthead-inner {
   padding-bottom: 8px;
 }
 
-html[data-design='b'] .wordmark {
+.wordmark {
   grid-area: mark;
   display: inline-flex;
   align-items: center;
@@ -124,7 +121,7 @@ html[data-design='b'] .wordmark {
 }
 
 /* The mark: a ring with one gold star on it. */
-html[data-design='b'] .wordmark::before {
+.wordmark::before {
   content: '';
   flex: none;
   width: 16px;
@@ -134,18 +131,18 @@ html[data-design='b'] .wordmark::before {
   background: radial-gradient(circle at 85% 20%, var(--gold) 0 2.6px, transparent 3.2px);
 }
 
-html[data-design='b'] .masthead-label {
+.masthead-label {
   grid-area: label;
   color: var(--muted);
   font-size: 0.6875rem;
 }
 
-html[data-design='b'] .masthead-nav {
+.masthead-nav {
   grid-area: nav;
   display: flex;
 }
 
-html[data-design='b'] .masthead-nav a {
+.masthead-nav a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -156,13 +153,13 @@ html[data-design='b'] .masthead-nav a {
   text-underline-offset: 6px;
 }
 
-html[data-design='b'] .masthead-nav a:last-child {
+.masthead-nav a:last-child {
   margin-right: -7px;
 }
 
 /* Hero: centered, like a view through a telescope. */
 
-html[data-design='b'] .hero {
+.hero {
   display: grid;
   gap: 40px;
   padding-top: 48px;
@@ -170,11 +167,11 @@ html[data-design='b'] .hero {
   text-align: center;
 }
 
-html[data-design='b'] .eyebrow {
+.eyebrow {
   color: var(--gold);
 }
 
-html[data-design='b'] h1 {
+h1 {
   margin-top: 18px;
   font-family: var(--display);
   font-size: clamp(2.125rem, 9.6vw, 5.75rem);
@@ -184,7 +181,7 @@ html[data-design='b'] h1 {
   text-wrap: balance;
 }
 
-html[data-design='b'] .hero-key {
+.hero-key {
   display: block;
   background: linear-gradient(90deg, #8c9cff, #e6c88f 45%, #ffd45c 60%, #f37a54);
   -webkit-background-clip: text;
@@ -192,7 +189,7 @@ html[data-design='b'] .hero-key {
   color: transparent;
 }
 
-html[data-design='b'] .lede {
+.lede {
   max-width: 32rem;
   margin: 22px auto 0;
   color: var(--soft);
@@ -201,7 +198,7 @@ html[data-design='b'] .lede {
 }
 
 /* The five apps as five stars on one orbit line. */
-html[data-design='b'] .suite-strip {
+.suite-strip {
   position: relative;
   display: flex;
   justify-content: space-between;
@@ -211,7 +208,7 @@ html[data-design='b'] .suite-strip {
   margin: 30px auto 0;
 }
 
-html[data-design='b'] .suite-strip::before {
+.suite-strip::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -221,7 +218,7 @@ html[data-design='b'] .suite-strip::before {
   background: linear-gradient(90deg, transparent, var(--line-strong) 15%, var(--line-strong) 85%, transparent);
 }
 
-html[data-design='b'] .suite-chip {
+.suite-chip {
   position: relative;
   width: 12px;
   height: 12px;
@@ -232,7 +229,7 @@ html[data-design='b'] .suite-chip {
     0 0 18px 2px var(--app-glow);
 }
 
-html[data-design='b'] .sheet {
+.sheet {
   justify-self: center;
   width: 100%;
   max-width: 30rem;
@@ -243,12 +240,12 @@ html[data-design='b'] .sheet {
   text-align: left;
 }
 
-html[data-design='b'] .sheet-title {
+.sheet-title {
   padding: 12px 0 8px;
   color: var(--gold);
 }
 
-html[data-design='b'] .sheet-row {
+.sheet-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -257,12 +254,12 @@ html[data-design='b'] .sheet-row {
   border-top: 1px dashed var(--line);
 }
 
-html[data-design='b'] .sheet-row dt {
+.sheet-row dt {
   color: var(--muted);
   font-size: 0.75rem;
 }
 
-html[data-design='b'] .sheet-row dd {
+.sheet-row dd {
   font-family: var(--display);
   font-size: 1rem;
   font-weight: 300;
@@ -271,7 +268,7 @@ html[data-design='b'] .sheet-row dd {
 
 /* Section heads */
 
-html[data-design='b'] .section-head {
+.section-head {
   display: grid;
   justify-items: center;
   gap: 8px;
@@ -279,30 +276,30 @@ html[data-design='b'] .section-head {
   text-align: center;
 }
 
-html[data-design='b'] .section-head h2 {
+.section-head h2 {
   font-family: var(--display);
   font-size: clamp(1.625rem, 6.5vw, 2.5rem);
   font-weight: 300;
   letter-spacing: -0.01em;
 }
 
-html[data-design='b'] .section-count {
+.section-count {
   color: var(--gold);
 }
 
 /* The index: each app a glowing window */
 
-html[data-design='b'] .index {
+.index {
   padding-top: 32px;
   padding-bottom: 72px;
 }
 
-html[data-design='b'] .entries {
+.entries {
   display: grid;
   gap: 20px;
 }
 
-html[data-design='b'] .entry {
+.entry {
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-areas:
@@ -317,7 +314,7 @@ html[data-design='b'] .entry {
   background: linear-gradient(180deg, rgb(14 18 48 / 85%), rgb(10 13 36 / 85%));
 }
 
-html[data-design='b'] .specimen {
+.specimen {
   grid-area: spec;
   overflow: hidden;
   margin-bottom: 18px;
@@ -328,7 +325,7 @@ html[data-design='b'] .specimen {
     0 18px 48px -18px color-mix(in srgb, var(--app-glow) 55%, transparent);
 }
 
-html[data-design='b'] .entry-number {
+.entry-number {
   grid-area: num;
   display: grid;
   place-items: center;
@@ -343,42 +340,42 @@ html[data-design='b'] .entry-number {
   font-weight: 400;
 }
 
-html[data-design='b'] .entry-name {
+.entry-name {
   grid-area: name;
   align-self: center;
 }
 
-html[data-design='b'] .entry-name h3 {
+.entry-name h3 {
   font-family: var(--display);
   font-size: 1.375rem;
   font-weight: 400;
   line-height: 1.15;
 }
 
-html[data-design='b'] .entry-path {
+.entry-path {
   margin-top: 2px;
   color: var(--muted);
   font-size: 0.9375rem;
 }
 
-html[data-design='b'] .entry-fields {
+.entry-fields {
   grid-area: fields;
   display: grid;
   gap: 14px;
   padding: 18px 4px 0;
 }
 
-html[data-design='b'] .field dt {
+.field dt {
   color: var(--app-glow);
   font-size: 0.75rem;
 }
 
-html[data-design='b'] .field dd {
+.field dd {
   margin-top: 4px;
   color: var(--soft);
 }
 
-html[data-design='b'] .entry-open {
+.entry-open {
   grid-area: open;
   display: flex;
   align-items: center;
@@ -395,31 +392,31 @@ html[data-design='b'] .entry-open {
   text-decoration: none;
 }
 
-html[data-design='b'] .entry-open:active {
+.entry-open:active {
   background: var(--app-glow);
 }
 
 /* Protocol: three stops on one orbit line */
 
-html[data-design='b'] .protocol-inner {
+.protocol-inner {
   padding-top: 32px;
   padding-bottom: 72px;
 }
 
-html[data-design='b'] .steps {
+.steps {
   display: grid;
   gap: 4px;
   margin: 0 auto;
   max-width: 36rem;
 }
 
-html[data-design='b'] .step {
+.step {
   position: relative;
   padding: 0 0 28px 36px;
 }
 
 /* The line */
-html[data-design='b'] .step::before {
+.step::before {
   content: '';
   position: absolute;
   top: 10px;
@@ -429,12 +426,12 @@ html[data-design='b'] .step::before {
   background: var(--line-strong);
 }
 
-html[data-design='b'] .step:last-child::before {
+.step:last-child::before {
   display: none;
 }
 
 /* The stop */
-html[data-design='b'] .step::after {
+.step::after {
   content: '';
   position: absolute;
   top: 3px;
@@ -446,24 +443,24 @@ html[data-design='b'] .step::after {
   box-shadow: 0 0 14px 1px rgb(230 200 143 / 55%);
 }
 
-html[data-design='b'] .step-number {
+.step-number {
   color: var(--gold);
 }
 
-html[data-design='b'] .step h3 {
+.step h3 {
   margin-top: 6px;
   font-family: var(--display);
   font-size: 1.25rem;
   font-weight: 400;
 }
 
-html[data-design='b'] .step p:last-child {
+.step p:last-child {
   margin-top: 6px;
   color: var(--soft);
 }
 
 /* The pass: a gold-ringed panel */
-html[data-design='b'] .protocol-pass {
+.protocol-pass {
   display: grid;
   gap: 12px;
   margin-top: 32px;
@@ -476,11 +473,11 @@ html[data-design='b'] .protocol-pass {
   text-align: center;
 }
 
-html[data-design='b'] .protocol-pass-label {
+.protocol-pass-label {
   color: var(--gold);
 }
 
-html[data-design='b'] .protocol-pass-text {
+.protocol-pass-text {
   font-family: var(--display);
   font-size: 1.375rem;
   font-weight: 300;
@@ -488,7 +485,7 @@ html[data-design='b'] .protocol-pass-text {
   text-wrap: balance;
 }
 
-html[data-design='b'] .protocol-pass-link {
+.protocol-pass-link {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -506,34 +503,34 @@ html[data-design='b'] .protocol-pass-link {
 
 /* Footer */
 
-html[data-design='b'] .colophon {
+.colophon {
   border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-html[data-design='b'] .colophon-inner {
+.colophon-inner {
   display: grid;
   gap: 20px;
   padding-top: 36px;
   padding-bottom: 40px;
 }
 
-html[data-design='b'] .colophon .wordmark {
+.colophon .wordmark {
   min-height: 0;
 }
 
-html[data-design='b'] .motto {
+.motto {
   margin-top: 6px;
   color: var(--muted);
 }
 
-html[data-design='b'] .colophon-links {
+.colophon-links {
   display: flex;
   flex-wrap: wrap;
   column-gap: 20px;
 }
 
-html[data-design='b'] .colophon-links a {
+.colophon-links a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -541,17 +538,17 @@ html[data-design='b'] .colophon-links a {
   text-underline-offset: 6px;
 }
 
-html[data-design='b'] .colophon-note {
+.colophon-note {
   max-width: 40rem;
   color: var(--muted);
   font-size: 0.9375rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html[data-design='b'] .entry-open,
-  html[data-design='b'] .protocol-pass-link,
-  html[data-design='b'] .entry-arrow,
-  html[data-design='b'] .specimen {
+  .entry-open,
+  .protocol-pass-link,
+  .entry-arrow,
+  .specimen {
     transition:
       background-color 180ms ease,
       transform 180ms ease,
@@ -560,20 +557,20 @@ html[data-design='b'] .colophon-note {
 }
 
 @media (hover: hover) {
-  html[data-design='b'] .masthead-nav a:hover,
-  html[data-design='b'] .colophon-links a:hover {
+  .masthead-nav a:hover,
+  .colophon-links a:hover {
     text-decoration: underline;
   }
 
-  html[data-design='b'] .entry-open:hover {
+  .entry-open:hover {
     background: var(--app-glow);
   }
 
-  html[data-design='b'] .protocol-pass-link:hover {
+  .protocol-pass-link:hover {
     background: var(--ink);
   }
 
-  html[data-design='b'] .entry:hover .specimen {
+  .entry:hover .specimen {
     box-shadow:
       0 0 0 1px var(--app-glow),
       0 22px 60px -14px color-mix(in srgb, var(--app-glow) 75%, transparent);
@@ -581,36 +578,36 @@ html[data-design='b'] .colophon-note {
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  html[data-design='b'] .entry-open:hover .entry-arrow,
-  html[data-design='b'] .protocol-pass-link:hover .entry-arrow {
+  .entry-open:hover .entry-arrow,
+  .protocol-pass-link:hover .entry-arrow {
     transform: translateX(3px);
   }
 }
 
 /* Terms and refund pages */
 
-html[data-design='b'] .legal {
+.legal {
   max-width: 44rem;
   margin: 0 auto;
   padding: 36px var(--pad-right) 72px var(--pad-left);
 }
 
-html[data-design='b'] .legal h1 {
+.legal h1 {
   margin: 0 0 12px;
   font-size: clamp(2rem, 8.5vw, 3.25rem);
 }
 
-html[data-design='b'] .legal-updated {
+.legal-updated {
   margin-bottom: 20px;
   color: var(--gold);
 }
 
-html[data-design='b'] .legal-intro {
+.legal-intro {
   color: var(--soft);
   font-size: 1.125rem;
 }
 
-html[data-design='b'] .legal-section {
+.legal-section {
   margin-top: 28px;
   padding: 22px 20px;
   border: 1px solid var(--line);
@@ -618,60 +615,60 @@ html[data-design='b'] .legal-section {
   background: rgb(14 18 48 / 70%);
 }
 
-html[data-design='b'] .legal-section h2 {
+.legal-section h2 {
   margin-bottom: 10px;
   font-family: var(--display);
   font-size: 1.125rem;
   font-weight: 400;
 }
 
-html[data-design='b'] .legal p {
+.legal p {
   line-height: 1.65;
 }
 
-html[data-design='b'] .legal-section p {
+.legal-section p {
   color: var(--soft);
 }
 
-html[data-design='b'] .legal p + p {
+.legal p + p {
   margin-top: 10px;
 }
 
 /* Tablet */
 
 @media (min-width: 640px) {
-  html[data-design='b'] {
+  :root {
     --gutter: 32px;
   }
 
-  html[data-design='b'] .wordmark {
+  .wordmark {
     font-size: 1rem;
   }
 
-  html[data-design='b'] .masthead-inner {
+  .masthead-inner {
     grid-template-columns: auto 1fr auto;
     grid-template-areas: 'mark label nav';
     column-gap: 20px;
   }
 
-  html[data-design='b'] .masthead-nav a {
+  .masthead-nav a {
     padding: 0 12px;
   }
 
-  html[data-design='b'] .masthead-nav a:last-child {
+  .masthead-nav a:last-child {
     margin-right: -12px;
   }
 
-  html[data-design='b'] .hero {
+  .hero {
     padding-top: 72px;
     padding-bottom: 72px;
   }
 
-  html[data-design='b'] .suite-strip {
+  .suite-strip {
     max-width: 24rem;
   }
 
-  html[data-design='b'] .entry {
+  .entry {
     grid-template-columns: 15rem auto 1fr;
     grid-template-rows: auto 1fr auto;
     grid-template-areas:
@@ -682,47 +679,47 @@ html[data-design='b'] .legal p + p {
     padding: 16px 24px 16px 16px;
   }
 
-  html[data-design='b'] .specimen {
+  .specimen {
     align-self: start;
     margin-bottom: 0;
     margin-right: 8px;
   }
 
-  html[data-design='b'] .entry-number {
+  .entry-number {
     margin-left: 0;
     margin-top: 6px;
   }
 
-  html[data-design='b'] .entry-name {
+  .entry-name {
     margin-top: 6px;
   }
 
-  html[data-design='b'] .entry-fields {
+  .entry-fields {
     padding: 16px 0 0;
   }
 
-  html[data-design='b'] .entry-open {
+  .entry-open {
     justify-self: start;
   }
 
-  html[data-design='b'] .protocol-pass {
+  .protocol-pass {
     padding: 40px 32px 32px;
   }
 
-  html[data-design='b'] .protocol-pass-link {
+  .protocol-pass-link {
     justify-self: center;
   }
 
-  html[data-design='b'] .colophon-inner {
+  .colophon-inner {
     grid-template-columns: auto 1fr;
     align-items: start;
   }
 
-  html[data-design='b'] .colophon-links {
+  .colophon-links {
     justify-content: flex-end;
   }
 
-  html[data-design='b'] .colophon-note {
+  .colophon-note {
     grid-column: 1 / -1;
   }
 }
@@ -730,20 +727,20 @@ html[data-design='b'] .legal p + p {
 /* Desktop */
 
 @media (min-width: 1024px) {
-  html[data-design='b'] {
+  :root {
     --gutter: 48px;
   }
 
-  html[data-design='b'] .hero {
+  .hero {
     padding-top: 104px;
     padding-bottom: 96px;
   }
 
-  html[data-design='b'] .lede {
+  .lede {
     font-size: 1.25rem;
   }
 
-  html[data-design='b'] .sheet {
+  .sheet {
     max-width: 60rem;
     display: grid;
     grid-template-columns: auto 1fr;
@@ -752,17 +749,17 @@ html[data-design='b'] .legal p + p {
     padding: 6px 24px;
   }
 
-  html[data-design='b'] .sheet-title {
+  .sheet-title {
     padding: 0;
   }
 
-  html[data-design='b'] .sheet-rows {
+  .sheet-rows {
     display: grid;
     grid-template-columns: repeat(5, auto);
     justify-content: space-between;
   }
 
-  html[data-design='b'] .sheet-row {
+  .sheet-row {
     display: grid;
     gap: 4px;
     padding: 14px 16px;
@@ -770,22 +767,22 @@ html[data-design='b'] .legal p + p {
     border-left: 1px dashed var(--line);
   }
 
-  html[data-design='b'] .sheet-row dd {
+  .sheet-row dd {
     text-align: left;
   }
 
   /* Windows alternate sides, like stops along a path. */
-  html[data-design='b'] .entries {
+  .entries {
     gap: 28px;
   }
 
-  html[data-design='b'] .entry {
+  .entry {
     grid-template-columns: 26rem auto 1fr;
     column-gap: 20px;
     padding: 20px 32px 20px 20px;
   }
 
-  html[data-design='b'] .entry:nth-child(even) {
+  .entry:nth-child(even) {
     grid-template-columns: auto 1fr 26rem;
     grid-template-areas:
       'num name spec'
@@ -794,27 +791,27 @@ html[data-design='b'] .legal p + p {
     padding: 20px 20px 20px 32px;
   }
 
-  html[data-design='b'] .entry:nth-child(even) .specimen {
+  .entry:nth-child(even) .specimen {
     margin-right: 0;
     margin-left: 12px;
   }
 
-  html[data-design='b'] .entry-fields {
+  .entry-fields {
     grid-template-columns: 1fr 1fr;
     column-gap: 28px;
   }
 
-  html[data-design='b'] .steps {
+  .steps {
     max-width: none;
     grid-template-columns: repeat(3, 1fr);
     gap: 32px;
   }
 
-  html[data-design='b'] .step {
+  .step {
     padding: 36px 0 0;
   }
 
-  html[data-design='b'] .step::before {
+  .step::before {
     top: 6px;
     bottom: auto;
     left: 14px;
@@ -823,17 +820,17 @@ html[data-design='b'] .legal p + p {
     height: 1px;
   }
 
-  html[data-design='b'] .step:last-child::before {
+  .step:last-child::before {
     display: block;
     right: 0;
     background: linear-gradient(90deg, var(--line-strong), transparent);
   }
 
-  html[data-design='b'] .step::after {
+  .step::after {
     top: 0;
   }
 
-  html[data-design='b'] .protocol-pass {
+  .protocol-pass {
     margin-top: 48px;
   }
 }

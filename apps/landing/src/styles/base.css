@@ -1,8 +1,6 @@
 /*
- * Shared by all three designs: a small reset, helpers, each app's own colors, and the
- * temporary design switcher. Everything visual lives in design-a.css, design-b.css and
- * design-c.css, each scoped by data-design on <html>. Phone layout first; min-width
- * queries at 640px and 1024px only.
+ * A small reset, helpers and each app's own colors. The page's look lives in observatory.css.
+ * Phone layout first; min-width queries at 640px and 1024px only.
  */
 
 :root {
@@ -10,12 +8,6 @@
   --pad-left: max(var(--gutter), env(safe-area-inset-left));
   --pad-right: max(var(--gutter), env(safe-area-inset-right));
   --measure: 1200px;
-  /* Room at the top for the switcher button, so it never covers the header links. */
-  --switcher-space: 0px;
-}
-
-:root[data-switcher] {
-  --switcher-space: 60px;
 }
 
 *,
@@ -99,7 +91,7 @@ button {
   aspect-ratio: 3 / 2;
 }
 
-/* Each design centers its sections in the same measure. */
+/* Every section is centered in the same measure. */
 .masthead-inner,
 .hero,
 .index,
@@ -118,7 +110,7 @@ button {
 }
 
 /*
- * Each app's own colors, from its own stylesheet. Every design uses them for that app's entry.
+ * Each app's own colors, from its own stylesheet, used for that app's entry.
  * ground: the app's background. strong / on-strong: a button in the app's color on a light page.
  * glow: the app's accent where it must read on a dark page (4.5:1 or more on #07091a).
  */
@@ -165,45 +157,4 @@ button {
   --app-strong: #f2683c;
   --app-on-strong: #141416;
   --app-glow: #f37a54;
-}
-
-/*
- * The design switcher (src/design.ts). Temporary, for Roger to compare the three designs.
- * Each design sets --sw-bg, --sw-ink and --sw-line.
- */
-.design-switcher {
-  position: fixed;
-  top: max(8px, env(safe-area-inset-top));
-  right: max(8px, env(safe-area-inset-right));
-  z-index: 20;
-  display: grid;
-  justify-items: end;
-  align-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 4px 14px;
-  border: 1px solid var(--sw-line, currentColor);
-  border-radius: 999px;
-  background: var(--sw-bg, #ffffff);
-  color: var(--sw-ink, #111111);
-  font-family: system-ui, sans-serif;
-  line-height: 1.15;
-  text-align: right;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.design-switcher-count {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.design-switcher-name {
-  font-size: 0.8125rem;
-  opacity: 0.85;
-}
-
-.design-switcher:focus-visible {
-  outline: 2px solid var(--sw-ink, #111111);
-  outline-offset: 3px;
 }

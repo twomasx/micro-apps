@@ -79,7 +79,7 @@ const parts: Record<string, () => string> = {
   sheet: () =>
     studySheet.map(([label, value]) => `<div class="sheet-row"><dt>${escape(label)}</dt><dd>${escape(value)}</dd></div>`).join('\n'),
   index: () => experiments.map(row).join('\n'),
-  // Five color chips, one per app in its own colors. Decorative: each design draws them its own way.
+  // Five stars on one orbit line, one per app in its own color. Decorative.
   strip: () =>
     `<div class="suite-strip" aria-hidden="true">${experiments.map((e) => `<span class="suite-chip" data-app="${e.id}"></span>`).join('')}</div>`,
   protocol: () =>

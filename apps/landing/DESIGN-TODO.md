@@ -11,12 +11,11 @@ In this order: Android Chrome, iPhone Safari, tablet, desktop.
 - [ ] The Android Back button behaves normally after tapping Index or Protocol in the header.
 - [ ] The link preview looks right when you paste polymadlabs.com into a message (after deploy).
 
-## Pick a design
+## Design
 
-- [ ] **Pick one of the three designs**: A Spectrum, B Observatory or C Field Journal (see `DESIGN-NOTES.md`). Use the button in the top right corner, or open `/?design=a`, `/?design=b` or `/?design=c`. Check each on your phone first, then tablet and desktop.
-- [ ] **The switcher is temporary.** Once you pick, it comes out (steps in `DESIGN-NOTES.md`, "The switcher"), with the other two designs and their fonts.
-- [ ] **Before the switcher goes live:** while it is on the page, the footer line "stores nothing on your device" is not quite true, because the page saves your design choice under `landing:design`. Either remove the switcher before the next deploy, or say if the footer line should change while it is there.
-- [ ] The link preview image (`public/og.png`) still shows Lab Index. Redraw it in the chosen design.
+- [x] **Observatory picked** by Roger on Nov 15, 2026. The switcher, Spectrum, Field Journal and their fonts are gone, so the footer line "stores nothing on your device" is true again.
+- [x] The link preview image (`public/og.png`), the favicon and the home screen icon are redrawn in Observatory.
+- [ ] Check the new home screen icon and the link preview on your phone (after deploy).
 
 ## Open questions
 
