@@ -9,6 +9,9 @@
  * The same session always gives the same code, so a success page can show it again after a
  * reload while the database keeps only its SHA-256 hash.
  */
+/** The request header that carries an app's own unlock code to its server (personality, intention). */
+export const UNLOCK_HEADER = 'X-Unlock-Code';
+
 export const CODE_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 export const CODE_LENGTH = 16;
 /** UNLOCK_CODE_SECRET must be at least this long. */

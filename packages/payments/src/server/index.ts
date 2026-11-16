@@ -13,6 +13,7 @@ export {
   type StoreOptions,
 } from './store';
 export { unlockRoutes, type UnlockAppConfig, type UnlockRoutes } from './unlock-routes';
+export { DEVICE_HEADER, deviceFrom, isPaidCode, requestHasUnlock, UNLOCK_HEADER, type UnlockAccess } from './unlock-access';
 export { CLIENT_IP_HEADER, requestHasPass, SERVICE_KEY_HEADER, type ServerPassOptions } from './pass-check';
 export {
   addressHash,

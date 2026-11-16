@@ -1,17 +1,9 @@
-import { admitDevice, purchaseStore, requestHasPass, type ServerPassOptions } from '@micro/payments/server';
+import { isPaidCode as isPaidUnlockCode, requestHasUnlock, type ServerPassOptions } from '@micro/payments/server';
 import { readSettings, type PaymentsMode } from '@micro/payments/settings';
 import { appConfig } from '../app.config.ts';
 
-/** Requests carry these headers. The device id is random and means nothing outside this app. */
-export const DEVICE_HEADER = 'X-Device-Id';
-export const UNLOCK_HEADER = 'X-Unlock-Code';
-
-const DEVICE_ID_PATTERN = /^[a-z0-9]{12,64}$/;
-
-export function deviceFrom(request: Request): string | null {
-  const id = request.headers.get(DEVICE_HEADER);
-  return id && DEVICE_ID_PATTERN.test(id) ? id : null;
-}
+// The check itself lives in packages/payments (requestHasUnlock), shared with personality.
+export { DEVICE_HEADER, deviceFrom, UNLOCK_HEADER } from '@micro/payments/server';
 
 /** What deciding Lab Pass needs: this deployment's mode, and the pass service to ask about all-app passes. */
 export interface LabPassAccess {
@@ -30,22 +22,16 @@ export function labPassAccess(env: Env): LabPassAccess {
  * device may use it (up to 5 devices), or an active all-app pass (checked with the pass service).
  * `deviceId` is the device the request names in its body, when it has no X-Device-Id header.
  */
-export async function hasLabPass(
+export function hasLabPass(
   request: Request,
   db: D1Database,
   access: LabPassAccess,
   deviceId: string | null = null,
 ): Promise<boolean> {
-  const device = deviceFrom(request) ?? deviceId;
-  if (device && (await isPaidCode(request.headers.get(UNLOCK_HEADER), db, access.mode, device))) return true;
-  return access.pass ? requestHasPass(request, access.pass) : false;
+  return requestHasUnlock(request, { db, app: appConfig.name, mode: access.mode, pass: access.pass }, deviceId);
 }
 
 /** A refunded or disputed Lab Pass no longer counts, and neither does a code already in use on 5 other devices. */
-export async function isPaidCode(input: string | null, db: D1Database, mode: PaymentsMode, deviceId: string): Promise<boolean> {
-  if (!input) return false;
-  const row = await purchaseStore({ db, app: appConfig.name, mode }).findByCode(input);
-  const codeHash = row?.unlock_code_hash;
-  if (typeof codeHash !== 'string') return false;
-  return (await admitDevice(db, codeHash, appConfig.name, deviceId)) === 'ok';
+export function isPaidCode(input: string | null, db: D1Database, mode: PaymentsMode, deviceId: string): Promise<boolean> {
+  return isPaidUnlockCode(input, { db, app: appConfig.name, mode }, deviceId);
 }
