@@ -45,7 +45,7 @@ Checked with `wrangler pages secret list` on Nov 15, 2026. Secrets live in each 
 | --- | --- | --- | --- |
 | `STRIPE_SECRET_KEY` | all six | The live restricted key `polymadlabs-apps` (`rk_live_...`): `stripe-live-apps-key` | Its test-mode twin: `stripe-test-apps-key` |
 | `STRIPE_WEBHOOK_SECRET` | all six | `live/<app>-stripe-webhook-secret` | `<app>-stripe-webhook-secret` (personality: `stripe-webhook-secret`; pass: `staging/pass-stripe-webhook-secret`) |
-| `UNLOCK_CODE_SECRET` | focus, breathwork, attention, intention; personality once the lifetime unlock is deployed (see below) | `<app>-unlock-code-secret` | `<app>-staging-unlock-code-secret` |
+| `UNLOCK_CODE_SECRET` | focus, breathwork, attention, intention, personality (since Nov 16, 2026) | `<app>-unlock-code-secret` | `<app>-staging-unlock-code-secret` |
 | `PASS_CODE_SECRET` | pass | `pass-code-secret` | `pass-staging-code-secret` |
 | `PASS_SERVICE_KEY` | pass, personality, intention | `pass-service-key` | `pass-staging-service-key` |
 | `ROUTER_KEY` | all six, and the router Worker | `router-key` | `staging/router-key` |
@@ -90,9 +90,9 @@ Local development uses its own SQLite file and is not touched by this.
 
 See "Secrets on the Pages projects" above for the names, values and the command.
 
-### Not deployed yet: the lifetime unlock and the Big Five test (built Nov 15, 2026)
+### The lifetime unlock and the Big Five test (deployed Nov 16, 2026)
 
-The code on `main` sells one $9.99 lifetime unlock with an unlock code, like the other apps, and adds the Big Five test. Production and staging still run the old per-result reports. Ship it in this order, staging first, and only when Roger says so:
+Personality sells one $9.99 lifetime unlock with an unlock code, like the other apps, and has the Big Five test. Built Nov 15, 2026, deployed to staging and production on Nov 16, 2026 with the steps below. Before migration 0004, both databases were exported to `~/polymadlabs-backups/personality-2026-11-16/`. Production then had 5 results and one unpaid (`pending`) purchase of the old report, so no buyer was affected. The steps, kept for the record:
 
 1. **Code secret**, a new one per environment. Never change it afterwards.
    ```bash
@@ -102,7 +102,7 @@ The code on `main` sells one $9.99 lifetime unlock with an unlock code, like the
    chmod 600 ~/.config/polymadlabs/personality-*unlock-code-secret
    cat ~/.config/polymadlabs/personality-staging-unlock-code-secret | pnpm exec wrangler pages secret put UNLOCK_CODE_SECRET --project-name micro-personality --env preview
    ```
-   The production one without `--env preview`, at step 6.
+   The production one without `--env preview`, at step 6. Both are saved without a trailing newline; the scripts trim the file, so they match.
 2. **Stripe price** `personality:lifetime` ($9.99) in test mode: `stripe-sync` with the test admin key (see Stripe prices below). The old test prices `personality:report`, `couple` and `both` can be archived.
 3. **Database:** `pnpm exec wrangler d1 migrations apply DB --remote --env preview` (0004 rebuilds `purchases` keeping every row, and adds the code tables).
 4. **Deploy staging:** `pnpm build && pnpm exec wrangler pages deploy dist --project-name micro-personality --branch staging`. The pass (`apps/pass`) also has new wording for what it covers in Personality; deploy it to staging too.
@@ -421,7 +421,9 @@ The full list, in a browser at 375px, 768px and 1280px. All of it passed on Oct 
 
 Delete your test results when you are done. Their purchase rows stay in the database by design.
 
-(Items 3 to 8 describe the lifetime unlock. Until it is deployed, production still sells the old per-result reports.)
+Items 3 to 7 and 9 passed on staging on Nov 16, 2026 in headless Chromium, plus a full refund that locked the report again and made the code invalid. On production the same day: everything up to Stripe's live checkout page (no payment), no console errors, no sideways scroll; the check result was deleted.
+
+Stripe's checkout page now puts its form inside a frame (`js.stripe.com/v3/elements-inner-...`), with the fields `#payment-numberInput`, `#payment-expiryInput`, `#payment-cvcInput`, `#payment-nameInput` and the Link box `#payment-linkOptInInput`. Pick "Card" inside that frame first. The test-mode admin key cannot refund; a test refund needs the full test key.
 
 ### Check focus
 
