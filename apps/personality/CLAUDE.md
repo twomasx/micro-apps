@@ -197,7 +197,7 @@ Commit after each step.
 
 ## Testing payments locally
 
-- `apps/personality/.env` needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and `PUBLIC_ORIGIN=http://localhost:3001`. Restart `pnpm dev:personality` after changing it.
+- `apps/personality/.env` needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PUBLIC_ORIGIN=http://localhost:3000` and `PAYMENTS_MODE=test` (see `.env.example`). Run it behind the router with `pnpm dev:apps personality`, so Stripe sends you back to the same address. Restart it after changing `.env`.
 - Webhooks: `stripe listen --events checkout.session.completed --forward-to http://127.0.0.1:8801/api/stripe/webhook` (Stripe CLI is in `~/.local/bin`). The `whsec_` value it prints goes in `.env`.
 - Test card: 4242 4242 4242 4242, any future date, any CVC. Untick "Save my information with Link" or Stripe asks for a phone number.
 

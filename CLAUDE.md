@@ -2,18 +2,27 @@
 
 Five small web apps, built one per day (Oct 12 to 16, 2026), all served from polymadlabs.com under their own path. Each app makes money through optional one-time unlocks. No ads, no subscriptions, no LLMs inside the apps.
 
-| App | Path | Site port | Functions port | Day |
-| --- | --- | --- | --- | --- |
-| personality | /personality/ | 3001 | 8801 | Mon |
-| focus | /focus/ | 3002 | 8802 | Tue |
-| breathwork | /breathwork/ | 3003 | 8803 | Wed |
-| attention | /attention/ | 3004 | 8804 | Thu |
-| intention | /intention/ | 3005 | 8805 | Fri |
-| landing | / (files under /_landing/) | 3006 | none | |
-| pass (all-app pass service) | /pass/ | 3007 | 8807 | |
-| router | (all of polymadlabs.com) | 3000 | none | |
+| App | Path | Site port | Functions port | Debugger port | Day |
+| --- | --- | --- | --- | --- | --- |
+| personality | /personality/ | 3001 | 8801 | 9301 | Mon |
+| focus | /focus/ | 3002 | 8802 | 9302 | Tue |
+| breathwork | /breathwork/ | 3003 | 8803 | 9303 | Wed |
+| attention | /attention/ | 3004 | 8804 | 9304 | Thu |
+| intention | /intention/ | 3005 | 8805 | 9305 | Fri |
+| landing | / (files under /_landing/) | 3006 | none | none | |
+| pass (all-app pass service) | /pass/ | 3007 | 8807 | 9307 | |
+| router | (all of polymadlabs.com) | 3000 | none | 9300 | |
 
 Run an app: `pnpm dev:<app>` (site and functions together). Router: `pnpm dev:router`. Checks: `pnpm typecheck`, `pnpm test`, `pnpm lint`, `pnpm build`. All four cover the whole repo. `pnpm test` runs the `test` script of every workspace that has one (Vitest).
+
+## Local development
+
+`pnpm dev:apps focus breathwork` runs the router at http://localhost:3000 plus the apps you name, linked like the real site: the landing page at `/`, each app at its path, the pass at `/pass/`. `pnpm dev:all` (or `dev:apps` with no names) runs everything. Edits reload in the browser as usual. Ctrl+C stops it all.
+
+- **Memory (measured Nov 15, 2026):** the router plus one app takes about 1.4 GB, everything about 5.5 GB of the 10 GB WSL has. Day to day, start only the app you are working on; `dev:all` is there for checking how they work together. An app you did not start answers with an error through the router.
+- **Settings:** each app's `.env` (copy `.env.example`) sets `PUBLIC_ORIGIN` and `PASS_API_ORIGIN` to `http://localhost:3000` and `PAYMENTS_MODE=test`. Without `PAYMENTS_MODE=test`, local dev takes `live` from `wrangler.jsonc` and refuses the test key.
+- **Local databases** are separate SQLite files under each app's `.wrangler/`. `dev:apps` applies new migrations before starting.
+- Each local Workers runtime has its own debugger port (table above). Without fixed ports they collide when several start at once.
 
 ## Who does what
 

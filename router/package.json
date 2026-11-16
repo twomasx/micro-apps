@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --env dev --ip 0.0.0.0 --port 3000",
+    "dev": "wrangler dev --env dev --ip 0.0.0.0 --port 3000 --inspector-port 9300",
     "build": "wrangler deploy --dry-run --outdir dist",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

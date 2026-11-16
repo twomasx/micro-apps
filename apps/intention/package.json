@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently -k -n site,functions \"pnpm dev:site\" \"pnpm dev:functions\"",
     "dev:site": "vite",
-    "dev:functions": "mkdir -p dist && wrangler pages dev --ip 127.0.0.1 --port 8805",
+    "dev:functions": "mkdir -p dist && wrangler pages dev --ip 127.0.0.1 --port 8805 --inspector-port 9305",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",

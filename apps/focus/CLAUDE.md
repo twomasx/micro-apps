@@ -109,7 +109,7 @@ Unlock codes are an HMAC of the Stripe session ID with the secret `UNLOCK_CODE_S
 
 ### Testing payments locally
 
-1. `cp .env.example .env` and fill it in: the test secret key, `openssl rand -hex 32` for `UNLOCK_CODE_SECRET`, and `PUBLIC_ORIGIN=http://localhost:3002`.
+1. `cp .env.example .env` and fill it in: the test secret key, `openssl rand -hex 32` for `UNLOCK_CODE_SECRET`, and keep `PUBLIC_ORIGIN=http://localhost:3000` and `PAYMENTS_MODE=test` from the example. Run it behind the router with `pnpm dev:apps focus` (root CLAUDE.md, Local development), so Stripe sends you back to the same address you started from.
 2. `pnpm db:migrate` once, to make the local `purchases` table.
 3. For the webhook: `stripe listen --api-key <test key> --forward-to localhost:8802/api/stripe/webhook` and put the `whsec_...` it prints in `STRIPE_WEBHOOK_SECRET`.
 4. Restart `pnpm dev:focus`. Wrangler reads `.env` only when it starts.
