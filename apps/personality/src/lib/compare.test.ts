@@ -42,10 +42,10 @@ describe('swapSides', () => {
   it('swaps the two results everywhere', () => {
     const compare: CompareResponse = {
       ...compareScores(scores([75, 60, 20, 40]), scores([55, 30, 20, 90]), currentQuestions),
-      a: { id: 'a', type: 'INTJ', reportUnlocked: true },
-      b: { id: 'b', type: 'ISTP', reportUnlocked: false },
+      kind: 'type',
+      a: { id: 'a', type: 'INTJ' },
+      b: { id: 'b', type: 'ISTP' },
       unlocked: false,
-      revoked: false,
       couple: null,
     };
     const swapped = swapSides(compare);

@@ -45,7 +45,7 @@ Checked with `wrangler pages secret list` on Nov 15, 2026. Secrets live in each 
 | --- | --- | --- | --- |
 | `STRIPE_SECRET_KEY` | all six | The live restricted key `polymadlabs-apps` (`rk_live_...`): `stripe-live-apps-key` | Its test-mode twin: `stripe-test-apps-key` |
 | `STRIPE_WEBHOOK_SECRET` | all six | `live/<app>-stripe-webhook-secret` | `<app>-stripe-webhook-secret` (personality: `stripe-webhook-secret`; pass: `staging/pass-stripe-webhook-secret`) |
-| `UNLOCK_CODE_SECRET` | focus, breathwork, attention, intention | `<app>-unlock-code-secret` | `<app>-staging-unlock-code-secret` |
+| `UNLOCK_CODE_SECRET` | focus, breathwork, attention, intention; personality once the lifetime unlock is deployed (see below) | `<app>-unlock-code-secret` | `<app>-staging-unlock-code-secret` |
 | `PASS_CODE_SECRET` | pass | `pass-code-secret` | `pass-staging-code-secret` |
 | `PASS_SERVICE_KEY` | pass, personality, intention | `pass-service-key` | `pass-staging-service-key` |
 | `ROUTER_KEY` | all six, and the router Worker | `router-key` | `staging/router-key` |
@@ -89,6 +89,25 @@ Local development uses its own SQLite file and is not touched by this.
 ### Secrets
 
 See "Secrets on the Pages projects" above for the names, values and the command.
+
+### Not deployed yet: the lifetime unlock and the Big Five test (built Nov 15, 2026)
+
+The code on `main` sells one $9.99 lifetime unlock with an unlock code, like the other apps, and adds the Big Five test. Production and staging still run the old per-result reports. Ship it in this order, staging first, and only when Roger says so:
+
+1. **Code secret**, a new one per environment. Never change it afterwards.
+   ```bash
+   cd apps/personality
+   openssl rand -hex 32 > ~/.config/polymadlabs/personality-staging-unlock-code-secret
+   openssl rand -hex 32 > ~/.config/polymadlabs/personality-unlock-code-secret
+   chmod 600 ~/.config/polymadlabs/personality-*unlock-code-secret
+   cat ~/.config/polymadlabs/personality-staging-unlock-code-secret | pnpm exec wrangler pages secret put UNLOCK_CODE_SECRET --project-name micro-personality --env preview
+   ```
+   The production one without `--env preview`, at step 6.
+2. **Stripe price** `personality:lifetime` ($9.99) in test mode: `stripe-sync` with the test admin key (see Stripe prices below). The old test prices `personality:report`, `couple` and `both` can be archived.
+3. **Database:** `pnpm exec wrangler d1 migrations apply DB --remote --env preview` (0004 rebuilds `purchases` keeping every row, and adds the code tables).
+4. **Deploy staging:** `pnpm build && pnpm exec wrangler pages deploy dist --project-name micro-personality --branch staging`. The pass (`apps/pass`) also has new wording for what it covers in Personality; deploy it to staging too.
+5. **Check on staging** (the list under "Check a deploy"): buy with 4242, get the code, restore it in another browser, refund it in the dashboard and see everything lock again.
+6. **Production**, the same steps: the production secret, `stripe-sync --live` (needs both admin keys), the migration without `--env preview`, then deploy personality and the pass with `--branch main`.
 
 ## Deploy the focus app
 
@@ -389,18 +408,20 @@ The full list, in a browser at 375px, 768px and 1280px. All of it passed on Oct 
 
 1. `/` shows "PolymadLabs" and links to `/personality/`.
 2. Assets and the service worker load from `/personality/`. Nothing loads from another site.
-3. Take the whole test. It ends on a result with a summary.
+3. Take the whole test. It ends on a result with a summary. Do the same for the Big Five test at `/personality/big-five/`.
 4. Reload the `/personality/r/<id>` page. It shows the result, not a 404.
-5. Open the full report offer. It says "$9.99 once. No renewals."
-6. Pay with card 4242 4242 4242 4242. You come back to the unlocked report. It is still unlocked after a reload.
-7. Open the result's compare link in another browser, take the test, land on the comparison.
-8. Pay for the couple report ($7.99). It unlocks for both people.
+5. Open the full report. The offer says "Unlock everything in Personality" and "$9.99 once. No renewals."
+6. Pay with card 4242 4242 4242 4242. You land on `/personality/unlock` with a code and a link back to the report, which is now open, also after a reload. The Big Five report and every couple report are open too.
+7. Open the result's compare link in another browser, take the test, land on the comparison. The couple report is locked there until you enter the code at `/personality/restore`.
+8. The 6th device to use one code is refused (5 devices per code).
 9. In Stripe, the two `checkout.session.completed` events show no pending webhook deliveries.
 10. `/personality/science` and `/personality/privacy` show, and the footer links to both.
 11. "Delete this result" removes each test result. Its page then says "Result not found".
 12. No console errors, and no page scrolls sideways.
 
 Delete your test results when you are done. Their purchase rows stay in the database by design.
+
+(Items 3 to 8 describe the lifetime unlock. Until it is deployed, production still sells the old per-result reports.)
 
 ### Check focus
 

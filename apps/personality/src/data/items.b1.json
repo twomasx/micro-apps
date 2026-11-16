@@ -1,0 +1,1013 @@
+{
+  "testId": "big-five",
+  "version": "b1",
+  "instructions": "Describe yourself as you generally are now, not as you wish to be. Answer honestly. There are no right or wrong answers.",
+  "scale": [
+    {
+      "value": 1,
+      "label": "Very inaccurate"
+    },
+    {
+      "value": 2,
+      "label": "Moderately inaccurate"
+    },
+    {
+      "value": 3,
+      "label": "Neither accurate nor inaccurate"
+    },
+    {
+      "value": 4,
+      "label": "Moderately accurate"
+    },
+    {
+      "value": 5,
+      "label": "Very accurate"
+    }
+  ],
+  "axes": [
+    {
+      "id": "O",
+      "name": "Openness to experience",
+      "plain": "interest in ideas, art and inner experience",
+      "aspects": [
+        {
+          "id": "intellect",
+          "name": "Intellect"
+        },
+        {
+          "id": "openness",
+          "name": "Openness"
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "name": "Conscientiousness",
+      "plain": "order, effort and follow-through",
+      "aspects": [
+        {
+          "id": "industriousness",
+          "name": "Industriousness"
+        },
+        {
+          "id": "orderliness",
+          "name": "Orderliness"
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "name": "Extraversion",
+      "plain": "energy and confidence with people",
+      "aspects": [
+        {
+          "id": "enthusiasm",
+          "name": "Enthusiasm"
+        },
+        {
+          "id": "assertiveness",
+          "name": "Assertiveness"
+        }
+      ]
+    },
+    {
+      "id": "A",
+      "name": "Agreeableness",
+      "plain": "care and consideration for others",
+      "aspects": [
+        {
+          "id": "compassion",
+          "name": "Compassion"
+        },
+        {
+          "id": "politeness",
+          "name": "Politeness"
+        }
+      ]
+    },
+    {
+      "id": "N",
+      "name": "Neuroticism",
+      "plain": "how strongly you feel negative emotions",
+      "aspects": [
+        {
+          "id": "volatility",
+          "name": "Volatility"
+        },
+        {
+          "id": "withdrawal",
+          "name": "Withdrawal"
+        }
+      ]
+    }
+  ],
+  "sources": {
+    "BFAS": "Big Five Aspect Scales: DeYoung, C. G., Quilty, L. C. and Peterson, J. B. (2007). Between facets and domains: 10 aspects of the Big Five. Journal of Personality and Social Psychology, 93, 880 to 896. Items from the International Personality Item Pool (ipip.ori.org), public domain, as listed at ipip.ori.org/BFASKeys.htm. Adapted by adding 'I' at the start. Four items have a note on where they come from."
+  },
+  "items": [
+    {
+      "id": "b1-001",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "+",
+      "text": "I get angry easily.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Get angry easily."
+    },
+    {
+      "id": "b1-002",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "+",
+      "text": "I feel others' emotions.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Feel others' emotions."
+    },
+    {
+      "id": "b1-003",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "+",
+      "text": "I carry out my plans.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Carry out my plans."
+    },
+    {
+      "id": "b1-004",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "+",
+      "text": "I make friends easily.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Make friends easily."
+    },
+    {
+      "id": "b1-005",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "+",
+      "text": "I am quick to understand things.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am quick to understand things."
+    },
+    {
+      "id": "b1-006",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "+",
+      "text": "I am filled with doubts about things.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am filled with doubts about things."
+    },
+    {
+      "id": "b1-007",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "+",
+      "text": "I respect authority.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Respect authority."
+    },
+    {
+      "id": "b1-008",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "+",
+      "text": "I like order.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Like order."
+    },
+    {
+      "id": "b1-009",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "+",
+      "text": "I take charge.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Take charge."
+    },
+    {
+      "id": "b1-010",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "+",
+      "text": "I enjoy the beauty of nature.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Enjoy the beauty of nature."
+    },
+    {
+      "id": "b1-011",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "-",
+      "text": "I rarely get irritated.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Rarely get irritated."
+    },
+    {
+      "id": "b1-012",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "-",
+      "text": "I am not interested in other people's problems.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am not interested in other people's problems."
+    },
+    {
+      "id": "b1-013",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "-",
+      "text": "I waste my time.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Waste my time."
+    },
+    {
+      "id": "b1-014",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "-",
+      "text": "I am hard to get to know.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am hard to get to know."
+    },
+    {
+      "id": "b1-015",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "-",
+      "text": "I have difficulty understanding abstract ideas.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Have difficulty understanding abstract ideas."
+    },
+    {
+      "id": "b1-016",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "-",
+      "text": "I seldom feel blue.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Seldom feel blue."
+    },
+    {
+      "id": "b1-017",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "-",
+      "text": "I insult people.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Insult people."
+    },
+    {
+      "id": "b1-018",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "-",
+      "text": "I leave my belongings around.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Leave my belongings around."
+    },
+    {
+      "id": "b1-019",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "-",
+      "text": "I do not have an assertive personality.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Do not have an assertive personality.",
+      "note": "A reverse wording of a Big Five Inventory item (John, Naumann and Soto, 2008), as published with the BFAS."
+    },
+    {
+      "id": "b1-020",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "-",
+      "text": "I do not like poetry.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Do not like poetry."
+    },
+    {
+      "id": "b1-021",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "+",
+      "text": "I get upset easily.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Get upset easily."
+    },
+    {
+      "id": "b1-022",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "+",
+      "text": "I inquire about others' well-being.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Inquire about others' well-being."
+    },
+    {
+      "id": "b1-023",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "+",
+      "text": "I finish what I start.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Finish what I start."
+    },
+    {
+      "id": "b1-024",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "+",
+      "text": "I warm up quickly to others.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Warm up quickly to others."
+    },
+    {
+      "id": "b1-025",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "+",
+      "text": "I can handle a lot of information.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Can handle a lot of information."
+    },
+    {
+      "id": "b1-026",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "+",
+      "text": "I feel threatened easily.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Feel threatened easily."
+    },
+    {
+      "id": "b1-027",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "+",
+      "text": "I hate to seem pushy.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Hate to seem pushy."
+    },
+    {
+      "id": "b1-028",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "+",
+      "text": "I keep things tidy.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Keep things tidy."
+    },
+    {
+      "id": "b1-029",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "+",
+      "text": "I have a strong personality.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Have a strong personality."
+    },
+    {
+      "id": "b1-030",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "+",
+      "text": "I believe in the importance of art.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Believe in the importance of art."
+    },
+    {
+      "id": "b1-031",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "-",
+      "text": "I keep my emotions under control.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Keep my emotions under control."
+    },
+    {
+      "id": "b1-032",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "-",
+      "text": "I can't be bothered with others' needs.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Can't be bothered with others' needs."
+    },
+    {
+      "id": "b1-033",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "-",
+      "text": "I find it difficult to get down to work.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Find it difficult to get down to work."
+    },
+    {
+      "id": "b1-034",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "-",
+      "text": "I keep others at a distance.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Keep others at a distance."
+    },
+    {
+      "id": "b1-035",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "-",
+      "text": "I avoid philosophical discussions.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Avoid philosophical discussions."
+    },
+    {
+      "id": "b1-036",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "-",
+      "text": "I feel comfortable with myself.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Feel comfortable with myself."
+    },
+    {
+      "id": "b1-037",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "-",
+      "text": "I believe that I am better than others.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Believe that I am better than others."
+    },
+    {
+      "id": "b1-038",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "-",
+      "text": "I am not bothered by messy people.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am not bothered by messy people."
+    },
+    {
+      "id": "b1-039",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "-",
+      "text": "I lack the talent for influencing people.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Lack the talent for influencing people."
+    },
+    {
+      "id": "b1-040",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "-",
+      "text": "I seldom get lost in thought.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Seldom get lost in thought."
+    },
+    {
+      "id": "b1-041",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "+",
+      "text": "I change my mood a lot.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Change my mood a lot."
+    },
+    {
+      "id": "b1-042",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "+",
+      "text": "I sympathize with others' feelings.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Sympathize with others' feelings."
+    },
+    {
+      "id": "b1-043",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "+",
+      "text": "I get things done quickly.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Get things done quickly."
+    },
+    {
+      "id": "b1-044",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "+",
+      "text": "I show my feelings when I'm happy.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Show my feelings when I'm happy."
+    },
+    {
+      "id": "b1-045",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "+",
+      "text": "I like to solve complex problems.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Like to solve complex problems."
+    },
+    {
+      "id": "b1-046",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "+",
+      "text": "I worry about things.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Worry about things."
+    },
+    {
+      "id": "b1-047",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "+",
+      "text": "I avoid imposing my will on others.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Avoid imposing my will on others.",
+      "note": "A reverse wording of IPIP item H721, as published with the BFAS."
+    },
+    {
+      "id": "b1-048",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "+",
+      "text": "I follow a schedule.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Follow a schedule."
+    },
+    {
+      "id": "b1-049",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "+",
+      "text": "I know how to captivate people.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Know how to captivate people."
+    },
+    {
+      "id": "b1-050",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "+",
+      "text": "I love to reflect on things.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Love to reflect on things."
+    },
+    {
+      "id": "b1-051",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "-",
+      "text": "I rarely lose my composure.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Rarely lose my composure."
+    },
+    {
+      "id": "b1-052",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "-",
+      "text": "I am indifferent to the feelings of others.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am indifferent to the feelings of others."
+    },
+    {
+      "id": "b1-053",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "-",
+      "text": "I mess things up.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Mess things up."
+    },
+    {
+      "id": "b1-054",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "-",
+      "text": "I reveal little about myself.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Reveal little about myself."
+    },
+    {
+      "id": "b1-055",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "-",
+      "text": "I avoid difficult reading material.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Avoid difficult reading material."
+    },
+    {
+      "id": "b1-056",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "-",
+      "text": "I rarely feel depressed.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Rarely feel depressed."
+    },
+    {
+      "id": "b1-057",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "-",
+      "text": "I take advantage of others.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Take advantage of others."
+    },
+    {
+      "id": "b1-058",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "-",
+      "text": "I am not bothered by disorder.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am not bothered by disorder."
+    },
+    {
+      "id": "b1-059",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "-",
+      "text": "I wait for others to lead the way.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Wait for others to lead the way."
+    },
+    {
+      "id": "b1-060",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "-",
+      "text": "I seldom daydream.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Seldom daydream."
+    },
+    {
+      "id": "b1-061",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "+",
+      "text": "I am a person whose moods go up and down easily.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am a person whose moods go up and down easily."
+    },
+    {
+      "id": "b1-062",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "+",
+      "text": "I take an interest in other people's lives.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Take an interest in other people's lives."
+    },
+    {
+      "id": "b1-063",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "+",
+      "text": "I always know what I am doing.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Always know what I am doing."
+    },
+    {
+      "id": "b1-064",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "+",
+      "text": "I have a lot of fun.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Have a lot of fun."
+    },
+    {
+      "id": "b1-065",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "+",
+      "text": "I have a rich vocabulary.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Have a rich vocabulary."
+    },
+    {
+      "id": "b1-066",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "+",
+      "text": "I am easily discouraged.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am easily discouraged."
+    },
+    {
+      "id": "b1-067",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "+",
+      "text": "I rarely put people under pressure.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Rarely put people under pressure.",
+      "note": "A reverse wording of IPIP item H774, as published with the BFAS."
+    },
+    {
+      "id": "b1-068",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "+",
+      "text": "I want everything to be just right.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Want everything to be just right."
+    },
+    {
+      "id": "b1-069",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "+",
+      "text": "I see myself as a good leader.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "See myself as a good leader."
+    },
+    {
+      "id": "b1-070",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "+",
+      "text": "I get deeply immersed in music.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Get deeply immersed in music."
+    },
+    {
+      "id": "b1-071",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "-",
+      "text": "I am not easily annoyed.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am not easily annoyed."
+    },
+    {
+      "id": "b1-072",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "-",
+      "text": "I take no time for others.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Take no time for others."
+    },
+    {
+      "id": "b1-073",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "-",
+      "text": "I don't put my mind on the task at hand.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Don't put my mind on the task at hand."
+    },
+    {
+      "id": "b1-074",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "-",
+      "text": "I rarely get caught up in the excitement.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Rarely get caught up in the excitement."
+    },
+    {
+      "id": "b1-075",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "-",
+      "text": "I learn things slowly.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Learn things slowly."
+    },
+    {
+      "id": "b1-076",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "-",
+      "text": "I am not embarrassed easily.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am not embarrassed easily."
+    },
+    {
+      "id": "b1-077",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "-",
+      "text": "I seek conflict.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Seek conflict."
+    },
+    {
+      "id": "b1-078",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "-",
+      "text": "I dislike routine.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Dislike routine."
+    },
+    {
+      "id": "b1-079",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "-",
+      "text": "I hold back my opinions.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Hold back my opinions."
+    },
+    {
+      "id": "b1-080",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "-",
+      "text": "I seldom notice the emotional aspects of paintings and pictures.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Seldom notice the emotional aspects of paintings and pictures."
+    },
+    {
+      "id": "b1-081",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "+",
+      "text": "I get easily agitated.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Get easily agitated."
+    },
+    {
+      "id": "b1-082",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "+",
+      "text": "I like to do things for others.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Like to do things for others."
+    },
+    {
+      "id": "b1-083",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "-",
+      "text": "I postpone decisions.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Postpone decisions."
+    },
+    {
+      "id": "b1-084",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "+",
+      "text": "I laugh a lot.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Laugh a lot."
+    },
+    {
+      "id": "b1-085",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "+",
+      "text": "I think quickly.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Think quickly."
+    },
+    {
+      "id": "b1-086",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "+",
+      "text": "I become overwhelmed by events.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Become overwhelmed by events."
+    },
+    {
+      "id": "b1-087",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "-",
+      "text": "I love a good fight.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Love a good fight."
+    },
+    {
+      "id": "b1-088",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "+",
+      "text": "I see that rules are observed.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "See that rules are observed."
+    },
+    {
+      "id": "b1-089",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "+",
+      "text": "I can talk others into doing things.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Can talk others into doing things."
+    },
+    {
+      "id": "b1-090",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "+",
+      "text": "I see beauty in things that others might not notice.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "See beauty in things that others might not notice."
+    },
+    {
+      "id": "b1-091",
+      "axis": "N",
+      "aspect": "volatility",
+      "keyed": "+",
+      "text": "I can be stirred up easily.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Can be stirred up easily."
+    },
+    {
+      "id": "b1-092",
+      "axis": "A",
+      "aspect": "compassion",
+      "keyed": "-",
+      "text": "I don't have a soft side.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Don't have a soft side."
+    },
+    {
+      "id": "b1-093",
+      "axis": "C",
+      "aspect": "industriousness",
+      "keyed": "-",
+      "text": "I am easily distracted.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am easily distracted."
+    },
+    {
+      "id": "b1-094",
+      "axis": "E",
+      "aspect": "enthusiasm",
+      "keyed": "-",
+      "text": "I am not a very enthusiastic person.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am not a very enthusiastic person.",
+      "note": "Written for the BFAS by DeYoung, Quilty and Peterson (2007), not taken from the IPIP."
+    },
+    {
+      "id": "b1-095",
+      "axis": "O",
+      "aspect": "intellect",
+      "keyed": "+",
+      "text": "I formulate ideas clearly.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Formulate ideas clearly."
+    },
+    {
+      "id": "b1-096",
+      "axis": "N",
+      "aspect": "withdrawal",
+      "keyed": "+",
+      "text": "I am afraid of many things.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am afraid of many things."
+    },
+    {
+      "id": "b1-097",
+      "axis": "A",
+      "aspect": "politeness",
+      "keyed": "-",
+      "text": "I am out for my own personal gain.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am out for my own personal gain."
+    },
+    {
+      "id": "b1-098",
+      "axis": "C",
+      "aspect": "orderliness",
+      "keyed": "+",
+      "text": "I want every detail taken care of.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Want every detail taken care of."
+    },
+    {
+      "id": "b1-099",
+      "axis": "E",
+      "aspect": "assertiveness",
+      "keyed": "+",
+      "text": "I am the first to act.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Am the first to act."
+    },
+    {
+      "id": "b1-100",
+      "axis": "O",
+      "aspect": "openness",
+      "keyed": "+",
+      "text": "I need a creative outlet.",
+      "source": "BFAS (IPIP)",
+      "sourceText": "Need a creative outlet."
+    }
+  ]
+}

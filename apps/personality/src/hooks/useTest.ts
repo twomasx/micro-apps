@@ -11,7 +11,7 @@ import {
   type AxisProgress,
   type Progress,
 } from '../lib/progress.ts';
-import type { Question, QuestionFile } from '../lib/questions.ts';
+import type { TestQuestions } from '../lib/tests.ts';
 import { addResult, clearProgress, loadProgress, saveProgress } from '../lib/store.ts';
 
 export type TestStatus = 'loading' | 'ready' | 'submitting';
@@ -21,7 +21,7 @@ export interface TestState {
   /** The question on screen, counted from 0. */
   index: number;
   total: number;
-  question: Question | undefined;
+  question: TestQuestions['items'][number] | undefined;
   /** The saved answer to the question on screen, if any. */
   value: number | undefined;
   answered: number;
@@ -43,7 +43,7 @@ export interface TestState {
 }
 
 /** The whole test flow: loading saved progress, answering, moving, submitting. */
-export function useTest(questions: QuestionFile): TestState {
+export function useTest(questions: TestQuestions): TestState {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitFailed, setSubmitFailed] = useState(false);

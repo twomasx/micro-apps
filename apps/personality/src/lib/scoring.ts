@@ -53,7 +53,8 @@ export class ScoringError extends Error {
   override name = 'ScoringError';
 }
 
-function readAnswer(answers: Answers, itemId: string): number {
+/** One answer, checked: a whole number from 1 to 5. Throws ScoringError otherwise. */
+export function readAnswer(answers: Answers, itemId: string): number {
   if (!Object.hasOwn(answers, itemId)) {
     throw new ScoringError(`Missing answer for ${itemId}`);
   }

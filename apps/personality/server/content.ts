@@ -19,7 +19,8 @@ export function getContent(path: string): ContentFile | null {
   return file;
 }
 
-function section(path: string, heading: string): string {
+/** One section of a content file. Throws when it is missing, so a gap fails loudly instead of showing nothing. */
+export function section(path: string, heading: string): string {
   const body = getContent(path)?.sections[heading];
   if (!body) throw new Error(`Missing content: ${path} "${heading}"`);
   return body;

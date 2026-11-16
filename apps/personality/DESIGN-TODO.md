@@ -77,16 +77,15 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - Loading states are one line of text.
 - **Report typeface.** The report uses Inter Tight for now. Pick the serif for long reading.
 - **Where the report offer sits on the result page**, and how loud it should be. It is a quiet block under Share now.
-- **Offer wording**: the lead, the three "what is inside" lines and the button labels are drafts.
-- **Product names on the Stripe page** ("Full personality report") are in `config/products.json`.
+- **Product name on the Stripe page** ("Personality lifetime unlock") is in `config/products.json`.
 - **Stripe Checkout look**: it shows your Stripe account name and default colors. Branding is set in the Stripe dashboard.
 - The report has no share button of its own.
 - **Chart details** to check on your phone: marker size (12px), ruler height (40px), bar thickness (8px), the shade of the balanced band (`--tint` in `src/base.css`).
 - **Wording in the report frame**: part titles, the profile caption, the Big Five note and the "How this was measured" paragraph are drafts. They are in `ReportPage.tsx` and `src/lib/report-view.ts`, not in `content/`, because they are the same for every type.
-- **Words on the compare page**: "You" and "Them", "First" and "Second", "Alike" and "Different", the offer text, and the note under the similarity number are drafts.
+- **Words on the compare page**: "You" and "Them", "First" and "Second", "Alike" and "Different", and the note under the similarity number are drafts.
 - **The similarity number is big.** The spec allows it, but decide how much weight it should get next to the four scales.
 - **Compare notice on the intro** is a white box with an accent edge. Same treatment as the messages on the result page.
-- **Footer links** ("The science", "Privacy") sit above the trademark line on every page, including during the test.
+- **Footer links** ("The science", "Privacy", "Big Five test", "Unlock", "Enter a code") sit above the trademark line on every page, including during the test. On a phone they wrap onto two lines.
 - **Icon.** Roger's four-slider design from the favicons kit, recolored on Oct 15, 2026 to the app's own tokens: paper `#f5f4f0` background, slider tracks in ink `#0d0d0c` at 32% (`--line-strong`), markers in the accent `#1f3bff`. Full-bleed square, no rounded corners. `public/favicon.svg` is the source; the PNGs (180, 192, 512) are rendered from it. Check the tracks are not too faint on your home screen.
 - A share image for results (planned for later in the spec).
 - A result opened by someone else says "This type is INTJ" and offers "Take the test yourself". Check that wording.
@@ -103,12 +102,46 @@ The app now has a first full design, direction "Instrument": off-white paper, ne
 - Info pages: `main.info[data-page="science|privacy"]`, `.info-title`, `.info-section`, `.info-section-title`, `.prose-list`, `.info-back-link`. Footer: `.site-footer-nav`, `.site-footer-link`.
 - Result: `main.result[data-state][data-type][data-own][data-revealed]`, `.result-title-label`, `.result-type`, `.result-letter` with `--i`, `.result-warning`, `.result-summary`, `ul.axes`, `li.axis[data-axis][data-letter][data-balanced][data-winner="left|right"]` with `--pct` and `--step`, `.axis-headline`, `.axis-pct`, `.axis-name`, `.axis-balance`, `.axis-plain`, `.axis-scale`, `.axis-fill`, `.axis-marker`, `.axis-side[data-letter][data-winner][data-pct]`, `.result-share`, `.result-compare`, `.result-compare-warning`, `.result-message`, `.result-delete`, `.result-take-test`.
 
+## The Big Five test and the one-time unlock (Nov 15, 2026)
+
+Built by Claude in this app's look, using its tokens and existing classes where they fit. Everything below is a draft for you to change.
+
+**Selling one unlock instead of reports per result**
+- [ ] **One product, $9.99 once** (`lifetime`), your choice on Nov 15. It opens every full report, the Big Five report and every couple report, on up to 5 devices with its code. It replaced report $9.99, couple $7.99 and both $14.99.
+- [ ] **A shared link no longer opens a paid report.** Before, anyone with the link to a paid result could read its report. Now the report opens on a device with the unlock or a pass. Someone you send a link to sees the free result and the offer. If you want shared reports to stay open, that needs a rule such as "a report opened once by a buyer stays open for its link".
+- [ ] **The offer** (`.unlock-offer`, in `src/components/UnlockOffer.tsx`): appears in place of a locked report and under a locked comparison. Title "Unlock everything in Personality", four lines on what it opens (`UNLOCK_ADDS` in `src/lib/unlock.ts`), the price, a solid ink button "Unlock everything", a note on the code and the 5 devices, then the pass offer and "Enter your code". The button goes straight to Stripe.
+- [ ] **The unlock page** (`/personality/unlock`, `.unlock-page`): blue kicker, big title "Lifetime unlock", then the offer, or after paying "Thank you. Personality is unlocked on this device." with the code card and a link back to the report or comparison you came from. A device that already has a code sees the code card.
+- [ ] **The code card** (`.code-card`): white card with a hairline, the code on one line at every width (it shrinks on small phones), "Copy the code" as an outline button that turns blue when copied.
+- [ ] **The code page** (`/personality/restore`, `.restore-page`): the old pass page, now for both kinds of code: "Enter your code", a 56px field, a solid ink button, the status in a blue-edged box. `/personality/pass` still opens it.
+- [ ] **Footer** gained "Big Five test", "Unlock" and "Enter a code".
+
+**The Big Five test**
+- [ ] **The intro** (`/personality/big-five/`) is the four-letter intro with its own words: "Five traits. Ten aspects.", "Big Five personality test", 100 questions, about 12 minutes, $0. Each intro ends with "Also here:" and a link to the other test (`.intro-other`).
+- [ ] **The test** is the same screen as the four-letter test with "Big Five test" as its title and five progress lines (O, C, E, A, N) instead of four.
+- [ ] **The result** (`.big-five-result`): "Your result" with "Big Five" large where the type code goes, the note that scores are not compared with other people, then one row per trait: name, score in blue, a 0 to 100 scale with small ticks at 40 and 60 (the middle band), the band ("Toward the higher end", "Near the middle", "Toward the lower end"), what the trait measures (gray) and the short text for the band. Numbers count up from 50 like the four-letter result.
+- [ ] **The report** (`.big-five-report`): "Full report" with "Big Five" large on the cover, a readout of the five scores, contents, then one numbered part per trait: score, band, scale, what it measures, "Your result" (the long text), and the two aspects side by side from tablet width (one under the other on phones), each with its own scale. Last part: how it was measured.
+- [ ] **The comparison**: the four-letter compare page with the five traits; each row's scale runs 0 to 100. "Alike" means the two scores are within 15 points. The couple report has one section per trait.
+- [ ] **No norms.** Scores show where answers sat on the scale. Once enough people have taken it, the result could add a comparison like Attention's (after 200 results).
+- [ ] **Aspect at exactly 50** reads "Higher half" and gets the "Higher" text. It is a stretch for a score right on the line.
+
+**The new text (drafts, `status: draft`)**
+- [ ] **20 files in `content/big-five/`**: 5 traits, 10 aspects, 5 couple sections. Things to look at: "not how smart you are" sits in the one line every Intellect reader sees; `aspects/politeness.md` says "respect rules and other people's wishes" where the questions say "Respect authority", and leaves out the harsher questions (insulting people, taking advantage); `pairs/N.md` makes the research point about negative emotions in both Alike and Different, because a couple sees only one; `traits/N.md` ends its higher text with "talking with someone you trust can help" (no clinical pointer); `pairs/E.md` shares two questions with the four-letter `pairs/EI.md`.
+- [ ] **`science.md` and `privacy.md`** went back to `draft` with new sections: the Big Five test, and the unlock code with its device ids. Read the new parts and set them to `approved`.
+
+**Class names and state attributes**
+- Intro: `main.intro[data-kind="type|big-five"]`, `.intro-other[data-kind]`, `.intro-other-title`, `.intro-other-text`, `.intro-other-link`. Test: `main.test[data-kind]`.
+- Big Five result: `main.result.big-five-result[data-own][data-revealed]`, `.b5-result-name`, `.big-five-note`, `ul.b5-traits`, `li.b5-trait[data-trait][data-band="lower|middle|higher"]` with `--pct` and `--step`, `.b5-trait-headline`, `.b5-trait-name`, `.b5-trait-pct`, `.b5-trait-scale`, `.b5-trait-fill`, `.b5-trait-marker`, `.b5-trait-band`, `.b5-trait-measures`, `.b5-trait-summary`.
+- Big Five report: `main.report.big-five-report[data-kind="big-five"]`, `.big-five-readout`, `.big-five-readout-cell[data-trait][data-band]`, `section.big-five-trait#trait-O` and so on, `.big-five-trait-score`, `.big-five-trait-pct`, `.big-five-trait-band`, `.big-five-trait-measures`, `.big-five-aspects`, `article.big-five-aspect[data-aspect][data-band]`, `.big-five-aspect-title`, `.big-five-aspect-name`, `.big-five-aspect-pct`, `.big-five-aspect-band`, `.big-five-aspect-measures`, `.big-five-aspect-text`.
+- Big Five compare: `main.compare.big-five-compare[data-kind="big-five"]`, `li.compare-axis[data-trait][data-alike]`. Couple sections: `article.compare-couple-section[data-scale]` (the axis or trait id).
+- Unlock: `section.unlock-offer[data-state="open|closed"]`, `.unlock-offer-title`, `.unlock-offer-list`, `.unlock-offer-price`, `.unlock-offer-button[data-state]`, `.unlock-offer-note`, `.unlock-offer-error`; `main.unlock-page`, `.unlock-kicker`, `.unlock-title`, `.unlock-status[data-state="paid|revoked"]`, `.unlock-check`, `.unlock-back`; `.code-card`, `.code-card-label`, `.code-card-code`, `.code-card-note`, `.code-card-copy[data-state="idle|copied"]`; `main.restore-page[data-state]`, `.restore-kicker`, `.restore-title`, `.restore-intro`, `.restore-form`, `.restore-label`, `.restore-input`, `.restore-submit`, `.restore-status`, `.restore-back`.
+- Removed with the old products: `.report-buy`, `.report-unlock`, `.report-price`, `.report-note`, `.report-unconfirmed`, `.report-check`, `.report-error`, `.compare-buy`, `.compare-unlock`, `.compare-unlock-both`, `.compare-price`, `.compare-unconfirmed`, `.compare-check`, `.compare-error`, `.pass-page` and its parts.
+
 ## Payments across the apps (PAYMENTS.md)
 
 - [ ] **"Unlocks open soon":** while payments are closed (the kill switch), the buy button is disabled, says "Unlocks open soon" and has `data-state="closed"` (open is `data-state="open"`). Style the closed state.
 - [ ] **TEST MODE label:** staging only (`.test-mode-label`, `data-mode="test"`, in `src/components/TestModeLabel.tsx`, shown when the hostname starts with `staging.`). For now it is fixed to the top edge in the middle, in plain system colors, and taps go through it. Production never shows it.
 - [x] **Pass offer** (`.pass-offer` under the report and couple report buy buttons): styled by Claude on Oct 16 at your request, in this app's look (`src/styles/pass.css`): a hairline above, muted text, bold links with the blue underline.
-- [x] **Pass page** (`/personality/pass?back=...`, `.pass-page`): styled the same day: blue kicker, big title, a 56px code field and a solid ink button, status in a blue-edged box. Change anything you like.
+- [x] **Pass page**: replaced on Nov 15, 2026 by the code page `/personality/restore` (see below), in the same look.
 
 ## Search and sharing (SEO.md step 1)
 

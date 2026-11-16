@@ -1,6 +1,6 @@
 import catalog from '../../config/products.json';
 
-export type ProductId = 'report' | 'couple' | 'both';
+export type ProductId = 'lifetime';
 
 export interface Product {
   id: string;

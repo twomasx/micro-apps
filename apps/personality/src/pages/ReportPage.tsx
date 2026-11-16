@@ -1,18 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Link } from '../components/Link.tsx';
 import { ProfileChart } from '../components/report/ProfileChart.tsx';
 import { ScaleRuler } from '../components/report/ScaleRuler.tsx';
 import { TraitBars } from '../components/report/TraitBars.tsx';
 import { useReport } from '../hooks/useReport.ts';
-import { CLOSED_LABEL, isClosedResponse } from '@micro/payments/client';
-import { CONTACT_EMAIL } from '@micro/payments/contact';
-import { PassOffer } from '../components/PassOffer.tsx';
-import { usePaymentsStatus } from '../hooks/usePaymentsStatus.ts';
-import { ApiError, startCheckout, type PublicResult } from '../lib/api.ts';
-import { leaveTo, onPageRestored } from '../lib/navigation.ts';
-import { getProduct, priceLine } from '../lib/products.ts';
+import { UnlockOffer } from '../components/UnlockOffer.tsx';
+import type { PublicResult } from '../lib/api.ts';
 import { paragraphs, type Report, type ReportBlock } from '../lib/report.ts';
 import { formatReportDate, reportParts, stepSize, type ReportPart } from '../lib/report-view.ts';
+import { BigFiveReportView } from './big-five/BigFiveReportView.tsx';
 
 const CONTENTS = [
   'What each of the four percentages means, including what it means to be near the middle.',
@@ -206,94 +201,35 @@ function ReportView({ report }: { report: Report }) {
   );
 }
 
-interface OfferProps {
-  result: PublicResult;
-  unconfirmed: boolean;
-  revoked: boolean;
-  onCheckAgain: () => void;
-}
-
-function Offer({ result, unconfirmed, revoked, onCheckAgain }: OfferProps) {
-  const [starting, setStarting] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [closedByServer, setClosedByServer] = useState(false);
-  const status = usePaymentsStatus();
-  // Back from Stripe's page can show this page as it was left, with the button still waiting.
-  useEffect(() => onPageRestored(() => setStarting(false)), []);
-  const closed = status?.enabled === false || closedByServer;
-
-  const unlock = async () => {
-    setStarting(true);
-    setFailed(false);
-    try {
-      leaveTo(await startCheckout('report', result.id));
-    } catch (error) {
-      setStarting(false);
-      if (error instanceof ApiError && isClosedResponse(error.status)) setClosedByServer(true);
-      else setFailed(true);
-    }
-  };
-
+/** A locked report: what it holds, and the one-time unlock that opens it. */
+function Locked({ result }: { result: PublicResult }) {
+  const bigFive = result.kind === 'big-five';
   return (
-    <main className="report" data-state="locked" data-type={result.type}>
+    <main className="report" data-state="locked" data-type={bigFive ? undefined : result.type} data-kind={result.kind}>
       <h1 className="report-title">
-        <span className="report-kicker">Full report</span>{' '}
-        <span className="report-type">{result.type}</span>
+        <span className="report-kicker">{bigFive ? 'Full Big Five report' : 'Full report'}</span>{' '}
+        {!bigFive && <span className="report-type">{result.type}</span>}
       </h1>
       <p className="report-lead">
-        A longer read about this result, written for its four percentages and its type.
+        {bigFive
+          ? 'A longer read about this result: both aspects of every trait and what each score means day to day.'
+          : 'A longer read about this result, written for its four percentages and its type.'}
       </p>
-      <ul className="report-contents">
-        {CONTENTS.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
-
-      {revoked && (
-        <div className="report-unconfirmed" data-state="revoked" role="status">
-          <p>This payment was refunded or disputed, so it does not unlock the report.</p>
-          <p>Questions? Write to {CONTACT_EMAIL}.</p>
-        </div>
+      {!bigFive && (
+        <ul className="report-contents">
+          {CONTENTS.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
       )}
-      {unconfirmed && (
-        <div className="report-unconfirmed" role="status">
-          <p>We could not confirm a payment yet. If you paid, wait a few seconds and check again.</p>
-          <button type="button" className="report-check" onClick={onCheckAgain}>
-            Check again
-          </button>
-        </div>
-      )}
-
-      <section className="report-buy">
-        <button
-          type="button"
-          className="report-unlock"
-          onClick={() => void unlock()}
-          disabled={starting || closed}
-          data-state={closed ? 'closed' : 'open'}
-        >
-          {closed ? CLOSED_LABEL : 'Unlock the full report'}
-        </button>
-        <p className="report-price">{priceLine(getProduct('report'))}</p>
-        <p className="report-note">
-          You pay on Stripe. Once it is unlocked, anyone who has the link to this result can read
-          the report.
-        </p>
-        {failed && (
-          <p className="report-error" role="alert">
-            Checkout could not be started. Try again.
-          </p>
-        )}
-        <PassOffer back={`r/${result.id}/report`} />
-      </section>
-
+      <UnlockOffer back={`r/${result.id}/report`} />
       <BackLink id={result.id} />
     </main>
   );
 }
 
-export function ReportPage({ id, sessionId }: { id: string; sessionId: string | null }) {
-  const { state, retry } = useReport(id, sessionId);
+export function ReportPage({ id }: { id: string }) {
+  const { state, retry } = useReport(id);
 
   switch (state.status) {
     case 'loading':
@@ -326,10 +262,8 @@ export function ReportPage({ id, sessionId }: { id: string; sessionId: string | 
         </main>
       );
     case 'locked':
-      return (
-        <Offer result={state.result} unconfirmed={state.unconfirmed} revoked={state.revoked} onCheckAgain={retry} />
-      );
+      return <Locked result={state.result} />;
     case 'ready':
-      return <ReportView report={state.report} />;
+      return state.report.kind === 'big-five' ? <BigFiveReportView report={state.report} /> : <ReportView report={state.report} />;
   }
 }

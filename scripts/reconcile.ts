@@ -8,7 +8,7 @@
  * Run it after each test session and daily for the first week of live sales. Exit code 1 means differences.
  */
 import type Stripe from 'stripe';
-import { SELLERS, type Seller } from './lib/catalog.ts';
+import { SELLERS } from './lib/catalog.ts';
 import { d1, DAY, environmentFromArgs, quote } from './lib/d1.ts';
 import { differences, madeOn, type SaleRow, type StripeSale } from './lib/reconcile.ts';
 import { flag, modeFromKey, stripeFor } from './lib/stripe.ts';
@@ -74,7 +74,7 @@ async function main() {
 
   // Sharing alerts.
   const alerts: string[] = [];
-  for (const app of SELLERS.filter((name): name is Exclude<Seller, 'personality'> => name !== 'personality')) {
+  for (const app of SELLERS) {
     const full = d1<{ stripe_session_id: string; for_app: string; devices: number }>(
       app,
       environment,

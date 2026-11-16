@@ -12,6 +12,8 @@ export const SITE: Site = { origin: appConfig.origin, base: appConfig.base, site
 
 const HOME_DESCRIPTION =
   '40 questions built on Big Five research. Get your four-letter type with a percentage on each scale. Free result, no email, no account.';
+const BIG_FIVE_DESCRIPTION =
+  'The Big Five Aspect Scales: 100 public-domain research questions. A score on each of the five traits, free, with no email and no account.';
 const IMAGE = {
   image: 'og.png',
   imageAlt: 'Free personality test: 40 questions, a four-letter type and a percentage on each of four scales.',
@@ -34,6 +36,23 @@ export const PAGES = {
       }),
     ],
   },
+  bigFive: {
+    path: 'big-five/',
+    title: 'Free Big Five Personality Test: 100 Questions',
+    description: BIG_FIVE_DESCRIPTION,
+    ...IMAGE,
+    imageAlt: 'Free Big Five personality test: 100 questions and a score on each of the five traits.',
+    jsonLd: [
+      webApplication({
+        name: 'Big Five personality test',
+        url: `${SITE.origin}${SITE.base}big-five/`,
+        description: BIG_FIVE_DESCRIPTION,
+        category: 'LifestyleApplication',
+        freeName: 'Free: a score from 0 to 100 on each of the five traits',
+        products: catalog.products,
+      }),
+    ],
+  },
   science: {
     path: 'science/',
     title: 'How This Personality Test Works: Big Five Research',
@@ -50,10 +69,10 @@ export const PAGES = {
 } satisfies Record<string, PageSeo>;
 
 /**
- * Routes served by a noindex shell: results and comparisons (r/..., c/...), the pass code page, and the test
- * itself, which shows this device's answers in progress.
+ * Routes served by a noindex shell: results and comparisons (r/..., c/...), the unlock and code pages, and the
+ * tests themselves, which show this device's answers in progress. 'pass' is the old address of the code page.
  */
-export const PRIVATE_ROUTES = ['test', 'pass', 'r/*', 'c/*'];
+export const PRIVATE_ROUTES = ['test', 'big-five/test', 'unlock', 'restore', 'pass', 'r/*', 'c/*'];
 
 /**
  * One scale on the share image, drawn like the result page: a hairline with a tick at the middle, filled in

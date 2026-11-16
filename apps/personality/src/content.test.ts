@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CONTENT } from '../server/content.generated.ts';
 import { parseContent, wordCount } from './lib/content.ts';
+import { bigFiveQuestions } from './lib/big-five-test.ts';
 import { currentQuestions } from './lib/questions.ts';
 
 const files = import.meta.glob<string>('../content/**/*.md', {
@@ -16,6 +17,8 @@ function read(path: string): string {
 }
 
 const axes = currentQuestions.axes;
+const traits = bigFiveQuestions.axes;
+const aspects = traits.flatMap((trait) => trait.aspects);
 const TYPE_CODES = ['E', 'I'].flatMap((ei) =>
   ['S', 'N'].flatMap((sn) => ['T', 'F'].flatMap((tf) => ['J', 'P'].map((jp) => ei + sn + tf + jp))),
 );
@@ -74,10 +77,12 @@ describe('content files', () => {
     expect(CONTENT).toEqual(fromDisk);
   });
 
-  it('has the 26 expected files and no others', () => {
+  it('has the 46 expected files and no others', () => {
     const expected = [
       ...TYPE_CODES.map((code) => `types/${code}.md`),
       ...axes.flatMap((axis) => [`axes/${axis.id}.md`, `pairs/${axis.id}.md`]),
+      ...traits.flatMap((trait) => [`big-five/traits/${trait.id}.md`, `big-five/pairs/${trait.id}.md`]),
+      ...aspects.map((aspect) => `big-five/aspects/${aspect.id}.md`),
       'science.md',
       'privacy.md',
     ];
@@ -123,5 +128,41 @@ describe('content files', () => {
       `One ${axis.left.letter}, one ${axis.right.letter}`,
       'Questions to talk through',
     ]);
+  });
+
+  it.each(traits)('big-five/traits/$id.md has every band, short and in depth', (trait) => {
+    const { title, sections } = parseContent(read(`big-five/traits/${trait.id}.md`));
+    expect(title).toBe(trait.name);
+    expect(Object.keys(sections)).toEqual([
+      'What this trait measures',
+      'Higher',
+      'Middle',
+      'Lower',
+      'Higher in depth',
+      'Middle in depth',
+      'Lower in depth',
+    ]);
+    for (const band of ['Higher', 'Middle', 'Lower']) {
+      expect(wordCount(sections[band] ?? '')).toBeGreaterThanOrEqual(30);
+      expect(wordCount(sections[`${band} in depth`] ?? '')).toBeGreaterThanOrEqual(90);
+    }
+  });
+
+  it.each(aspects)('big-five/aspects/$id.md says what it measures and has both halves', (aspect) => {
+    const { title, sections } = parseContent(read(`big-five/aspects/${aspect.id}.md`));
+    expect(title).toBe(aspect.name);
+    expect(Object.keys(sections)).toEqual(['What this aspect measures', 'Higher', 'Lower']);
+  });
+
+  it.each(traits)('big-five/pairs/$id.md covers alike, different and questions', (trait) => {
+    const { sections } = parseContent(read(`big-five/pairs/${trait.id}.md`));
+    expect(Object.keys(sections)).toEqual(['Alike', 'Different', 'Questions to talk through']);
+  });
+
+  it('never compares a Big Five score with other people: there are no norms yet', () => {
+    for (const [path, text] of Object.entries(files)) {
+      if (!path.includes('big-five/')) continue;
+      expect(/than (most|other) people|above average|below average|average person/i.exec(text)?.[0], path).toBeUndefined();
+    }
   });
 });

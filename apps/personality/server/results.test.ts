@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import p1 from '../src/data/items.p1.json';
 import { score } from '../src/lib/scoring.ts';
 import { randomId, RESULT_ID_PATTERN, sha256Hex } from './ids.ts';
+import { LOCKED } from './payments.ts';
 import { createResult, deleteResult, getResult } from './results.ts';
 import { createTestDb, type TestDb } from './testing.ts';
 
@@ -66,16 +67,6 @@ async function expectError(response: Response, status: number, code: string): Pr
   const body = await response.json<ErrorBody>();
   expect(body.error).toBe(code);
   expect(body.message.length).toBeGreaterThan(0);
-}
-
-async function addPurchase(resultId: string, product: string, status: string): Promise<void> {
-  await db
-    .prepare(
-      `INSERT INTO purchases (id, stripe_session_id, product, result_id, amount_cents, currency, status, created_at)
-       VALUES (?, ?, ?, ?, 999, 'usd', ?, ?)`,
-    )
-    .bind(randomId(), `cs_test_${randomId()}`, product, resultId, status, new Date().toISOString())
-    .run();
 }
 
 describe('ids', () => {
@@ -169,13 +160,13 @@ describe('POST /api/results', () => {
 describe('GET /api/results/:id', () => {
   it('returns the stored result without answers or the delete token', async () => {
     const created = await create();
-    const response = await getResult(created.id, db, 'test');
+    const response = await getResult(created.id, db, LOCKED);
     expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe('no-store');
 
     const body = await response.json<Record<string, unknown>>();
     expect(Object.keys(body).sort()).toEqual(
-      ['createdAt', 'flags', 'id', 'scores', 'summary', 'type', 'unlocked', 'version'].sort(),
+      ['createdAt', 'flags', 'id', 'kind', 'scores', 'summary', 'type', 'unlocked', 'version'].sort(),
     );
     expect(body.id).toBe(created.id);
     expect(body.version).toBe('p1');
@@ -188,32 +179,13 @@ describe('GET /api/results/:id', () => {
   });
 
   it('returns 404 for an id that does not exist', async () => {
-    await expectError(await getResult(randomId(), db, 'test'), 404, 'not_found');
+    await expectError(await getResult(randomId(), db, LOCKED), 404, 'not_found');
   });
 
   it('returns 404 for an id in the wrong format', async () => {
     for (const id of ['', 'abc', '1', "x' OR '1'='1", 'A'.repeat(16)]) {
-      await expectError(await getResult(id, db, 'test'), 404, 'not_found');
+      await expectError(await getResult(id, db, LOCKED), 404, 'not_found');
     }
-  });
-
-  it('is unlocked after a paid purchase of the report or of both', async () => {
-    for (const product of ['report', 'both']) {
-      const created = await create();
-      await addPurchase(created.id, product, 'paid');
-      const body = await (await getResult(created.id, db, 'test')).json<{ unlocked: boolean }>();
-      expect(body.unlocked).toBe(true);
-    }
-  });
-
-  it('is not unlocked by an unpaid purchase or by the couple report alone', async () => {
-    const unpaid = await create();
-    await addPurchase(unpaid.id, 'report', 'pending');
-    expect((await (await getResult(unpaid.id, db, 'test')).json<{ unlocked: boolean }>()).unlocked).toBe(false);
-
-    const couple = await create();
-    await addPurchase(couple.id, 'couple', 'paid');
-    expect((await (await getResult(couple.id, db, 'test')).json<{ unlocked: boolean }>()).unlocked).toBe(false);
   });
 });
 
@@ -222,13 +194,13 @@ describe('DELETE /api/results/:id', () => {
     const created = await create();
     const response = await deleteResult(del(created.id, created.deleteToken), created.id, db);
     expect(response.status).toBe(204);
-    await expectError(await getResult(created.id, db, 'test'), 404, 'not_found');
+    await expectError(await getResult(created.id, db, LOCKED), 404, 'not_found');
   });
 
   it('refuses without a token', async () => {
     const created = await create();
     await expectError(await deleteResult(del(created.id), created.id, db), 401, 'missing_token');
-    expect((await getResult(created.id, db, 'test')).status).toBe(200);
+    expect((await getResult(created.id, db, LOCKED)).status).toBe(200);
   });
 
   it('refuses with the wrong token', async () => {
@@ -239,7 +211,7 @@ describe('DELETE /api/results/:id', () => {
       403,
       'wrong_token',
     );
-    expect((await getResult(created.id, db, 'test')).status).toBe(200);
+    expect((await getResult(created.id, db, LOCKED)).status).toBe(200);
   });
 
   it('returns 404 for an id that does not exist', async () => {

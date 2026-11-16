@@ -13,8 +13,8 @@ import { flag } from './lib/stripe.ts';
 async function main() {
   const args = process.argv.slice(2);
   const app = flag(args, '--app') as Seller | undefined;
-  if (!app || !SELLERS.includes(app) || app === 'personality') {
-    throw new Error('Say which app: --app focus|breathwork|attention|intention|pass');
+  if (!app || !SELLERS.includes(app)) {
+    throw new Error('Say which app: --app personality|focus|breathwork|attention|intention|pass');
   }
   const typed = flag(args, '--code');
   const hash = typed ? await hashOfTyped(app, typed) : null;

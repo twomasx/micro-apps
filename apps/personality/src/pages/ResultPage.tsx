@@ -1,74 +1,32 @@
-import { share } from '@micro/platform';
-import { useCallback, useEffect, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, type CSSProperties } from 'react';
 import { Link } from '../components/Link.tsx';
+import { ResultActions } from '../components/ResultActions.tsx';
 import { useLoaded } from '../hooks/useLoaded.ts';
 import { useResult } from '../hooks/useResult.ts';
 import { revealStep, useReveal } from '../hooks/useReveal.ts';
-import { ApiError, deleteResult, type PublicResult } from '../lib/api.ts';
-import { appHref, navigate } from '../lib/navigation.ts';
+import type { TypeResult } from '../lib/api.ts';
 import { getProduct, priceLine } from '../lib/products.ts';
 import { getQuestions } from '../lib/questions.ts';
-import { COMPARE_WARNING, describeAxes, SAME_ANSWERS_MESSAGE } from '../lib/result-view.ts';
-import { shareMessage } from '../lib/share-message.ts';
+import { describeAxes, SAME_ANSWERS_MESSAGE } from '../lib/result-view.ts';
 import { loadResults, removeResult, type SavedResult } from '../lib/store.ts';
+import { BigFiveResultView } from './big-five/BigFiveResultView.tsx';
 
 // The reveal: letters and axes come in one after another, numbers count up from 50.
 const STEP_DELAY_MS = 150;
 const STEP_DURATION_MS = 900;
 const REVEAL_MS = STEP_DELAY_MS * 3 + STEP_DURATION_MS;
 
-function absoluteUrl(path: string): string {
-  return `${window.location.origin}${appHref(path)}`;
-}
-
 interface ResultViewProps {
-  result: PublicResult;
+  result: TypeResult;
   /** Set when this result was taken on this device. */
   own: SavedResult | undefined;
 }
 
 function ResultView({ result, own }: ResultViewProps) {
-  const [message, setMessage] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
   const questions = getQuestions(result.version);
   const axes = questions ? describeAxes(result.scores, questions) : [];
   const elapsed = useReveal(REVEAL_MS);
   const revealed = elapsed >= REVEAL_MS;
-
-  const shareResult = async () => {
-    const outcome = await share({
-      title: `My personality type is ${result.type}`,
-      url: absoluteUrl(`r/${result.id}`),
-    });
-    setMessage(shareMessage(outcome));
-  };
-
-  const shareCompareLink = async () => {
-    const outcome = await share({
-      title: 'Take this personality test and compare your result with mine',
-      url: absoluteUrl(`?with=${result.id}`),
-    });
-    setMessage(shareMessage(outcome));
-  };
-
-  const deleteOwn = async () => {
-    if (!own) return;
-    if (!window.confirm('Delete this result? This cannot be undone.')) return;
-    setDeleting(true);
-    try {
-      try {
-        await deleteResult(result.id, own.deleteToken);
-      } catch (cause) {
-        // 404: already gone, for example when the first try worked but its answer was lost.
-        if (!(cause instanceof ApiError && cause.status === 404)) throw cause;
-      }
-      await removeResult(result.id);
-      navigate('', { replace: true });
-    } catch {
-      setDeleting(false);
-      setMessage('The result could not be deleted. Try again.');
-    }
-  };
 
   return (
     <main
@@ -144,12 +102,6 @@ function ResultView({ result, own }: ResultViewProps) {
         })}
       </ul>
 
-      <section className="result-share">
-        <button type="button" className="result-share-button" onClick={() => void shareResult()}>
-          Share this result
-        </button>
-      </section>
-
       <section className="result-report" data-unlocked={result.unlocked}>
         <h2 className="result-report-title">Full report</h2>
         <p className="result-report-lead">
@@ -158,49 +110,10 @@ function ResultView({ result, own }: ResultViewProps) {
         <Link to={`r/${result.id}/report`} className="result-report-link">
           {result.unlocked ? 'Read the full report' : 'See the full report'}
         </Link>
-        {!result.unlocked && (
-          <p className="result-report-price">{priceLine(getProduct('report'))}</p>
-        )}
+        {!result.unlocked && <p className="result-report-price">{priceLine(getProduct('lifetime'))}</p>}
       </section>
 
-      {own ? (
-        <section className="result-compare">
-          <h2 className="result-compare-title">Compare with someone</h2>
-          <p className="result-compare-warning">{COMPARE_WARNING}</p>
-          <button
-            type="button"
-            className="result-compare-button"
-            onClick={() => void shareCompareLink()}
-          >
-            Send a compare link
-          </button>
-        </section>
-      ) : (
-        <p className="result-take-test">
-          <Link to="" className="result-take-test-link">
-            Take the test yourself
-          </Link>
-        </p>
-      )}
-
-      {message && (
-        <p className="result-message" role="status">
-          {message}
-        </p>
-      )}
-
-      {own && (
-        <section className="result-delete">
-          <button
-            type="button"
-            className="result-delete-button"
-            onClick={() => void deleteOwn()}
-            disabled={deleting}
-          >
-            Delete this result
-          </button>
-        </section>
-      )}
+      <ResultActions id={result.id} kind="type" own={own} shareTitle={`My personality type is ${result.type}`} />
     </main>
   );
 }
@@ -255,5 +168,9 @@ export function ResultPage({ id }: { id: string }) {
     );
   }
 
-  return <ResultView result={state.result} own={own ?? undefined} />;
+  return state.result.kind === 'big-five' ? (
+    <BigFiveResultView result={state.result} own={own ?? undefined} />
+  ) : (
+    <ResultView result={state.result} own={own ?? undefined} />
+  );
 }

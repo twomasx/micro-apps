@@ -17,8 +17,8 @@ import { hashCode } from '@micro/payments/unlock-codes';
 async function main() {
   const args = process.argv.slice(2);
   const app = flag(args, '--app') as Seller | undefined;
-  if (!app || !SELLERS.includes(app) || app === 'personality') {
-    throw new Error('Say which app: --app focus|breathwork|attention|intention|pass (personality has no codes)');
+  if (!app || !SELLERS.includes(app)) {
+    throw new Error('Say which app: --app personality|focus|breathwork|attention|intention|pass');
   }
   const environment = environmentFromArgs(args);
   const session = flag(args, '--session');

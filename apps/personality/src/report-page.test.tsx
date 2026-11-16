@@ -3,9 +3,10 @@ import 'fake-indexeddb/auto';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App.tsx';
-import type { PublicResult } from './lib/api.ts';
+import type { PublicResult, TypeReport } from './lib/api.ts';
+import type { BigFiveReport, BigFiveResultResponse } from './lib/big-five-view.ts';
+import { saveUnlock, loadUnlockBack } from './lib/store.ts';
 import { leaveTo } from './lib/navigation.ts';
-import type { Report } from './lib/report.ts';
 
 // Leaving for Stripe would navigate the test page away, so only record it.
 vi.mock('./lib/navigation.ts', async (importOriginal) => ({
@@ -17,6 +18,7 @@ const ID = 'abcdefghjkmnpqrs';
 const CHECKOUT_URL = 'https://checkout.stripe.com/c/pay/cs_test_1';
 
 const RESULT: PublicResult = {
+  kind: 'type',
   id: ID,
   version: 'p1',
   type: 'INTJ',
@@ -32,7 +34,8 @@ const RESULT: PublicResult = {
   unlocked: false,
 };
 
-const REPORT: Report = {
+const REPORT: TypeReport = {
+  kind: 'type',
   id: ID,
   type: 'INTJ',
   version: 'p1',
@@ -60,9 +63,38 @@ const REPORT: Report = {
   sections: [{ heading: 'Strengths', body: 'Strengths text.' }],
 };
 
+const BIG_FIVE: BigFiveResultResponse = {
+  kind: 'big-five',
+  id: ID,
+  version: 'b1',
+  traits: [
+    { trait: 'O', name: 'Openness to experience', pct: 72.5, band: 'higher', measures: 'O measures.', summary: 'O summary.' },
+    { trait: 'N', name: 'Neuroticism', pct: 31.25, band: 'lower', measures: 'N measures.', summary: 'N summary.' },
+  ],
+  flags: [],
+  createdAt: '2026-11-15T00:00:00.000Z',
+  unlocked: false,
+};
+
+const BIG_FIVE_REPORT: BigFiveReport = {
+  kind: 'big-five',
+  id: ID,
+  version: 'b1',
+  createdAt: '2026-11-15T12:00:00.000Z',
+  questionCount: 100,
+  traits: BIG_FIVE.traits.map((trait) => ({
+    ...trait,
+    depth: `${trait.trait} depth first.\n\n${trait.trait} depth second.`,
+    aspects: [
+      { aspect: `${trait.trait}1`, name: `${trait.trait} aspect one`, pct: 80, band: 'higher', measures: 'm', text: `${trait.trait} one text.` },
+      { aspect: `${trait.trait}2`, name: `${trait.trait} aspect two`, pct: 20, band: 'lower', measures: 'm', text: `${trait.trait} two text.` },
+    ],
+  })),
+};
+
 const fetchMock = vi.fn<typeof fetch>();
 /** What the report endpoint answers, in order. The last one repeats. */
-let reportAnswers: (Report | 402 | 'revoked')[];
+let reportAnswers: (TypeReport | BigFiveReport | 402)[];
 /** What the result endpoint says: null means the result does not exist. */
 let result: PublicResult | null;
 
@@ -70,9 +102,6 @@ function reportResponse(): Response {
   const answer = reportAnswers.length > 1 ? reportAnswers.shift() : reportAnswers[0];
   if (answer === 402) {
     return Response.json({ error: 'payment_required', message: 'Not unlocked.' }, { status: 402 });
-  }
-  if (answer === 'revoked') {
-    return Response.json({ error: 'payment_revoked', message: 'Refunded or disputed.' }, { status: 402 });
   }
   return Response.json(answer);
 }
@@ -113,28 +142,32 @@ describe('report page', () => {
     open(`/personality/r/${ID}/report`);
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Full report INTJ' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Unlock everything in Personality' })).toBeTruthy();
     expect(screen.getByText('$9.99 once. No renewals.')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Unlock the full report' })).toBeTruthy();
-    expect(screen.queryByText(/could not confirm/)).toBeNull();
+    expect(screen.getByRole('button', { name: 'Unlock everything' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Enter your code' }).getAttribute('href')).toBe(
+      `/personality/restore/?back=r%2F${ID}%2Freport`,
+    );
     expect(screen.queryByText('Strengths text.')).toBeNull();
     // A locked report is not requested, so the browser logs no failed request.
     expect(calls('/report')).toEqual([]);
     expect(document.title).toContain('Full report');
   });
 
-  it('starts checkout on the server and goes to the URL it returns', async () => {
+  it('starts checkout for the lifetime unlock and remembers this report to come back to', async () => {
     open(`/personality/r/${ID}/report`);
-    fireEvent.click(await screen.findByRole('button', { name: 'Unlock the full report' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Unlock everything' }));
 
     await waitFor(() => expect(leaveTo).toHaveBeenCalledWith(CHECKOUT_URL));
     const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(post?.[0]).toBe('/personality/api/checkout');
-    expect(JSON.parse(String(post?.[1]?.body))).toEqual({ product: 'report', resultId: ID });
+    expect(JSON.parse(String(post?.[1]?.body))).toEqual({ product: 'lifetime' });
+    expect(await loadUnlockBack()).toBe(`r/${ID}/report`);
   });
 
   it('wakes the button again when Back from Stripe shows the page as it was left', async () => {
     open(`/personality/r/${ID}/report`);
-    const button = await screen.findByRole('button', { name: 'Unlock the full report' });
+    const button = await screen.findByRole('button', { name: 'Unlock everything' });
     fireEvent.click(button);
     await waitFor(() => expect(leaveTo).toHaveBeenCalledWith(CHECKOUT_URL));
     expect((button as HTMLButtonElement).disabled).toBe(true);
@@ -145,11 +178,13 @@ describe('report page', () => {
 
   it('says so when checkout cannot be started', async () => {
     open(`/personality/r/${ID}/report`);
-    const button = await screen.findByRole('button', { name: 'Unlock the full report' });
+    const button = await screen.findByRole('button', { name: 'Unlock everything' });
     fetchMock.mockImplementation(async () => new Response(null, { status: 500 }));
     fireEvent.click(button);
 
-    expect((await screen.findByRole('alert')).textContent).toBe('Checkout could not be started. Try again.');
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Checkout could not be started. Check your connection and try again.',
+    );
     expect(leaveTo).not.toHaveBeenCalled();
   });
 
@@ -165,7 +200,7 @@ describe('report page', () => {
     expect(screen.getByText('Second paragraph.')).toBeTruthy();
     expect(screen.getByRole('heading', { level: 2, name: '04 INTJ in depth' })).toBeTruthy();
     expect(screen.getByText('Strengths text.')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Unlock the full report' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Unlock everything' })).toBeNull();
 
     // The graphics: the profile panel, a ruler with all 41 positions, and the trait bar.
     expect(screen.getByRole('img', { name: 'Profile: 53% Intuition.' })).toBeTruthy();
@@ -195,32 +230,41 @@ describe('report page', () => {
     );
   });
 
-  it('sends the checkout session to the server, then drops it from the URL', async () => {
+  it("sends this device's unlock code and device id with its requests", async () => {
+    await saveUnlock({ code: '7K3M-Q9TD-2XWB-HC4R', valid: true, checkedAt: 1 });
+    result = { ...RESULT, unlocked: true };
     reportAnswers = [REPORT];
-    open(`/personality/r/${ID}/report?session_id=cs_test_1`);
+    open(`/personality/r/${ID}/report`);
 
     expect(await screen.findByText('Strengths text.')).toBeTruthy();
-    expect(calls('/report')).toEqual([`/personality/api/results/${ID}/report?session_id=cs_test_1`]);
-    await waitFor(() => expect(window.location.search).toBe(''));
-    expect(window.location.pathname).toBe(`/personality/r/${ID}/report/`);
+    const [, init] = fetchMock.mock.calls.find(([input]) => String(input).includes('/report'))!;
+    const headers = init?.headers as Record<string, string>;
+    expect(headers['X-Unlock-Code']).toBe('7K3M-Q9TD-2XWB-HC4R');
+    expect(headers['X-Device-Id']).toMatch(/^[a-z0-9]{12,64}$/);
   });
 
-  it('offers to check again when the payment is not confirmed yet', async () => {
-    reportAnswers = [402, REPORT];
-    open(`/personality/r/${ID}/report?session_id=cs_test_1`);
-
-    expect((await screen.findByRole('status')).textContent).toContain('could not confirm a payment');
-    fireEvent.click(screen.getByRole('button', { name: 'Check again' }));
-    expect(await screen.findByText('Strengths text.')).toBeTruthy();
+  it('a locked Big Five report offers the same unlock', async () => {
+    result = BIG_FIVE;
+    open(`/personality/r/${ID}/report`);
+    expect(await screen.findByRole('heading', { level: 1, name: 'Full Big Five report' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Unlock everything' })).toBeTruthy();
+    expect(calls('/report')).toEqual([]);
   });
 
-  it('says when the payment it came back from was refunded or disputed', async () => {
-    reportAnswers = ['revoked'];
-    open(`/personality/r/${ID}/report?session_id=cs_test_1`);
+  it('shows the Big Five report: each trait in depth with both aspects', async () => {
+    result = { ...BIG_FIVE, unlocked: true };
+    reportAnswers = [BIG_FIVE_REPORT];
+    open(`/personality/r/${ID}/report`);
 
-    expect((await screen.findByRole('status')).textContent).toContain('refunded or disputed');
-    expect(screen.queryByText(/could not confirm/)).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Check again' })).toBeNull();
+    expect(await screen.findByRole('heading', { level: 2, name: '01 Openness to experience' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: '02 Neuroticism' })).toBeTruthy();
+    expect(screen.getByText('O depth first.')).toBeTruthy();
+    expect(screen.getByText('O depth second.')).toBeTruthy();
+    expect(screen.getByText('O one text.')).toBeTruthy();
+    expect(screen.getByText('N two text.')).toBeTruthy();
+    expect(screen.getByText('Toward the higher end')).toBeTruthy();
+    expect(document.querySelectorAll('.big-five-aspect')).toHaveLength(4);
+    expect(document.getElementById('method')).toBeTruthy();
   });
 
   it('says when the result does not exist', async () => {
@@ -237,6 +281,17 @@ describe('result page', () => {
     expect(link.getAttribute('href')).toBe(`/personality/r/${ID}/report/`);
     expect(screen.getByText('$9.99 once. No renewals.')).toBeTruthy();
     expect(screen.getByText('A short summary.')).toBeTruthy();
+  });
+
+  it('shows a Big Five result: five traits with scores, bands and text', async () => {
+    result = BIG_FIVE;
+    open(`/personality/r/${ID}`);
+    expect(await screen.findByRole('heading', { level: 1, name: 'This result Big Five' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Openness to experience 73' })).toBeTruthy();
+    expect(screen.getByText('O summary.')).toBeTruthy();
+    expect(screen.getByText('Toward the lower end')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'See the full report' }).getAttribute('href')).toBe(`/personality/r/${ID}/report/`);
+    expect(screen.getByRole('link', { name: 'Take the test yourself' }).getAttribute('href')).toBe('/personality/big-five/');
   });
 
   it('shows no price once the report is unlocked', async () => {

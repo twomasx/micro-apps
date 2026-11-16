@@ -1,57 +1,37 @@
 import { useEffect, useState } from 'react';
-import { ApiError, fetchReport, fetchResult, type PublicResult } from '../lib/api.ts';
-import { navigate } from '../lib/navigation.ts';
-import type { Report } from '../lib/report.ts';
+import { ApiError, fetchReport, fetchResult, type AnyReport, type PublicResult } from '../lib/api.ts';
 
 export type ReportState =
   | { status: 'loading' }
-  | { status: 'ready'; report: Report }
-  /**
-   * Not paid. `unconfirmed` is true when the buyer came back from Checkout and it still is not paid.
-   * `revoked` is true when they came back and that payment was refunded or disputed.
-   */
-  | { status: 'locked'; result: PublicResult; unconfirmed: boolean; revoked: boolean }
+  | { status: 'ready'; report: AnyReport }
+  /** This device has no unlock code or pass that opens it. */
+  | { status: 'locked'; result: PublicResult }
   | { status: 'notFound' }
   | { status: 'error' };
 
-async function load(id: string, sessionId: string | null): Promise<ReportState> {
+async function load(id: string): Promise<ReportState> {
   const result = await fetchResult(id);
   // Only ask for the report when it should be there, so a locked report is not a failed request.
-  if (!result.unlocked && sessionId === null) {
-    return { status: 'locked', result, unconfirmed: false, revoked: false };
-  }
+  if (!result.unlocked) return { status: 'locked', result };
   try {
-    return { status: 'ready', report: await fetchReport(id, sessionId) };
+    return { status: 'ready', report: await fetchReport(id) };
   } catch (cause) {
-    if (!(cause instanceof ApiError) || cause.status !== 402) throw cause;
-    // The server decides what is paid. 402 means the payment is not confirmed, or was taken back.
-    const revoked = cause.code === 'payment_revoked';
-    return { status: 'locked', result, unconfirmed: sessionId !== null && !revoked, revoked };
+    // The server decides. 402 means the code or pass stopped counting between the two requests.
+    if (cause instanceof ApiError && cause.status === 402) return { status: 'locked', result };
+    throw cause;
   }
 }
 
-/**
- * Loads the paid report. `sessionId` is the Checkout session from the return URL;
- * the server uses it to confirm the payment if the webhook has not arrived yet.
- * Mount it with `key={id}` so each id starts fresh.
- */
-export function useReport(
-  id: string,
-  sessionId: string | null,
-): { state: ReportState; retry: () => void } {
+/** Loads the paid report for one result of either test. Mount it with `key={id}` so each id starts fresh. */
+export function useReport(id: string): { state: ReportState; retry: () => void } {
   const [state, setState] = useState<ReportState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
-  // Keep the session from the first render: the URL loses it once the report opens.
-  const [session] = useState(sessionId);
 
   useEffect(() => {
     let cancelled = false;
-    load(id, session).then(
+    load(id).then(
       (next) => {
-        if (cancelled) return;
-        setState(next);
-        // A reload or a shared link should not carry the session id.
-        if (next.status === 'ready' && session) navigate(`r/${id}/report`, { replace: true });
+        if (!cancelled) setState(next);
       },
       (cause: unknown) => {
         if (cancelled) return;
@@ -62,7 +42,7 @@ export function useReport(
     return () => {
       cancelled = true;
     };
-  }, [id, session, attempt]);
+  }, [id, attempt]);
 
   const retry = () => {
     setState({ status: 'loading' });

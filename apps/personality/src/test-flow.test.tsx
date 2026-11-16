@@ -3,6 +3,7 @@ import 'fake-indexeddb/auto';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App.tsx';
+import { bigFiveQuestions } from './lib/big-five-test.ts';
 import { currentQuestions as questions } from './lib/questions.ts';
 import { score } from './lib/scoring.ts';
 import {
@@ -93,7 +94,9 @@ afterEach(async () => {
   vi.unstubAllEnvs();
   await clearProgress(questions.version);
   await removeResult(RESULT_ID);
-  await clearCompareWith();
+  await clearCompareWith('type');
+  await clearCompareWith('big-five');
+  await clearProgress(bigFiveQuestions.version);
 });
 
 describe('test flow', () => {
@@ -242,7 +245,7 @@ describe('test flow', () => {
   });
 
   it('opens the comparison when you came from a compare link', async () => {
-    await saveCompareWith('zzzzzzzzzzzzzzzz');
+    await saveCompareWith('type', 'zzzzzzzzzzzzzzzz');
     respondWithResult();
     await openTest();
     await answerQuestions(TOTAL - 1, 4);
@@ -253,7 +256,37 @@ describe('test flow', () => {
       expect(window.location.pathname).toBe(`/personality/c/zzzzzzzzzzzzzzzz/${RESULT_ID}/`),
     );
     // Used once: the next test you take ends on the plain result.
-    expect(await loadCompareWith()).toBeNull();
+    expect(await loadCompareWith('type')).toBeNull();
+  });
+
+  it('the Big Five test: 100 questions, its own progress and compare link, then the result', async () => {
+    await saveCompareWith('type', 'zzzzzzzzzzzzzzzz');
+    await saveCompareWith('big-five', 'yyyyyyyyyyyyyyyy');
+    fetchMock.mockImplementation(async (_input, init) =>
+      init?.method === 'POST'
+        ? Response.json({ id: RESULT_ID, kind: 'big-five', version: 'b1', type: '', flags: [], deleteToken: 'token' }, { status: 201 })
+        : Response.json({ error: 'not_found', message: 'Not in this test.' }, { status: 404 }),
+    );
+    window.history.pushState(null, '', '/personality/big-five/test');
+    render(<App />);
+    await screen.findByRole('status');
+    expect(screen.getByRole('heading', { level: 1, name: 'Big Five test' })).toBeTruthy();
+    expect(progressText()).toBe('Question 1 of 100');
+    expect(document.querySelectorAll('.test-axis')).toHaveLength(5);
+
+    await answerQuestions(99, 2);
+    choose(2);
+    fireEvent.click(screen.getByRole('button', { name: 'See your result' }));
+    // The Big Five compare link is used, the four-letter one is left alone.
+    await waitFor(() => expect(window.location.pathname).toBe(`/personality/c/yyyyyyyyyyyyyyyy/${RESULT_ID}/`));
+    expect(await loadCompareWith('type')).toBe('zzzzzzzzzzzzzzzz');
+
+    const [, init] = fetchMock.mock.calls.find(([, options]) => options?.method === 'POST') ?? [];
+    const sent = JSON.parse(String(init?.body)) as { version: string; answers: Record<string, number> };
+    expect(sent.version).toBe('b1');
+    expect(Object.keys(sent.answers)).toHaveLength(100);
+    expect(await loadProgress('b1')).toBeUndefined();
+    expect(await loadResults()).toMatchObject([{ id: RESULT_ID, version: 'b1', type: '' }]);
   });
 
   it('keeps the answers and says so when sending fails', async () => {

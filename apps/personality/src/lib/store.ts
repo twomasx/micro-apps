@@ -1,13 +1,21 @@
 import { createStorage, storageKey } from '@micro/platform';
 import { appConfig } from '../../app.config.ts';
+import { sanitizeUnlock, type SavedUnlock } from '@micro/payments/saved-unlock';
 import type { Progress } from './progress.ts';
+import type { TestKind } from './tests.ts';
 
 // IndexedDB can be missing or blocked (some private modes). The test still
 // works then; it only loses resume and "Your last result".
 const storage = createStorage(appConfig.name);
 
 const RESULTS_KEY = storageKey(appConfig.name, 'results');
-const COMPARE_WITH_KEY = storageKey(appConfig.name, 'compare-with');
+const UNLOCK_KEY = storageKey(appConfig.name, 'unlock');
+const UNLOCK_BACK_KEY = storageKey(appConfig.name, 'unlock-back');
+
+/** The four-letter test keeps the key it always had; each other test has its own. */
+function compareWithKey(kind: TestKind): string {
+  return storageKey(appConfig.name, kind === 'type' ? 'compare-with' : `compare-with:${kind}`);
+}
 
 function progressKey(version: string): string {
   return storageKey(appConfig.name, `progress:${version}`);
@@ -76,26 +84,61 @@ export async function removeResult(id: string): Promise<void> {
 }
 
 /** The result someone asked you to compare with, kept while you take the test. */
-export async function loadCompareWith(): Promise<string | null> {
+export async function loadCompareWith(kind: TestKind): Promise<string | null> {
   try {
-    return (await storage.get<string>(COMPARE_WITH_KEY)) ?? null;
+    return (await storage.get<string>(compareWithKey(kind))) ?? null;
   } catch {
     return null;
   }
 }
 
-export async function saveCompareWith(resultId: string): Promise<void> {
+export async function saveCompareWith(kind: TestKind, resultId: string): Promise<void> {
   try {
-    await storage.set(COMPARE_WITH_KEY, resultId);
+    await storage.set(compareWithKey(kind), resultId);
   } catch {
     // See saveProgress. The test still works; it ends on the plain result.
   }
 }
 
-export async function clearCompareWith(): Promise<void> {
+export async function clearCompareWith(kind: TestKind): Promise<void> {
   try {
-    await storage.delete(COMPARE_WITH_KEY);
+    await storage.delete(compareWithKey(kind));
   } catch {
     // See saveProgress.
+  }
+}
+
+/** The Personality unlock code saved on this device, or null. */
+export async function loadUnlock(): Promise<SavedUnlock | null> {
+  try {
+    return sanitizeUnlock(await storage.get<unknown>(UNLOCK_KEY));
+  } catch {
+    return null;
+  }
+}
+
+export async function saveUnlock(unlock: SavedUnlock): Promise<void> {
+  try {
+    await storage.set(UNLOCK_KEY, unlock);
+  } catch {
+    // The unlock still works for this visit. The code can be entered again on the restore page.
+  }
+}
+
+/** The report or comparison to go back to after buying, like 'r/abc/report'. Kept across the trip to Stripe. */
+export async function loadUnlockBack(): Promise<string | null> {
+  try {
+    return (await storage.get<string>(UNLOCK_BACK_KEY)) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveUnlockBack(path: string | null): Promise<void> {
+  try {
+    if (path) await storage.set(UNLOCK_BACK_KEY, path);
+    else await storage.delete(UNLOCK_BACK_KEY);
+  } catch {
+    // The buyer lands on the unlock page without a link back. Nothing else is lost.
   }
 }

@@ -1,4 +1,5 @@
-import { getReport, passCheck, paymentsContext } from '../../../../server/payments.ts';
+import { unlockCheck } from '../../../../server/payments.ts';
+import { getReport } from '../../../../server/results.ts';
 
 export const onRequestGet: PagesFunction<Env, 'id'> = ({ request, params, env }) =>
-  getReport(request, String(params.id), env.DB, paymentsContext(env), passCheck(request, env));
+  getReport(String(params.id), env.DB, unlockCheck(request, env));

@@ -1,0 +1,223 @@
+/*
+ * The Big Five test: the free result, the paid report and the comparison.
+ * Same look as the four-letter screens: hairlines, ink, the accent for measured things only.
+ * A b5-trait scale runs from 0 on the left to 100 on the right, filled from 0.
+ */
+
+/* The result's name in the place where the four-letter test shows the type code. */
+.b5-result-name {
+  font-size: clamp(3.25rem, 17vw, 6rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  margin-left: -0.03em;
+}
+
+.big-five-note {
+  color: var(--ink-muted);
+  font-size: 0.9375rem;
+}
+
+.b5-traits {
+  border-bottom: 1px solid var(--line);
+}
+
+.b5-trait {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 0 18px;
+  border-top: 1px solid var(--ink);
+}
+
+.b5-trait + .b5-trait {
+  border-top-color: var(--line);
+}
+
+.b5-trait-headline,
+.big-five-aspect-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.b5-trait-pct,
+.big-five-aspect-pct {
+  font-size: 1.75rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+
+.b5-trait-scale {
+  position: relative;
+  height: 18px;
+}
+
+/* The track, with ticks at 40 and 60 where the middle band starts and ends. */
+.b5-trait-scale::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--line);
+}
+
+.b5-trait-scale::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 40%;
+  width: 20%;
+  height: 12px;
+  border-right: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+}
+
+.b5-trait-fill {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: calc(var(--pct) * 1%);
+  height: 2px;
+  background: var(--accent);
+}
+
+.b5-trait-marker {
+  position: absolute;
+  top: 3px;
+  left: calc(var(--pct) * 1% - 6px);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--paper);
+}
+
+.b5-trait-band,
+.big-five-aspect-band,
+.big-five-trait-band {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.b5-trait-measures,
+.big-five-trait-measures,
+.big-five-aspect-measures {
+  color: var(--ink-muted);
+}
+
+.result[data-revealed='false'] .b5-trait-summary {
+  opacity: 0;
+}
+
+.b5-trait-summary {
+  transition: opacity 400ms var(--ease-out);
+}
+
+/* The report: a readout of the five scores on the cover, then one part per b5-trait. */
+
+.big-five-readout {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.big-five-readout-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 6px 12px 0;
+}
+
+.big-five-readout-cell + .big-five-readout-cell {
+  padding-left: 8px;
+  border-left: 1px solid var(--line);
+}
+
+.big-five-readout-pct {
+  font-size: 1.5rem;
+  font-weight: 650;
+  line-height: 1;
+  color: var(--accent);
+}
+
+/* Trait names are long: on a phone only the first word fits, so the readout uses small type. */
+.big-five-readout-name {
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+
+.big-five-trait {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.big-five-trait-score {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.big-five-trait-pct {
+  font-size: 2.5rem;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+}
+
+.big-five-aspects {
+  display: grid;
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.big-five-aspect {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.big-five-aspect-title {
+  font-size: 1.0625rem;
+}
+
+.big-five-aspect-pct {
+  font-size: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .big-five-readout-name {
+    font-size: 0.8125rem;
+  }
+
+  .big-five-aspects {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .b5-trait-summary {
+    transition: none;
+  }
+}

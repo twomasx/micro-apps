@@ -5,7 +5,7 @@ import { useTest } from '../hooks/useTest.ts';
 import { navigate } from '../lib/navigation.ts';
 import { clearCompareWith, loadCompareWith } from '../lib/store.ts';
 import { isValidAnswer } from '../lib/progress.ts';
-import { currentQuestions } from '../lib/questions.ts';
+import { TESTS, type TestKind } from '../lib/tests.ts';
 
 // How long the chosen answer stays on screen before the next question comes in.
 const ADVANCE_DELAY_MS = 160;
@@ -14,8 +14,11 @@ function optionId(questionId: string, value: number): string {
   return `${questionId}-${value}`;
 }
 
-export function TestPage() {
-  const test = useTest(currentQuestions);
+const TITLES: Readonly<Record<TestKind, string>> = { type: 'Personality test', 'big-five': 'Big Five test' };
+
+export function TestPage({ kind }: { kind: TestKind }) {
+  const { questions } = TESTS[kind];
+  const test = useTest(questions);
   const { status, index, total, question, value } = test;
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
 
@@ -71,8 +74,8 @@ export function TestPage() {
     if (created) {
       await release();
       // Someone who came from a compare link lands on the comparison, not the plain result.
-      const compareWith = await loadCompareWith();
-      await clearCompareWith();
+      const compareWith = await loadCompareWith(kind);
+      await clearCompareWith(kind);
       navigate(compareWith ? `c/${compareWith}/${created.id}` : `r/${created.id}`, { replace: true });
     }
   };
@@ -80,16 +83,16 @@ export function TestPage() {
   if (!question) {
     return (
       <main className="test" data-state={status}>
-        <h1 className="test-title">Personality test</h1>
+        <h1 className="test-title">{TITLES[kind]}</h1>
         <p className="test-loading">Loading your test.</p>
       </main>
     );
   }
 
   return (
-    <main className="test" data-state={status} data-index={index} data-answered={test.answered}>
+    <main className="test" data-kind={kind} data-state={status} data-index={index} data-answered={test.answered}>
       <header className="test-header">
-        <h1 className="test-title">Personality test</h1>
+        <h1 className="test-title">{TITLES[kind]}</h1>
         <p className="test-progress" role="status">
           Question {index + 1} of {total}
         </p>
@@ -116,7 +119,7 @@ export function TestPage() {
         data-direction={direction}
         onSubmit={(event) => void onSubmit(event)}
       >
-        {index === 0 && <p className="test-instructions">{currentQuestions.instructions}</p>}
+        {index === 0 && <p className="test-instructions">{questions.instructions}</p>}
 
         {/*
           A radiogroup instead of a fieldset: browsers do not let a fieldset stretch
@@ -138,7 +141,7 @@ export function TestPage() {
             {question.text}
           </h2>
           <div className="scale">
-            {currentQuestions.scale.map((option) => (
+            {questions.scale.map((option) => (
               <label
                 key={option.value}
                 className="scale-option"

@@ -9,6 +9,7 @@ import { addResult, loadResults, removeResult } from './lib/store.ts';
 const ID = 'abcdefghjkmnpqrs';
 
 const RESULT: PublicResult = {
+  kind: 'type',
   id: ID,
   version: 'p1',
   type: 'INTJ',

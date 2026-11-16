@@ -211,9 +211,7 @@
 
 .compare-couple,
 .compare-offer,
-.compare-share,
-.compare-buy,
-.compare-unconfirmed {
+.compare-share {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -234,24 +232,14 @@
   font-size: 1.0625rem;
 }
 
-.compare-price {
-  font-weight: 600;
-}
-
 .compare-note {
   color: var(--ink-muted);
 }
 
-.compare-unconfirmed,
-.compare-error,
 .compare-message {
   padding: 12px 14px;
   border-left: 2px solid var(--accent);
   background: var(--surface);
-}
-
-.compare-check {
-  align-self: flex-start;
 }
 
 .compare-couple-section {

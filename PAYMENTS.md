@@ -8,9 +8,7 @@ Read the root CLAUDE.md first. All payment code goes through `packages/payments`
 
 | Product id | App | What it unlocks | Price |
 | --- | --- | --- | --- |
-| `report` | personality | Full report for one result | $9.99 |
-| `couple` | personality | Couple report for one pair | $7.99 |
-| `both` | personality | Both of the above | $14.99 |
+| `lifetime` | personality | Lifetime unlock: every full report, the Big Five report, every couple report (since Nov 2026; before that `report` $9.99, `couple` $7.99 and `both` $14.99, per result) | $9.99 |
 | `lifetime` | focus | Lifetime unlock | $6.99 |
 | `lifetime` | breathwork | Lifetime unlock | $4.99 |
 | `lifetime` | attention | Lifetime unlock | $6.99 |
@@ -54,7 +52,7 @@ Read the root CLAUDE.md first. All payment code goes through `packages/payments`
 - **Carrying the pass across domains with no typing:** links from the pass success screen, the pass page and the landing page add a one-time token (`?passToken=...`, valid for 10 minutes, single use). The app exchanges the token with the pass service for the code and stores it, then removes the token from the address bar. Typing the code on any app's restore screen always works as a backup.
 - After purchase the success screen shows the pass code: "Save this code to unlock every PolymadLabs app on any device," and buttons that open each app with a token.
 - **Every app's unlock check:** its own purchase **or** `checkPass` says active. Every app's restore screen accepts pass codes.
-- **Personality with a pass:** every full report and couple report is unlocked. Personality's server calls the verify API before returning paid text.
+- **Personality with a pass:** every full report, the Big Five report and every couple report are unlocked. Personality's server calls the verify API before returning paid text, the same check that accepts its own unlock code (`requestHasUnlock` in `packages/payments`).
 - Every app's unlock screen offers the pass: "Or get every app for $19.99 once." The landing page gets one line about it.
 - **Terms:** "The pass covers every app operated by PolymadLabs, including new ones." If an app is ever sold or spun off, its own single-app purchases move with it; pass holders keep access for as long as PolymadLabs runs the app.
 - **Per-app independence stays intact:** each app keeps its own Stripe products, webhook endpoint, secrets and purchases table, so any app can move to its own domain (or its own Stripe account) without touching the others. The origin each app runs on is config (`PUBLIC_ORIGIN`), never hard-coded.

@@ -44,32 +44,6 @@
   border-top-color: var(--ink);
 }
 
-.report-buy,
-.report-unconfirmed {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.report-price {
-  font-weight: 600;
-}
-
-.report-note {
-  color: var(--ink-muted);
-}
-
-.report-unconfirmed,
-.report-error {
-  padding: 12px 14px;
-  border-left: 2px solid var(--accent);
-  background: var(--surface);
-}
-
-.report-check {
-  align-self: flex-start;
-}
-
 /* ---------- Cover ---------- */
 
 .report-cover {

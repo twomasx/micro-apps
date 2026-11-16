@@ -1,21 +1,9 @@
 {
   "products": [
     {
-      "id": "report",
-      "name": "Full personality report",
+      "id": "lifetime",
+      "name": "Personality lifetime unlock",
       "amount": 999,
-      "currency": "usd"
-    },
-    {
-      "id": "couple",
-      "name": "Couple report",
-      "amount": 799,
-      "currency": "usd"
-    },
-    {
-      "id": "both",
-      "name": "Full personality report and couple report",
-      "amount": 1499,
       "currency": "usd"
     }
   ]

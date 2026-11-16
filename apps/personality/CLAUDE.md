@@ -2,7 +2,7 @@
 
 Path `/personality/`. Site port 3001, functions port 8801. Run with `pnpm dev:personality`.
 
-A 40-question test that gives you a four-letter type (like INTJ) with a percentage on each of the four axes. A compatibility checker compares two people. Free core, optional one-time paid reports.
+Two tests. The four-letter test: 40 questions that give a type (like INTJ) with a percentage on each of the four axes. The Big Five test (since Nov 15, 2026): 100 questions that give a score from 0 to 100 on each of the five traits, and two aspects per trait in the paid report. A compare page puts two results of the same test side by side. Free results; one optional lifetime unlock ($9.99) opens every report and couple report of both tests.
 
 Roger owns the design. On Oct 12, 2026 he approved the direction "Instrument" and asked Claude to build it, so this app is styled (the root rule about unstyled HTML no longer applies here). Logic still stays in modules, and every design choice Claude makes goes in `DESIGN-TODO.md` for Roger to confirm or change.
 
@@ -32,6 +32,14 @@ Roger owns the design. On Oct 12, 2026 he approved the direction "Instrument" an
 - 40 questions, 10 per axis, 5 toward each pole. Fixed order (already interleaved in the file). Same order for everyone so results compare.
 - 5-point scale: Very inaccurate (1) to Very accurate (5). Labels are in the file.
 - Show the instructions line from the file before the first question.
+
+## The Big Five test (version b1)
+
+- File: `src/data/items.b1.json`, the 100-item Big Five Aspect Scales (DeYoung, Quilty and Peterson, 2007), copied from ipip.ori.org/BFASKeys.htm with "I" added, like p1. `sourceText` keeps the published wording; four items carry a `note` on where they come from. Same rule as p1: never edit in place, a change makes `b2`.
+- `axes` in that file are the five traits (O, C, E, A, N) so the test flow and progress lines work unchanged; each item has `axis` (trait), `aspect` and `keyed` (`+` or `-`). Fixed order, interleaved so no trait comes twice in a row.
+- Scoring in `src/lib/big-five-test.ts` (shared): reverse-keyed answers count as 6 minus the answer; a scale's score is `(total - min) / (max - min) * 100`. Trait = its 20 questions, aspect = its 10. Bands: lower below 40, middle 40 to 60, higher above 60; aspects lower below 50, higher from 50. Same `same_answers` flag.
+- There are no norms yet, so a score is never compared with other people, in code or copy. A test in `content.test.ts` checks the wording.
+- `src/lib/tests.ts` lists both tests (`TESTS`, `kindOf(version)`). Results store `type = ''` for b1; the API answers with `kind: 'type' | 'big-five'` and every page dispatches on it.
 
 ## Scoring (put this in `src/lib/scoring.ts`, shared by client and server)
 
@@ -63,14 +71,18 @@ Required unit tests (Vitest), at least these:
 | --- | --- |
 | `/` | Intro: what the test is, about 6 minutes, free result, start button. Reads `?with=<resultId>` for the compare flow. |
 | `/test` | The 40 questions. |
-| `/r/:id` | The free result. Permanent link. |
-| `/r/:id/report` | The full paid report, or the unlock offer if not paid. |
-| `/c/:a/:b` | Comparison of two results. Couple report if paid. |
+| `/big-five/` | The Big Five intro, the same page with its own copy. Reads `?with=`. |
+| `/big-five/test` | The 100 questions. |
+| `/unlock` | The lifetime unlock: the offer, the code after Stripe sends the buyer back (`?session_id=`), or the code already on this device. |
+| `/restore` | Enter an unlock code or an all-app pass code. `/pass` is its old address and still works. |
+| `/r/:id` | The free result, of either test. Permanent link. |
+| `/r/:id/report` | The full report, or the unlock offer when this device has no unlock. |
+| `/c/:a/:b` | Comparison of two results of the same test. Couple report when this device has the unlock. |
 | `/science` | How the test works and where the questions come from, with sources. |
 | `/privacy` | What we store and how to delete it. |
 
 Functional rules for the test (layout and flow look are Roger's):
-- Save progress to IndexedDB after every answer, key `personality:progress:p1`. Reloading resumes where you left off. Clear it after a successful submit.
+- Save progress to IndexedDB after every answer, key `personality:progress:<version>` (p1 or b1). Reloading resumes where you left off. Clear it after a successful submit.
 - You can go back and change any answer. Going back never loses answers.
 - Keys 1 to 5 answer on desktop. Each question is a proper radio group with labels. Move focus to the new question when it changes. Announce progress ("Question 12 of 40") to screen readers.
 - The Android Back button goes to the previous question during the test, not off the page.
@@ -101,20 +113,20 @@ Functional rules for the test (layout and flow look are Roger's):
 - "Compare with someone" creates the link `/personality/?with=<id>`. Before sharing, say plainly: "The person you send this to will see your result."
 - Save the user's result IDs in IndexedDB (`personality:results`) so the intro page can show "Your last result". Each entry also holds the `deleteToken`.
 - A result taken on this device is "own": it shows the compare link and "Delete this result". Anyone else's result shows "Take the test yourself" instead.
-- The intro saves the id from `?with=<id>` under `personality:compare-with`. Submitting the test reads it, clears it, and opens `/c/<with>/<new>` instead of the plain result. Opening the intro with no link and no test under way clears it.
+- The intro saves the id from `?with=<id>` under `personality:compare-with` (`personality:compare-with:big-five` for the Big Five test, so the two never mix). Submitting the test reads it, clears it, and opens `/c/<with>/<new>` instead of the plain result. Opening the intro with no link and no test under way clears it.
 
-## Paid products (prices in `config/products.json`)
+## Paid product (price in `config/products.json`)
 
 | Product id | What it unlocks | Price |
 | --- | --- | --- |
-| `report` | The full report for one result | $9.99 |
-| `couple` | The couple report for one pair of results | $7.99 |
-| `both` | Both of the above | $14.99 |
+| `lifetime` | Every full report and couple report of both tests, and any test added later | $9.99 |
 
-- Full report: what each of your four percentages means, including what being near the middle means; the long type description (strengths, blind spots, at work, under stress, how others may read you); your scores described as the four Big Five traits they measure.
-- Couple report: for each axis, whether you are alike or different and what that tends to mean day to day, plus questions to talk through together.
-- Paid text is never in the client bundle. The server returns it only after it confirms the unlock. Anyone with a paid result link can read that report; that is fine, it makes sharing work.
-- Checkout `success_url` returns to the report with `session_id`. If the webhook hasn't arrived yet, the page calls `verifyPurchase(sessionId)` so the unlock shows right away.
+- Since Nov 15, 2026. Before that Personality sold `report` ($9.99), `couple` ($7.99) and `both` ($14.99) per result; none was sold in live mode. Old rows stay in `purchases` with their result ids and unlock nothing now.
+- It works like the other apps' lifetime unlock: Stripe Checkout through `unlockRoutes` in `packages/payments`, an unlock code (HMAC of the session id with `UNLOCK_CODE_SECRET`), up to 5 devices per code, restore with the code. The all-app pass opens the same things.
+- The device keeps the code (`personality:unlock`) and sends it with every API request (`X-Unlock-Code` with `X-Device-Id`, plus the pass headers if it has one; `src/lib/access.ts`). The server checks it on every request (`requestHasUnlock`) before it sends paid text. A link alone no longer opens a paid report.
+- Offers start checkout directly (`UnlockOffer`) and remember the page to come back to (`personality:unlock-back`); Stripe returns to `/unlock?session_id=`, which shows the code and links back.
+- Full report (four-letter): what each percentage means, the type in depth, the scores as Big Five traits. Big Five report: each trait in depth for its band, with both aspects. Couple reports: alike or different per scale or trait, with questions to talk through.
+- Paid text is never in the client bundle.
 
 ## Compatibility, honestly
 
@@ -126,27 +138,25 @@ Functional rules for the test (layout and flow look are Roger's):
 
 | Method and path | Does |
 | --- | --- |
-| `POST /api/results` | Body `{ version, answers }`. Validates, scores on the server with the same scoring module, stores, returns `{ id, type, scores, flags, deleteToken }`. |
-| `GET /api/results/:id` | Returns `{ id, version, type, scores, flags, createdAt, summary, unlocked }`. Never returns raw answers. |
-| `GET /api/results/:id/report` | Full report text if unlocked, otherwise 402. |
+| `POST /api/results` | Body `{ version, answers }` for either test. Validates, scores on the server with the shared scoring module, stores, returns `{ id, kind, version, type, flags, deleteToken }` (plus `scores` for p1). |
+| `GET /api/results/:id` | p1: `{ kind: 'type', id, version, type, scores, flags, createdAt, summary, unlocked }`. b1: `{ kind: 'big-five', id, version, traits, flags, createdAt, unlocked }` with each trait's free text; aspect scores only come with the report. Never returns raw answers. |
+| `GET /api/results/:id/report` | The full report if the request carries the unlock or a pass, otherwise 402. |
 | `DELETE /api/results/:id` | Needs the `deleteToken`. Deletes the result. |
-| `GET /api/compare/:a/:b` | The comparison, plus couple report text if unlocked. |
-| `POST /api/checkout` | Body `{ product, resultId, partnerResultId? }`. Returns the Stripe Checkout URL through `packages/payments`. |
+| `GET /api/compare/:a/:b` | The comparison, plus couple report text with the unlock. 400 for the same id twice, 404 when either is missing, 409 for two different tests or versions. |
+| `POST /api/checkout` | Body `{ product: 'lifetime' }`. Returns the Stripe Checkout URL. |
+| `GET /api/purchase/:sessionId` | For the return page: `{ paid: true, code }` once paid. Works before the webhook arrives. |
+| `GET /api/unlock/:code` | With `X-Device-Id`. Whether the code is a paid Personality unlock this device may use. Rate limited. |
 | `POST /api/stripe/webhook` | Verifies the signature, records the purchase. Safe to receive twice. |
+| `GET /api/payments` | Kill switch, mode and environment. |
 | `GET /api/health` | `{ "ok": true }` |
 
+- `unlocked` means this request may read paid text: it carries a paid Personality unlock code for this device, or an active pass. The server asks once per request (`unlockCheck` in `server/payments.ts`).
 - The client keeps `deleteToken` in IndexedDB. The server stores only its hash (SHA-256).
 - Result IDs: random, 16 characters from lowercase letters and digits (no `l`, `o`, `0`, `1`). See `server/ids.ts`.
 - `DELETE` takes the token as `Authorization: Bearer <deleteToken>`. 401 without a token, 403 with the wrong one, 204 when deleted.
-- `answers` is an object from question id to value: `{ "p1-01": 4, ... }`. `scores` is an array of four `{ axis, letter, leftPct, rightPct, balanced }` in type code order.
+- `answers` is an object from question id to value: `{ "p1-01": 4, ... }`.
 - Errors are `{ error: "<code>", message }` with a 4xx status. Every API response sends `Cache-Control: no-store`.
-- `unlocked` is true when `purchases` has a row for the result with product `report` or `both` and status `paid`.
-- `summary` is the Summary section of the type's content file.
-- `POST /api/checkout` stores a `pending` row in `purchases` with the Stripe session id. Only two things turn it into `paid`: the webhook, or `GET /api/results/:id/report?session_id=...` when the buyer returns first. Both ask Stripe whether the session is paid, and only a session we created for that result can unlock it.
-- `couple` and `both` need `partnerResultId` and are sold on the compare page. For `both`, `resultId` is the buyer's own result: that one gets the full report. A paid pair is unlocked whichever way round the two ids are given.
-- `GET /api/compare/:a/:b` takes `?session_id=` the same way the report does. It answers 400 for the same id twice, 404 when either result is missing, 409 when the two results come from different question versions.
-- The report page fetches the result first and only asks for the report when it is unlocked or a `session_id` is present, so a locked report does not log a failed request.
-- `PUBLIC_ORIGIN` (in `.env`) is where Checkout sends the buyer back. Without it the functions use the request origin, which is wrong behind the Vite proxy.
+- `PUBLIC_ORIGIN` (in `.env`) is where Checkout sends the buyer back.
 
 ## Where server code lives
 
@@ -158,17 +168,17 @@ Functional rules for the test (layout and flow look are Roger's):
 
 ## Database (D1, migrations in `migrations/`)
 
-- `results`: id, version, answers (JSON), scores (JSON), type, flags (JSON), delete_token_hash, created_at.
-- `purchases`: id, stripe_session_id (unique), product, result_id, partner_result_id (nullable), amount_cents, currency, status, created_at.
+- `results`: id, version, answers (JSON), scores (JSON), type, flags (JSON), delete_token_hash, created_at. For b1, `scores` holds the five traits with their aspects and `type` is ''.
+- `purchases`: the shared columns (see `packages/payments/test/schema.sql`) plus product, and result_id and partner_result_id for the old per-result purchases. Migration 0004 rebuilt the table so result_id may be empty, and added `code_devices`, `code_addresses` and `rate_limits`.
 - Store raw answers. We need them later to check reliability and to rescore if the model changes.
 - Use local D1 for development. Run `pnpm --filter @micro/personality db:migrate` once after cloning and after adding a migration. The data is a SQLite file under `apps/personality/.wrangler/` (not in git).
 - `purchases` has no foreign key to `results`, so a purchase record stays when a result is deleted.
 
 ## Content
 
-- Lives in `content/` as Markdown, not in components: `types/<CODE>.md` (free summary plus paid sections), `axes/<EI|SN|TF|JP>.md`, `pairs/<EI|SN|TF|JP>.md`, `science.md`, `privacy.md`.
+- Lives in `content/` as Markdown, not in components: `types/<CODE>.md` (free summary plus paid sections), `axes/<EI|SN|TF|JP>.md`, `pairs/<EI|SN|TF|JP>.md`, `science.md`, `privacy.md`, and for the Big Five test `big-five/traits/<O|C|E|A|N>.md` (what it measures, a short text per band, a longer paid text per band), `big-five/aspects/<aspect>.md` (paid) and `big-five/pairs/<trait>.md` (couple report).
 - Every file starts with `status: draft`. Roger reviews and changes it to `status: approved`.
-- File format: the `status:` line, one `# title`, then `## sections`. `parseContent` in `src/lib/content.ts` reads it. `src/content.test.ts` checks that all 26 files exist, have their sections and use no banned wording.
+- File format: the `status:` line, one `# title`, then `## sections`. `parseContent` in `src/lib/content.ts` reads it. `src/content.test.ts` checks that all 46 files exist, have their sections and use no banned wording.
 - The server serves the files whatever their status. Before launch every file should say `approved`.
 - Describe preferences, not abilities. No claims about intelligence, success, income or which careers someone "should" have. Every type gets equally respectful framing.
 - No Barnum statements that fit everyone ("You sometimes doubt yourself"). Each sentence should be truer of this type than of its opposite.
@@ -181,6 +191,7 @@ Functional rules for the test (layout and flow look are Roger's):
 - Type tests are less stable than trait scores: people near 50% can get a different letter on a retest. Their percentages barely move.
 - Where the questions come from (IPIP, public domain) and which ones are original.
 - It is not a clinical or hiring tool.
+- The Big Five test: what it measures, where its 100 questions come from, that its scores are not compared with other people, and that a higher Neuroticism score is not a diagnosis.
 
 ## Build order
 
@@ -197,7 +208,7 @@ Commit after each step.
 
 ## Testing payments locally
 
-- `apps/personality/.env` needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PUBLIC_ORIGIN=http://localhost:3000` and `PAYMENTS_MODE=test` (see `.env.example`). Run it behind the router with `pnpm dev:apps personality`, so Stripe sends you back to the same address. Restart it after changing `.env`.
+- `apps/personality/.env` needs `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `UNLOCK_CODE_SECRET`, `PUBLIC_ORIGIN=http://localhost:3000` and `PAYMENTS_MODE=test` (see `.env.example`). Run it behind the router with `pnpm dev:apps personality`, so Stripe sends you back to the same address. Restart it after changing `.env`.
 - Webhooks: `stripe listen --events checkout.session.completed --forward-to http://127.0.0.1:8801/api/stripe/webhook` (Stripe CLI is in `~/.local/bin`). The `whsec_` value it prints goes in `.env`.
 - Test card: 4242 4242 4242 4242, any future date, any CVC. Untick "Save my information with Link" or Stripe asks for a phone number.
 

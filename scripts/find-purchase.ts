@@ -54,7 +54,8 @@ async function main() {
       console.log(`${head}\n  No row in the ${environment} ${app} database.`);
       continue;
     }
-    if (app === 'personality') {
+    // Personality sold a report per result until Nov 2026. Those rows have a result id and no code.
+    if (app === 'personality' && row.result_id) {
       const pair = row.partner_result_id ? ` and ${row.partner_result_id}` : '';
       console.log(`${head}\n  Status ${row.status}. Unlocks result ${row.result_id}${pair}: polymadlabs.com/personality/r/${row.result_id}`);
       continue;

@@ -175,8 +175,7 @@ button:disabled {
 
 .intro-start,
 .result-share-button,
-.report-unlock,
-.compare-unlock,
+.unlock-offer-button,
 .question-next[data-last='true'] {
   min-height: var(--target-primary);
   border-color: var(--ink);
@@ -193,8 +192,7 @@ button:disabled {
 
   .intro-start:hover,
   .result-share-button:not(:disabled):hover,
-  .report-unlock:not(:disabled):hover,
-  .compare-unlock:not(:disabled):hover,
+  .unlock-offer-button:not(:disabled):hover,
   .question-next[data-last='true']:not(:disabled):hover {
     background: #2a2a27;
   }
@@ -213,13 +211,15 @@ button:disabled {
 
 .site-footer-nav {
   display: flex;
-  gap: 24px;
+  flex-wrap: wrap;
+  column-gap: 24px;
   margin-bottom: 8px;
 }
 
 .site-footer-link {
   display: inline-flex;
   align-items: center;
+  white-space: nowrap;
   min-height: var(--target);
   font-size: 0.9375rem;
   font-weight: 500;

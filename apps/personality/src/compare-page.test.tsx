@@ -7,7 +7,9 @@ import { compareScores, type CompareResponse } from './lib/compare.ts';
 import { leaveTo } from './lib/navigation.ts';
 import { currentQuestions } from './lib/questions.ts';
 import type { AxisScore } from './lib/scoring.ts';
-import { addResult, clearCompareWith, loadCompareWith, removeResult } from './lib/store.ts';
+import { compareTraits, type BigFiveCompareResponse } from './lib/big-five-view.ts';
+import { bigFiveQuestions } from './lib/big-five-test.ts';
+import { addResult, clearCompareWith, loadCompareWith, loadUnlockBack, removeResult } from './lib/store.ts';
 
 // Leaving for Stripe would navigate the test page away, so only record it.
 vi.mock('./lib/navigation.ts', async (importOriginal) => ({
@@ -35,10 +37,21 @@ function scores(rights: number[]): AxisScore[] {
 const COMPARE: CompareResponse = {
   // A is INTJ, B is ISFP: alike on E/I only.
   ...compareScores(scores([75, 60, 20, 40]), scores([55, 30, 80, 90]), currentQuestions),
-  a: { id: A, type: 'INTJ', reportUnlocked: false },
-  b: { id: B, type: 'ISFP', reportUnlocked: false },
+  kind: 'type',
+  a: { id: A, type: 'INTJ' },
+  b: { id: B, type: 'ISFP' },
   unlocked: false,
-  revoked: false,
+  couple: null,
+};
+
+const traitScores = (values: number[]) => bigFiveQuestions.axes.map((trait, n) => ({ trait: trait.id, pct: values[n]! }));
+
+const BIG_FIVE: BigFiveCompareResponse = {
+  kind: 'big-five',
+  ...compareTraits(traitScores([80, 50, 20, 60, 40]), traitScores([70, 50, 60, 60, 90]), bigFiveQuestions.axes),
+  a: { id: A },
+  b: { id: B },
+  unlocked: false,
   couple: null,
 };
 
@@ -58,7 +71,7 @@ const UNLOCKED: CompareResponse = {
 
 const fetchMock = vi.fn<typeof fetch>();
 /** What the compare endpoint answers, in order. The last one repeats. */
-let answers: (CompareResponse | 404)[];
+let answers: (CompareResponse | BigFiveCompareResponse | 404)[];
 
 function open(path: string): void {
   window.history.pushState(null, '', path);
@@ -97,7 +110,8 @@ afterEach(async () => {
   vi.unstubAllEnvs();
   await removeResult(A);
   await removeResult(B);
-  await clearCompareWith();
+  await clearCompareWith('type');
+  await clearCompareWith('big-five');
 });
 
 describe('compare page', () => {
@@ -134,24 +148,19 @@ describe('compare page', () => {
     expect(document.body.textContent).not.toMatch(/compatib|match/i);
   });
 
-  it('offers the couple report with a one-time price and starts checkout for the pair', async () => {
+  it('offers the one-time unlock for the couple report and remembers this comparison to come back to', async () => {
     open(`/personality/c/${A}/${B}`);
-    expect(await screen.findByText('$7.99 once. No renewals.')).toBeTruthy();
-    // Neither result is yours, so there is no offer that includes "your" full report.
-    expect(screen.queryByRole('button', { name: 'Unlock it with your full report' })).toBeNull();
+    expect(await screen.findByText('$9.99 once. No renewals.')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Unlock the couple report' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Unlock everything' }));
     await waitFor(() => expect(leaveTo).toHaveBeenCalledWith(CHECKOUT_URL));
     const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');
     expect(post?.[0]).toBe('/personality/api/checkout');
-    expect(JSON.parse(String(post?.[1]?.body))).toEqual({
-      product: 'couple',
-      resultId: A,
-      partnerResultId: B,
-    });
+    expect(JSON.parse(String(post?.[1]?.body))).toEqual({ product: 'lifetime' });
+    expect(await loadUnlockBack()).toBe(`c/${A}/${B}`);
   });
 
-  it('puts your own result first and offers both reports for it', async () => {
+  it('puts your own result first', async () => {
     await saveAsOwn(B, 'ISFP');
     open(`/personality/c/${A}/${B}`);
 
@@ -159,26 +168,6 @@ describe('compare page', () => {
     const decisions = axisRow('Thinking and Feeling');
     expect(within(decisions).getByText('You: 80% Feeling')).toBeTruthy();
     expect(within(decisions).getByText('Them: 80% Thinking')).toBeTruthy();
-    expect(screen.getByText('$14.99 once. No renewals.')).toBeTruthy();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Unlock it with your full report' }));
-    await waitFor(() => expect(leaveTo).toHaveBeenCalled());
-    const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');
-    // Your own result is the one that gets the full report.
-    expect(JSON.parse(String(post?.[1]?.body))).toEqual({
-      product: 'both',
-      resultId: B,
-      partnerResultId: A,
-    });
-  });
-
-  it('does not offer both when your full report is already unlocked', async () => {
-    await saveAsOwn(A, 'INTJ');
-    answers = [{ ...COMPARE, a: { ...COMPARE.a, reportUnlocked: true } }];
-    open(`/personality/c/${A}/${B}`);
-
-    expect(await screen.findByRole('button', { name: 'Unlock the couple report' })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Unlock it with your full report' })).toBeNull();
   });
 
   it('shows the couple report once the server says it is unlocked', async () => {
@@ -190,34 +179,25 @@ describe('compare page', () => {
     ).toBeTruthy();
     expect(screen.getByText('You both lean toward quiet.')).toBeTruthy();
     expect(screen.getByText('First question?')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Unlock the couple report' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Unlock everything' })).toBeNull();
     expect(screen.queryByText(/once\. No renewals/)).toBeNull();
   });
 
-  it('sends the checkout session to the server, then drops it from the URL', async () => {
-    answers = [UNLOCKED];
-    open(`/personality/c/${A}/${B}?session_id=cs_test_1`);
+  it('compares two Big Five results trait by trait', async () => {
+    answers = [BIG_FIVE];
+    await saveAsOwn(A, '');
+    open(`/personality/c/${A}/${B}`);
 
-    expect(await screen.findByText('You both lean toward quiet.')).toBeTruthy();
-    expect(fetchMock.mock.calls[0]?.[0]).toBe(`/personality/api/compare/${A}/${B}?session_id=cs_test_1`);
-    await waitFor(() => expect(window.location.search).toBe(''));
-  });
-
-  it('offers to check again when the payment is not confirmed yet', async () => {
-    answers = [COMPARE, UNLOCKED];
-    open(`/personality/c/${A}/${B}?session_id=cs_test_1`);
-
-    expect((await screen.findByRole('status')).textContent).toContain('could not confirm a payment');
-    fireEvent.click(screen.getByRole('button', { name: 'Check again' }));
-    expect(await screen.findByText('You both lean toward quiet.')).toBeTruthy();
-  });
-
-  it('says when the payment it came back from was refunded or disputed', async () => {
-    answers = [{ ...COMPARE, revoked: true }];
-    open(`/personality/c/${A}/${B}?session_id=cs_test_1`);
-
-    expect((await screen.findByRole('status')).textContent).toContain('refunded or disputed');
-    expect(screen.queryByText(/could not confirm/)).toBeNull();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Comparison Two Big Five results' })).toBeTruthy();
+    const extraversion = axisRow('Extraversion');
+    expect(extraversion.dataset.alike).toBe('false');
+    expect(within(extraversion).getByText('You: 20')).toBeTruthy();
+    expect(within(extraversion).getByText('Them: 60')).toBeTruthy();
+    expect(within(axisRow('Conscientiousness')).getByText('Alike')).toBeTruthy();
+    // Gaps of 10, 0, 40, 0 and 50 average 20.
+    expect(screen.getByText('80%')).toBeTruthy();
+    expect(screen.getByText(/gap between the two scores on the five traits/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Unlock everything' })).toBeTruthy();
   });
 
   it('says when one of the results does not exist', async () => {
@@ -233,7 +213,7 @@ describe('compare link on the intro', () => {
 
     expect(await screen.findByRole('heading', { level: 2, name: 'Someone wants to compare' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Start the test' })).toBeTruthy();
-    expect(await loadCompareWith()).toBe(A);
+    expect(await loadCompareWith('type')).toBe(A);
   });
 
   it('offers your last result so you do not have to retake the test', async () => {
@@ -250,14 +230,14 @@ describe('compare link on the intro', () => {
 
     expect(await screen.findByText(/This is your own compare link/)).toBeTruthy();
     expect(screen.queryByRole('heading', { level: 2, name: 'Someone wants to compare' })).toBeNull();
-    expect(await loadCompareWith()).toBeNull();
+    expect(await loadCompareWith('type')).toBeNull();
   });
 
   it('ignores a link that is not a result id', async () => {
     open('/personality/?with=<script>');
     expect(await screen.findByRole('link', { name: 'Start the test' })).toBeTruthy();
     expect(screen.queryByRole('heading', { level: 2, name: 'Someone wants to compare' })).toBeNull();
-    expect(await loadCompareWith()).toBeNull();
+    expect(await loadCompareWith('type')).toBeNull();
   });
 });
 

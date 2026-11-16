@@ -55,8 +55,6 @@ export function compareScores(
 export interface ComparedResult {
   id: string;
   type: string;
-  /** True when the full report for this result is unlocked. */
-  reportUnlocked: boolean;
 }
 
 export interface CoupleSection {
@@ -69,14 +67,13 @@ export interface CoupleSection {
   questions: string[];
 }
 
-/** What GET /api/compare/:a/:b returns. */
+/** What GET /api/compare/:a/:b returns for two four-letter results. */
 export interface CompareResponse extends Comparison {
+  kind: 'type';
   a: ComparedResult;
   b: ComparedResult;
-  /** True when the couple report for this pair is paid. */
+  /** True when this device may read the couple report and both full reports: the Personality unlock or a pass. */
   unlocked: boolean;
-  /** True when the buyer came back from a checkout for this pair whose payment was refunded or disputed. */
-  revoked: boolean;
   /** The couple report, or null until it is unlocked. */
   couple: CoupleSection[] | null;
 }

@@ -1,4 +1,4 @@
-import type { QuestionFile } from './questions.ts';
+import type { TestQuestions } from './tests.ts';
 import { MAX_ANSWER, MIN_ANSWER } from './scoring.ts';
 
 export interface Progress {
@@ -26,12 +26,12 @@ export function answeredCount(progress: Progress): number {
 }
 
 /** Index of the first question with no answer, or the question count when all are answered. */
-export function firstUnanswered(progress: Progress, questions: QuestionFile): number {
+export function firstUnanswered(progress: Progress, questions: TestQuestions): number {
   const index = questions.items.findIndex((item) => !Object.hasOwn(progress.answers, item.id));
   return index === -1 ? questions.items.length : index;
 }
 
-export function isComplete(progress: Progress, questions: QuestionFile): boolean {
+export function isComplete(progress: Progress, questions: TestQuestions): boolean {
   return firstUnanswered(progress, questions) === questions.items.length;
 }
 
@@ -42,7 +42,7 @@ export interface AxisProgress {
 }
 
 /** How many questions of each axis are answered. Says nothing about which way the answers lean. */
-export function axisProgress(progress: Progress, questions: QuestionFile): AxisProgress[] {
+export function axisProgress(progress: Progress, questions: TestQuestions): AxisProgress[] {
   return questions.axes.map((axis) => {
     const items = questions.items.filter((item) => item.axis === axis.id);
     return {
@@ -61,7 +61,7 @@ export function withAnswer(progress: Progress, itemId: string, value: number): P
  * Rebuilds saved progress from storage. Anything that does not fit the question
  * file is dropped, so stale or damaged data can never break the test.
  */
-export function restoreProgress(raw: unknown, questions: QuestionFile): Progress | null {
+export function restoreProgress(raw: unknown, questions: TestQuestions): Progress | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const saved = raw as Partial<Record<keyof Progress, unknown>>;
   if (saved.version !== questions.version) return null;

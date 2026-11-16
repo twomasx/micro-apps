@@ -7,9 +7,10 @@ import { ComparePage } from './pages/ComparePage.tsx';
 import { InfoPage } from './pages/InfoPage.tsx';
 import { IntroPage } from './pages/IntroPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
-import { PassPage } from './pages/PassPage.tsx';
 import { ReportPage } from './pages/ReportPage.tsx';
 import { ResultPage } from './pages/ResultPage.tsx';
+import { RestorePage } from './pages/RestorePage.tsx';
+import { UnlockPage } from './pages/UnlockPage.tsx';
 import { TestPage } from './pages/TestPage.tsx';
 import { PAGES } from './seo.ts';
 
@@ -19,19 +20,22 @@ function pageTitle(route: Route): string {
   switch (route.name) {
     // Pages that search engines see keep the title from src/seo.ts, the same as in the HTML the server sent.
     case 'intro':
+      return PAGES[route.kind === 'big-five' ? 'bigFive' : 'intro'].title;
     case 'science':
     case 'privacy':
       return PAGES[route.name].title;
     case 'test':
-      return `Questions | ${SITE_TITLE}`;
+      return `Questions | ${route.kind === 'big-five' ? 'Big Five test' : SITE_TITLE}`;
     case 'result':
       return `Your result | ${SITE_TITLE}`;
     case 'report':
       return `Full report | ${SITE_TITLE}`;
     case 'compare':
       return `Comparison | ${SITE_TITLE}`;
-    case 'pass':
-      return `PolymadLabs pass | ${SITE_TITLE}`;
+    case 'unlock':
+      return `Lifetime unlock | ${SITE_TITLE}`;
+    case 'restore':
+      return `Enter your code | ${SITE_TITLE}`;
     case 'notFound':
       return `Page not found | ${SITE_TITLE}`;
   }
@@ -40,27 +44,22 @@ function pageTitle(route: Route): string {
 function Page({ route }: { route: Route }) {
   switch (route.name) {
     case 'intro':
-      return <IntroPage withId={route.withId} />;
+      return <IntroPage key={route.kind} kind={route.kind} withId={route.withId} />;
     case 'test':
-      return <TestPage />;
+      return <TestPage key={route.kind} kind={route.kind} />;
     case 'result':
       return <ResultPage key={route.id} id={route.id} />;
     case 'report':
-      return <ReportPage key={route.id} id={route.id} sessionId={route.sessionId} />;
+      return <ReportPage key={route.id} id={route.id} />;
     case 'compare':
-      return (
-        <ComparePage
-          key={`${route.a}/${route.b}`}
-          a={route.a}
-          b={route.b}
-          sessionId={route.sessionId}
-        />
-      );
+      return <ComparePage key={`${route.a}/${route.b}`} a={route.a} b={route.b} />;
     case 'science':
     case 'privacy':
       return <InfoPage page={route.name} />;
-    case 'pass':
-      return <PassPage back={route.back} />;
+    case 'unlock':
+      return <UnlockPage sessionId={route.sessionId} back={route.back} />;
+    case 'restore':
+      return <RestorePage back={route.back} />;
     case 'notFound':
       return <NotFoundPage />;
   }
@@ -84,6 +83,15 @@ export function App() {
           </Link>{' '}
           <Link to="privacy" className="site-footer-link">
             Privacy
+          </Link>{' '}
+          <Link to="big-five/" className="site-footer-link">
+            Big Five test
+          </Link>{' '}
+          <Link to="unlock" className="site-footer-link">
+            Unlock
+          </Link>{' '}
+          <Link to="restore" className="site-footer-link">
+            Enter a code
           </Link>
         </nav>
         <p className="site-footer-trademark">
