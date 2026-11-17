@@ -46,6 +46,10 @@ describe('differences', () => {
       'focus y: Stripe says not paid, our row says paid',
     ]);
   });
+
+  it('leaves gift passes alone: they were never sold', () => {
+    expect(differences([], [{ app: 'pass', sessionId: 'gift_abcdefghijklmnopqrstuvwx', status: 'paid' }])).toEqual([]);
+  });
 });
 
 describe('madeOn', () => {

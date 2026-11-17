@@ -31,6 +31,8 @@ export function quote(value: string, pattern: RegExp): string {
   return `'${value}'`;
 }
 
-export const SESSION_ID = /^cs_(test|live)_[A-Za-z0-9]{10,250}$/;
+/** A Stripe Checkout session id, or a gift pass's id (scripts/gift-pass.ts), which stands in for one. */
+export const SESSION_ID = /^(cs_(test|live)_[A-Za-z0-9]{10,250}|gift_[a-z0-9]{24})$/;
+export const GIFT_PREFIX = 'gift_';
 export const HEX = /^[0-9a-f]{64}$/;
 export const DAY = /^\d{4}-\d{2}-\d{2}$/;

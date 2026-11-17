@@ -51,7 +51,8 @@ export function differences(sales: StripeSale[], rows: SaleRow[]): string[] {
   }
 
   for (const row of rows) {
-    if (seen.has(row.sessionId) || row.status === 'pending') continue;
+    // Gift passes (scripts/gift-pass.ts) were never sold, so Stripe has nothing to match them with.
+    if (seen.has(row.sessionId) || row.status === 'pending' || row.sessionId.startsWith('gift_')) continue;
     problems.push(`${row.app} ${row.sessionId}: our row says ${row.status}, but Stripe has no completed sale for it in this period`);
   }
   return problems;

@@ -10,7 +10,8 @@
     "reconcile": "tsx reconcile.ts",
     "find-purchase": "tsx find-purchase.ts",
     "reissue-code": "tsx reissue-code.ts",
-    "reset-devices": "tsx reset-devices.ts"
+    "reset-devices": "tsx reset-devices.ts",
+    "gift-pass": "tsx gift-pass.ts"
   },
   "dependencies": {
     "@micro/payments": "workspace:*",
